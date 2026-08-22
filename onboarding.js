@@ -3,6 +3,16 @@
   const KEY='denshaKuruyoIntroV2';
   const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  function ensureStyles(){
+    if(document.querySelector('link[data-product-v5]'))return;
+    const link=document.createElement('link');
+    link.rel='stylesheet';
+    link.href='./product-v5.css';
+    link.dataset.productV5='1';
+    document.head.appendChild(link);
+  }
+  ensureStyles();
+
   async function init(){
     try { await (window.TrainWatchEngineReady || Promise.resolve()); } catch {}
     const dialog=document.getElementById('aboutDialog');
