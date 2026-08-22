@@ -24,9 +24,7 @@
 
   <header class="app-header">
     <div class="brand-lockup" aria-label="でんしゃくるよ！ TRAIN WATCH">
-      <span class="brand-mark" aria-hidden="true">
-        <svg viewBox="0 0 64 64"><rect x="9" y="8" width="46" height="39" rx="15" fill="currentColor"/><rect x="16" y="15" width="32" height="13" rx="5" fill="white"/><circle cx="20" cy="37" r="4" fill="white"/><circle cx="44" cy="37" r="4" fill="white"/><path d="M20 50l-6 7M44 50l6 7M16 55h32" stroke="currentColor" stroke-width="5" stroke-linecap="round"/></svg>
-      </span>
+      <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 64 64"><rect x="9" y="8" width="46" height="39" rx="15" fill="currentColor"/><rect x="16" y="15" width="32" height="13" rx="5" fill="white"/><circle cx="20" cy="37" r="4" fill="white"/><circle cx="44" cy="37" r="4" fill="white"/><path d="M20 50l-6 7M44 50l6 7M16 55h32" stroke="currentColor" stroke-width="5" stroke-linecap="round"/></svg></span>
       <span><strong>でんしゃくるよ！</strong><small>TRAIN WATCH</small></span>
     </div>
     <div class="header-clock" aria-label="現在時刻"><strong id="clock">--:--:--</strong><small id="date">--</small></div>
@@ -34,9 +32,7 @@
 
   <main id="main" class="app-shell">
     <section class="station-toolbar" aria-label="表示中の駅">
-      <button id="stationButton" type="button" class="station-button touchable" aria-haspopup="dialog" aria-controls="stationDialog" aria-label="駅を変更">
-        <span class="station-code" id="stationCode">TX19</span><span id="stationName">研究学園</span><span class="chevron" aria-hidden="true">⌄</span>
-      </button>
+      <button id="stationButton" type="button" class="station-button touchable" aria-haspopup="dialog" aria-controls="stationDialog" aria-label="駅を変更"><span class="station-code" id="stationCode">TX19</span><span id="stationName">研究学園</span><span class="chevron" aria-hidden="true">⌄</span></button>
       <button id="favoriteToggle" type="button" class="favorite-toggle touchable" aria-label="お気に入りに追加" title="お気に入り">☆</button>
     </section>
 
@@ -45,76 +41,62 @@
       <div class="countdown" id="countdown" aria-label="次の見どころまで">--:--</div>
       <p class="hero-message" id="heroMessage">時刻を確認しています</p>
       <p class="ten-count" id="tenCount" hidden></p>
-
-      <div class="train-scene" aria-hidden="true">
-        <div class="train-wrap" id="trainWrap">
-          <svg class="train-illustration" viewBox="0 0 260 96"><rect x="12" y="18" width="222" height="58" rx="24" fill="currentColor"/><rect x="30" y="29" width="128" height="25" rx="9" fill="#fff" opacity=".95"/><rect x="169" y="29" width="44" height="25" rx="9" fill="#fff" opacity=".95"/><path d="M234 34c10 6 15 15 15 24s-5 14-15 18V34z" fill="currentColor"/><circle cx="58" cy="78" r="10" fill="#1c2d43"/><circle cx="196" cy="78" r="10" fill="#1c2d43"/><circle cx="58" cy="78" r="4" fill="#d9e5f2"/><circle cx="196" cy="78" r="4" fill="#d9e5f2"/></svg>
-        </div>
-        <div class="track"><span></span><span></span><span></span><span></span><span></span></div>
-      </div>
-
+      <div class="train-scene" aria-hidden="true"><div class="train-wrap" id="trainWrap"><svg class="train-illustration" viewBox="0 0 260 96"><rect x="12" y="18" width="222" height="58" rx="24" fill="currentColor"/><rect x="30" y="29" width="128" height="25" rx="9" fill="#fff" opacity=".95"/><rect x="169" y="29" width="44" height="25" rx="9" fill="#fff" opacity=".95"/><path d="M234 34c10 6 15 15 15 24s-5 14-15 18V34z" fill="currentColor"/><circle cx="58" cy="78" r="10" fill="#1c2d43"/><circle cx="196" cy="78" r="10" fill="#1c2d43"/><circle cx="58" cy="78" r="4" fill="#d9e5f2"/><circle cx="196" cy="78" r="4" fill="#d9e5f2"/></svg></div><div class="track"><span></span><span></span><span></span><span></span><span></span></div></div>
       <button id="heroMomentAction" type="button" class="hero-moment-action touchable" hidden></button>
       <div class="hero-meta" id="metaRow" aria-label="次の電車の情報"></div>
     </section>
 
     <nav class="quick-tools" aria-label="便利な機能">
-      <button id="notifyButton" type="button" class="quick-tool touchable" aria-pressed="false"><span aria-hidden="true">●</span><b>お知らせ</b></button>
+      <button id="notifyButton" type="button" class="quick-tool touchable" aria-haspopup="dialog" aria-controls="notifyDialog" aria-pressed="false"><span aria-hidden="true">●</span><b>お知らせ</b></button>
       <button id="openAbout" type="button" class="quick-tool touchable" aria-haspopup="dialog" aria-controls="aboutDialog"><span aria-hidden="true">?</span><b>使い方</b></button>
       <button id="shareButton" type="button" class="quick-tool touchable"><span aria-hidden="true">↗</span><b>共有</b></button>
     </nav>
     <p class="sr-only" id="sessionNote" aria-live="polite">お知らせは、このページを開いている間だけ動きます。</p>
 
     <section class="moments-section" aria-labelledby="momentsTitle">
-      <div class="section-heading moments-heading">
-        <div><h2 id="momentsTitle">いま・もうすぐ</h2><p>近い見どころを、最大3本まで。</p></div>
-        <span id="watchedCount" class="watched-count">きょう 0本見た</span>
-      </div>
+      <div class="section-heading moments-heading"><div><h2 id="momentsTitle">いま・もうすぐ</h2><p>近い見どころを、最大3本まで。</p></div><span id="watchedCount" class="watched-count">きょう 0本見た</span></div>
       <div id="rareBanner" class="rare-banner" role="status" hidden><strong>2本がほぼ同時！</strong><span class="rare-copy">ちょっと珍しい瞬間です</span><span class="rare-rails" aria-hidden="true"><i class="rare-train a"></i><i class="rare-train b"></i></span></div>
       <div id="momentList" class="moment-list"></div>
     </section>
 
-    <section class="favorites-section" aria-labelledby="favoritesTitle">
-      <div class="section-heading"><h2 id="favoritesTitle">お気に入りの駅</h2><button id="openStations" type="button" class="add-station-button touchable" aria-haspopup="dialog" aria-controls="stationDialog">駅を追加</button></div>
-      <div id="favoriteCards" class="favorite-cards"></div>
-    </section>
+    <section class="favorites-section" aria-labelledby="favoritesTitle"><div class="section-heading"><h2 id="favoritesTitle">お気に入りの駅</h2><button id="openStations" type="button" class="add-station-button touchable" aria-haspopup="dialog" aria-controls="stationDialog">駅を追加</button></div><div id="favoriteCards" class="favorite-cards"></div></section>
 
-    <section class="timeline-section" aria-labelledby="timelineTitle">
-      <div class="section-heading"><h2 id="timelineTitle">このあと</h2><button class="settings-link touchable" id="openSettings" type="button" aria-haspopup="dialog" aria-controls="settingsDialog">表示設定</button></div>
-      <div id="timeline" class="timeline"></div>
-    </section>
+    <section class="timeline-section" aria-labelledby="timelineTitle"><div class="section-heading"><h2 id="timelineTitle">このあと</h2><button class="settings-link touchable" id="openSettings" type="button" aria-haspopup="dialog" aria-controls="settingsDialog">表示設定</button></div><div id="timeline" class="timeline"></div></section>
 
-    <section id="dataNotice" class="data-notice data-notice-bottom" aria-label="時刻データ">
-      <span class="data-dot" aria-hidden="true"></span><span id="modeBadge">参考ダイヤ</span>
-      <button id="openDataInfo" type="button" aria-haspopup="dialog" aria-controls="dataDialog">時刻について</button>
-    </section>
+    <section id="dataNotice" class="data-notice data-notice-bottom" aria-label="時刻データ"><span class="data-dot" aria-hidden="true"></span><span id="modeBadge">時刻表ベース</span><button id="openDataInfo" type="button" aria-haspopup="dialog" aria-controls="dataDialog">時刻について</button></section>
   </main>
 
-  <footer class="app-footer">
-    <p>でんしゃくるよ！ β</p>
-    <button id="openAboutFooter" type="button" class="footer-link touchable" aria-haspopup="dialog" aria-controls="aboutDialog">このアプリについて</button>
-    <a href="https://www.mir.co.jp/route_map/index.html" target="_blank" rel="noopener">TX公式サイト ↗</a>
-  </footer>
+  <footer class="app-footer"><p>でんしゃくるよ！ β</p><button id="openAboutFooter" type="button" class="footer-link touchable" aria-haspopup="dialog" aria-controls="aboutDialog">使い方を見る</button><a href="https://www.mir.co.jp/route_map/index.html" target="_blank" rel="noopener">TX公式サイト ↗</a></footer>
 
   <dialog id="stationDialog" class="native-dialog" aria-labelledby="stationDialogTitle"><div class="dialog-shell"><header class="dialog-header"><h2 id="stationDialogTitle">駅をえらぶ</h2><button type="button" class="dialog-close touchable" data-close-dialog="stationDialog" aria-label="閉じる">×</button></header><label class="search-label" for="stationSearch">駅名を検索</label><input id="stationSearch" class="station-search" type="search" inputmode="search" placeholder="例：研究学園、TX19" autocomplete="off"><div id="stationList" class="station-list"></div></div></dialog>
 
-  <dialog id="settingsDialog" class="native-dialog" aria-labelledby="settingsDialogTitle"><div class="dialog-shell"><header class="dialog-header"><h2 id="settingsDialogTitle">表示とお知らせ</h2><button type="button" class="dialog-close touchable" data-close-dialog="settingsDialog" aria-label="閉じる">×</button></header><div class="setting-block"><h3>見たい電車</h3><div class="segmented" id="trainFilter" role="group" aria-label="見たい電車"><button type="button" data-filter="all" class="active" aria-pressed="true">通過も含める</button><button type="button" data-filter="stop" aria-pressed="false">停車だけ</button></div></div><div class="setting-block"><h3>方面</h3><div class="segmented three" id="directionFilter" role="group" aria-label="方面"><button type="button" data-dir="both" class="active" aria-pressed="true">両方</button><button type="button" data-dir="down" aria-pressed="false">つくば</button><button type="button" data-dir="up" aria-pressed="false">秋葉原</button></div></div><div class="setting-block switches"><label class="toggle-row" for="soundToggle"><span><strong>お知らせ音</strong><small>見どころの接近時に音で知らせる</small></span><input id="soundToggle" type="checkbox" checked><span class="toggle-ui" aria-hidden="true"></span></label><label class="toggle-row" for="vibrateToggle"><span><strong>振動</strong><small>対応端末のみ</small></span><input id="vibrateToggle" type="checkbox" checked><span class="toggle-ui" aria-hidden="true"></span></label></div><p class="settings-help">設定はこの端末に保存されます。お知らせはページを開いている間だけ動きます。</p></div></dialog>
+  <dialog id="settingsDialog" class="native-dialog" aria-labelledby="settingsDialogTitle"><div class="dialog-shell"><header class="dialog-header"><h2 id="settingsDialogTitle">表示設定</h2><button type="button" class="dialog-close touchable" data-close-dialog="settingsDialog" aria-label="閉じる">×</button></header><div class="setting-block"><h3>見たい電車</h3><div class="segmented" id="trainFilter" role="group" aria-label="見たい電車"><button type="button" data-filter="all" class="active" aria-pressed="true">通過も含める</button><button type="button" data-filter="stop" aria-pressed="false">停車だけ</button></div></div><div class="setting-block"><h3>方面</h3><div class="segmented three" id="directionFilter" role="group" aria-label="方面"><button type="button" data-dir="both" class="active" aria-pressed="true">両方</button><button type="button" data-dir="down" aria-pressed="false">つくば</button><button type="button" data-dir="up" aria-pressed="false">秋葉原</button></div></div><div class="setting-block switches"><label class="toggle-row" for="soundToggle"><span><strong>お知らせ音</strong><small>お知らせ中に音を鳴らす</small></span><input id="soundToggle" type="checkbox" checked><span class="toggle-ui" aria-hidden="true"></span></label><label class="toggle-row" for="vibrateToggle"><span><strong>振動</strong><small>対応端末のみ</small></span><input id="vibrateToggle" type="checkbox" checked><span class="toggle-ui" aria-hidden="true"></span></label></div><p class="settings-help">設定はこの端末に保存されます。</p></div></dialog>
 
-  <dialog id="aboutDialog" class="native-dialog about-dialog" aria-labelledby="aboutDialogTitle">
-    <div class="dialog-shell">
-      <header class="dialog-header"><h2 id="aboutDialogTitle">でんしゃくるよ！</h2><button type="button" class="dialog-close touchable" data-close-dialog="aboutDialog" aria-label="閉じる">×</button></header>
-      <p class="about-lead">来る瞬間も、動く瞬間も。親子で電車を見るための小さなウォッチです。</p>
-      <ol class="howto-steps">
-        <li><span>1</span><div><strong>駅をえらぶ</strong><p>上の駅名を押して、いまいる駅に切り替えます。</p></div></li>
-        <li><span>2</span><div><strong>大きな表示を見る</strong><p>次の到着・発車・通過を1つだけ大きく表示。近い電車が複数あれば、その下にも並びます。</p></div></li>
-        <li><span>3</span><div><strong>見えたら押してもOK</strong><p>「停まった！」「動いた！」「見えた！」は任意です。押さなくても時間に合わせて自動で次へ進みます。</p></div></li>
-      </ol>
-      <div class="about-note"><strong>安全に楽しんでね</strong><p>ホームでは黄色い線の内側など、安全な場所から実際の電車を優先して見てください。</p></div>
-      <p class="about-data" id="aboutDataFreshness">時刻データを確認しています…</p>
-      <button type="button" class="about-primary touchable" data-close-dialog="aboutDialog">わかった、見に行こう</button>
+  <dialog id="aboutDialog" class="native-dialog tutorial-dialog" aria-labelledby="aboutDialogTitle">
+    <div class="dialog-shell tutorial-shell">
+      <header class="dialog-header tutorial-header"><h2 id="aboutDialogTitle">使い方</h2><button type="button" class="dialog-close touchable" data-close-dialog="aboutDialog" aria-label="閉じる">×</button></header>
+      <div class="tutorial-slides" id="tutorialSlides">
+        <section class="tutorial-slide is-active" data-tutorial-step="0" aria-hidden="false">
+          <div class="tutorial-art" aria-hidden="true"><svg viewBox="0 0 320 190"><rect x="34" y="28" width="252" height="126" rx="8" fill="#fffdf8" stroke="#244d55" stroke-width="5"/><path d="M160 30v124M36 96h248" stroke="#cfc7ba" stroke-width="4"/><circle cx="82" cy="58" r="15" fill="#d9ac45"/><path d="M26 158h268" stroke="#242722" stroke-width="5"/><g transform="translate(92 112)"><rect width="140" height="38" rx="13" fill="#244d55"/><rect x="16" y="8" width="72" height="14" rx="5" fill="#fff"/><rect x="98" y="8" width="25" height="14" rx="5" fill="#fff"/><circle cx="31" cy="39" r="7" fill="#242722"/><circle cx="111" cy="39" r="7" fill="#242722"/></g></svg></div>
+          <p class="tutorial-step">1 / 3</p><h3>駅をえらぼう</h3><p>いま電車を見ている駅に切り替えるだけ。</p>
+        </section>
+        <section class="tutorial-slide" data-tutorial-step="1" aria-hidden="true" hidden>
+          <div class="tutorial-art" aria-hidden="true"><svg viewBox="0 0 320 190"><rect x="42" y="22" width="236" height="146" rx="6" fill="#fffdf8" stroke="#bbb3a7" stroke-width="4"/><text x="160" y="72" text-anchor="middle" font-size="22" font-weight="700" fill="#66645e">到着まで</text><text x="160" y="125" text-anchor="middle" font-size="54" font-weight="800" fill="#242722">00:24</text><path d="M78 148h164" stroke="#244d55" stroke-width="5" stroke-linecap="round"/></svg></div>
+          <p class="tutorial-step">2 / 3</p><h3>次の見どころがわかる</h3><p>到着・発車・通過。いちばん近い瞬間を大きく表示します。</p>
+        </section>
+        <section class="tutorial-slide" data-tutorial-step="2" aria-hidden="true" hidden>
+          <div class="tutorial-art" aria-hidden="true"><svg viewBox="0 0 320 190"><path d="M30 142h260" stroke="#242722" stroke-width="5"/><g transform="translate(58 88)"><rect width="154" height="46" rx="15" fill="#244d55"/><rect x="18" y="10" width="78" height="16" rx="5" fill="#fff"/><rect x="108" y="10" width="28" height="16" rx="5" fill="#fff"/><circle cx="35" cy="47" r="8" fill="#242722"/><circle cx="120" cy="47" r="8" fill="#242722"/></g><path d="M228 109h48m-14-14 14 14-14 14" fill="none" stroke="#c04a36" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="246" cy="55" r="24" fill="#d9ac45"/><path d="M239 55h14M246 48v14" stroke="#242722" stroke-width="5" stroke-linecap="round"/></svg></div>
+          <p class="tutorial-step">3 / 3</p><h3>動く瞬間も楽しもう</h3><p>「停まった！」「動いた！」は押してもOK。押さなくても自動で進みます。</p>
+        </section>
+      </div>
+      <div class="tutorial-progress" aria-hidden="true"><i class="is-active"></i><i></i><i></i></div>
+      <div class="tutorial-actions"><button id="tutorialBack" type="button" class="tutorial-secondary touchable" hidden>戻る</button><button id="tutorialNext" type="button" class="tutorial-primary touchable">次へ</button><button id="tutorialDone" type="button" class="tutorial-primary touchable" data-close-dialog="aboutDialog" hidden>見に行こう！</button></div>
     </div>
   </dialog>
 
-  <dialog id="dataDialog" class="native-dialog" aria-labelledby="dataDialogTitle"><div class="dialog-shell"><header class="dialog-header"><h2 id="dataDialogTitle">時刻について</h2><button type="button" class="dialog-close touchable" data-close-dialog="dataDialog" aria-label="閉じる">×</button></header><div class="data-copy"><p><strong>このサービスは「電車を見る」ための参考ウォッチです。</strong></p><p id="dataVersionCopy">時刻データを読み込んでいます。</p><ul><li>公開時刻が分単位のため、発車秒を断定しません</li><li>通過・到着には推定を含む場合があります</li><li>遅延・運休・臨時列車は現在の静的版には反映しません</li><li>「停まった！」「動いた！」は任意の現地補正です</li></ul><p>公共交通オープンデータセンターにはTXの駅時刻表・列車時刻表・GTFS/GTFS-RTが公開されています。APIキーを安全に扱える同期基盤へ移行できるよう、データ層は分離してあります。</p></div></div></dialog>
+  <dialog id="notifyDialog" class="native-dialog notify-dialog" aria-labelledby="notifyDialogTitle"><div class="dialog-shell"><header class="dialog-header"><h2 id="notifyDialogTitle">お知らせ</h2><button type="button" class="dialog-close touchable" data-close-dialog="notifyDialog" aria-label="閉じる">×</button></header><p class="notify-lead">見どころが近づいたら、このページで知らせます。</p><div class="notify-status"><span id="notifyStatusText">いまはOFF</span><button id="notifyToggleButton" type="button" class="notify-toggle-button touchable" aria-pressed="false">お知らせをONにする</button></div><dl class="notify-facts"><div><dt>何を？</dt><dd>到着・発車・通過</dd></div><div><dt>いつ？</dt><dd>3分前と30秒前</dd></div><div><dt>どうやって？</dt><dd>画面表示・音・対応端末では振動</dd></div></dl><p class="notify-limit"><strong>Safariを閉じた後のプッシュ通知ではありません。</strong><br>このページを開いて表示している間に使う機能です。</p><button id="openSettingsFromNotify" type="button" class="notify-settings-link touchable" aria-haspopup="dialog" aria-controls="settingsDialog">音・振動の設定を見る</button></div></dialog>
+
+  <dialog id="dataDialog" class="native-dialog" aria-labelledby="dataDialogTitle"><div class="dialog-shell"><header class="dialog-header"><h2 id="dataDialogTitle">時刻について</h2><button type="button" class="dialog-close touchable" data-close-dialog="dataDialog" aria-label="閉じる">×</button></header><div class="data-copy user-data-copy"><p id="dataVersionCopy">時刻表を確認しています。</p><ul><li>発車時刻は分単位のため、秒までは断定しません</li><li>到着・通過は一部「目安」を含みます</li><li>遅延・運休・臨時列車は反映していません</li></ul><p>表示より、駅や列車の案内を優先してください。</p><a class="data-official-link" href="https://www.mir.co.jp/route_map/index.html" target="_blank" rel="noopener">TX公式の時刻表を見る ↗</a></div></div></dialog>
 
   <div id="toast" class="app-toast" role="status" aria-live="assertive" hidden></div>
   <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js"></script>
