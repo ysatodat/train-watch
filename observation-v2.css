@@ -1,0 +1,33 @@
+/* Observation resilience — schedule is a guide, what the family sees wins. */
+.hero-delay-action {
+  width: 100%;
+  min-height: 48px;
+  margin: 5px 0 2px;
+  padding: 8px 14px;
+  border: 1px solid var(--line-strong, #a8b5c6);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--brand-blue-dark, #002b68);
+  font-size: .9375rem;
+  line-height: 1.25;
+  font-weight: 750;
+}
+.hero-delay-action[hidden] { display: none; }
+.hero-card.waiting-observed {
+  border-color: #7d95b3;
+  background: #f7f9fd;
+}
+.hero-card.observation-complete {
+  border-color: var(--tx-blue, #003b8f);
+  background: #f7f9fd;
+}
+.hero-card.observation-complete .countdown {
+  font-size: clamp(2.6rem, 12vw, 4.5rem);
+  letter-spacing: -.035em;
+}
+.moment-card.waiting-observed {
+  background: #f3f6fa !important;
+}
+@media (max-width: 360px) {
+  .hero-delay-action { font-size: .875rem; }
+}

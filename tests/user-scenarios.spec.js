@@ -2,18 +2,26 @@ const { test, expect } = require('@playwright/test');
 
 const FIXED_NOW = new Date('2026-08-23T12:00:00+09:00').valueOf();
 
-async function prepare(page, { seenIntro = true } = {}) {
+async function prepare(page, { seenIntro = true, now = FIXED_NOW } = {}) {
   await page.route('https://**/*', route => route.abort());
-  await page.addInitScript(({ now, seen }) => {
+  await page.addInitScript(({ initialNow, seen }) => {
     const RealDate = Date;
+    let currentNow = initialNow;
+    window.__setTestNow = value => { currentNow = value; };
     class FixedDate extends RealDate {
-      constructor(...args) { super(...(args.length ? args : [now])); }
-      static now() { return now; }
+      constructor(...args) { super(...(args.length ? args : [currentNow])); }
+      static now() { return currentNow; }
     }
     window.Date = FixedDate;
     localStorage.clear();
     if (seen) localStorage.setItem('denshaKuruyoIntroV2', 'seen');
-  }, { now: FIXED_NOW, seen: seenIntro });
+  }, { initialNow: now, seen: seenIntro });
+}
+
+async function setNow(page, iso) {
+  const value = new Date(iso).valueOf();
+  await page.evaluate(ms => window.__setTestNow(ms), value);
+  await page.waitForTimeout(1150);
 }
 
 test('初回ユーザーが3画面チュートリアルを読んで使い始められる', async ({ page }) => {
@@ -70,6 +78,50 @@ test('お知らせは説明を読んでから明示的にONにできる', async 
   await page.locator('#notifyToggleButton').click();
   await expect(entry).toHaveAttribute('aria-pressed', 'true');
   await expect(page.locator('#notifyStatusText')).toHaveText('お知らせ中');
+});
+
+test('停まった→動いたを押すと同じ列車の停まったへ戻らず、見送りの余韻が出る', async ({ page }) => {
+  await prepare(page, { now: new Date('2026-08-23T12:20:50+09:00').valueOf() });
+  await page.goto('/?station=TX19');
+
+  const action = page.locator('#heroMomentAction');
+  await expect(action).toBeVisible();
+  await expect(action).toHaveText('停まった！');
+  const visitId = await action.getAttribute('data-visit');
+
+  await action.click();
+  await expect(action).toHaveText('動いた！');
+  await action.click();
+
+  await expect(page.locator('#countdown')).toHaveText('いってらっしゃい！');
+  await expect(page.locator('#heroMessage')).toContainText('動く瞬間');
+  await expect(action).toBeHidden();
+
+  await setNow(page, '2026-08-23T12:20:55+09:00');
+  const nextVisit = await action.getAttribute('data-visit');
+  if (nextVisit) expect(nextVisit).not.toBe(visitId);
+  await expect(action).not.toHaveText('停まった！');
+});
+
+test('時刻を過ぎても未到着ならまだかなになり、まだ来てないでその列車を待ち続けられる', async ({ page }) => {
+  await prepare(page, { now: new Date('2026-08-23T12:21:20+09:00').valueOf() });
+  await page.goto('/?station=TX19');
+
+  await expect(page.locator('#heroLabel')).toHaveText('到着予定を過ぎています');
+  await expect(page.locator('#countdown')).toHaveText('まだかな？');
+  await expect(page.locator('#heroMomentAction')).toHaveText('停まった！');
+  const waitButton = page.locator('#heroDelayAction');
+  await expect(waitButton).toBeVisible();
+  await expect(waitButton).toHaveText('まだ来てない');
+
+  await waitButton.click();
+  await expect(page.locator('#countdown')).toHaveText('待ってる');
+  await expect(page.locator('#heroMomentAction')).toHaveText('停まった！');
+  await expect(waitButton).toBeHidden();
+
+  await setNow(page, '2026-08-23T12:23:00+09:00');
+  await expect(page.locator('#countdown')).toHaveText('待ってる');
+  await expect(page.locator('#heroMomentAction')).toHaveText('停まった！');
 });
 
 test('研究学園では2000系・3000系だけを会える車両として案内する', async ({ page }) => {
