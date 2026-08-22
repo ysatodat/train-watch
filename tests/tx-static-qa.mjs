@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 
-for (const file of ['tx-special.js','tx-special.css','data/tx-profile.json','docs/media-credits.md','playwright.config.js','tests/user-scenarios.spec.js']) {
+for (const file of ['tx-special.js','tx-special.css','data/tx-profile.json','docs/media-credits.md','docs/tx-design.md','playwright.config.js','tests/user-scenarios.spec.js']) {
   if (!fs.existsSync(file)) throw new Error(`Missing TX-specialized asset: ${file}`);
 }
 
@@ -18,29 +18,43 @@ for(const vehicle of profile.vehicles){
 }
 
 const js=fs.readFileSync('tx-special.js','utf8');
-for(const required of ["fetch('./data/tx-profile.json'",'findNextPass','findNextRare','denshaKuruyoVehicleCollectionV1','tx-route-intro']){
+for(const required of ["fetch('./data/tx-profile.json'",'findNextPass','findNextRare','denshaKuruyoVehicleCollectionV1','tx-route-intro','TX専用・非公式','renderedVehicleStationId']){
   if(!js.includes(required)) throw new Error(`TX behavior missing: ${required}`);
 }
+if(js.includes('if (vehicleDialog?.open) renderVehicleDialog();')) throw new Error('Vehicle dialog must not rebuild every stationCode mutation tick');
+if(!js.includes('nextStationId === observedStationId')) throw new Error('Station observer must ignore no-op station code mutations');
 
 const onboarding=fs.readFileSync('onboarding.js','utf8');
 if(!onboarding.includes("href='./tx-special.css'")||!onboarding.includes("script.src='./tx-special.js'")) throw new Error('TX-specialized assets are not loaded by onboarding layer');
 
 const css=fs.readFileSync('tx-special.css','utf8');
 if(!css.includes('#stationDialog .station-row::before')||!css.includes('.tx-vehicle-photo')) throw new Error('TX route and vehicle visualization styles are missing');
+if(!css.includes('--tx-blue: #003b8f')||!css.includes('--tx-red: #e40046')) throw new Error('TX-inspired blue/red design tokens are missing');
 const tiny=[...css.matchAll(/font-size\s*:\s*(\d+(?:\.\d+)?)px/gi)].map(m=>Number(m[1])).filter(n=>n<13);
 if(tiny.length) throw new Error(`tx-special.css contains font sizes below 13px: ${tiny.join(', ')}`);
+
+const nativeCss=fs.readFileSync('native-ui.css','utf8');
+if(!/\.dialog-header\s*\{[\s\S]*?position:\s*sticky/.test(nativeCss)||!nativeCss.includes('z-index: 20')) throw new Error('Dialog header must stay visible while scrolling');
 
 const sw=fs.readFileSync('sw.js','utf8');
 for(const asset of ['./tx-special.css','./tx-special.js','./data/tx-profile.json']){
   if(!sw.includes(asset)) throw new Error(`Service Worker must cache ${asset}`);
 }
 
+const manifest=JSON.parse(fs.readFileSync('manifest.webmanifest','utf8'));
+if(!manifest.description.includes('つくばエクスプレス専用')||!manifest.description.includes('非公式')) throw new Error('PWA metadata must clearly state TX-only unofficial positioning');
+
 const readme=fs.readFileSync('README.md','utf8');
 if(!readme.includes('いまは、あえてTXだけ')||!readme.includes('次に通過する「ビューン」')) throw new Error('README must explain the TX-specialized experience');
+if(!readme.includes('TX専用の非公式ファンツール')&&!readme.includes('つくばエクスプレス（TX）専用の非公式ファンツール')) throw new Error('README must clearly state that this is TX-only and unofficial');
+if(!readme.includes('docs/tx-design.md')) throw new Error('README must link to TX design documentation');
 if(!readme.includes('たまたま泊まったホテル')||!readme.includes('電車好きの息子')) throw new Error('README product origin must match the real story');
 
+const txDesign=fs.readFileSync('docs/tx-design.md','utf8');
+if(!txDesign.includes('安全性・信頼性')||!txDesign.includes('活気・エネルギー')||!txDesign.includes('公式アプリと誤認させない')) throw new Error('TX design documentation must explain color intent and unofficial positioning');
+
 const scenarios=fs.readFileSync('tests/user-scenarios.spec.js','utf8');
-for(const phrase of ['3画面チュートリアル','TX路線図','研究学園では2000系・3000系','横にはみ出さない']){
+for(const phrase of ['3画面チュートリアル','TX路線図','研究学園では2000系・3000系','横にはみ出さない','写真DOMが毎秒作り直されない','閉じるボタンが表示領域に残る']){
   if(!scenarios.includes(phrase)) throw new Error(`Scenario test missing: ${phrase}`);
 }
 
