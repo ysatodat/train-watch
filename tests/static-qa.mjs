@@ -35,6 +35,21 @@ if (!brandCss.includes('--tap-min: 44px')) throw new Error('44px touch-target to
 if (!brandCss.includes('prefers-reduced-motion')) throw new Error('Reduced-motion support is missing');
 if (!brandCss.includes('prefers-contrast: more')) throw new Error('Increased-contrast support is missing');
 
+const mobileCss=fs.readFileSync('mobile-fixes.css','utf8');
+if (!mobileCss.includes('.action-copy small') || !mobileCss.includes('overflow-wrap: anywhere')) {
+  throw new Error('Supporting action copy must be allowed to wrap on narrow screens');
+}
+if (/primary-action[^\{]*\{[^\}]*word-break\s*:\s*keep-all/s.test(mobileCss)) {
+  throw new Error('Primary action container must not force keep-all; it can overflow after state changes');
+}
+if (!mobileCss.includes('@media (max-width: 430px)') || !mobileCss.includes('.event-remain')) {
+  throw new Error('Common iPhone widths need the two-row timeline fallback');
+}
+const momentsCss=fs.readFileSync('moments.css','utf8');
+if (!momentsCss.startsWith('@import url("./overnight.css")')) {
+  throw new Error('Overnight styles must be loaded by the moment stylesheet');
+}
+
 const appJs=fs.readFileSync('app.js','utf8');
 if (appJs.includes("setAttribute('open'")) throw new Error('app.js must not manage dialog open state');
 if (appJs.includes('Notification.requestPermission')) throw new Error('Do not request system notification permission for page-only alerts');
