@@ -1,4 +1,4 @@
-const CACHE='densha-kuruyo-v20';
+const CACHE='densha-kuruyo-v21';
 const CORE=['./','./index.html','./styles.css','./mobile-fixes.css','./native-ui.css','./brand-refresh.css','./moments.css','./overnight.css','./product-v4.css','./dialog-controller.js','./train-engine.js','./app.js','./onboarding.js','./microinteractions.js','./moments-interactions.js','./data/timetable.json','./manifest.webmanifest','./icon.svg'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
