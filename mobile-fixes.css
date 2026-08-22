@@ -4,7 +4,7 @@
 html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
-  scroll-padding-bottom: 120px;
+  scroll-padding-bottom: 96px;
 }
 body { min-height: 100dvh; }
 
@@ -27,19 +27,30 @@ button:not(:disabled) { cursor: pointer; }
   -webkit-user-select: none;
 }
 
+/* Keep only short labels together. Supporting copy must be allowed to wrap. */
 .brand-lockup strong,
 .hero-topline p,
 .hero-message,
 .section-heading h2,
-.primary-action,
-.secondary-action,
-.add-station-button {
+.add-station-button,
+.action-copy b {
   word-break: keep-all;
 }
 .hero-topline p,
 .hero-message,
 .session-note,
 .section-heading h2 { text-wrap: balance; }
+.action-copy {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+.action-copy b,
+.action-copy small { max-width: 100%; }
+.action-copy small {
+  word-break: normal;
+  overflow-wrap: anywhere;
+}
 
 .station-toolbar { grid-template-columns: minmax(0,1fr) 52px; }
 .station-button { width: 100%; min-height: 52px; }
@@ -59,7 +70,7 @@ button:not(:disabled) { cursor: pointer; }
 .track { bottom: 14px; }
 
 .hero-actions {
-  grid-template-columns: 1.18fr 1fr;
+  grid-template-columns: minmax(0,1.18fr) minmax(0,1fr);
   gap: 8px;
   margin-top: 10px;
 }
@@ -78,9 +89,10 @@ button:not(:disabled) { cursor: pointer; }
 
 .station-search { font-size: 16px; }
 
-.app-shell { padding-bottom: 64px; }
+/* Enough room for Safari chrome without creating a large empty tail. */
+.app-shell { padding-bottom: 36px; }
 .app-footer {
-  padding-bottom: max(96px, calc(env(safe-area-inset-bottom) + 72px));
+  padding-bottom: max(64px, calc(env(safe-area-inset-bottom) + 44px));
 }
 
 .is-pressing { will-change: transform; }
@@ -96,6 +108,14 @@ button:not(:disabled) { cursor: pointer; }
     padding-right: 12px;
   }
   .section-heading { margin-bottom: 10px; }
+
+  /* Three columns squeeze the train description on common iPhone widths. */
+  .event-row { grid-template-columns: 58px minmax(0,1fr); }
+  .event-remain {
+    grid-column: 2;
+    justify-self: start;
+    margin-top: 2px;
+  }
 }
 
 @media (max-width: 390px) {
@@ -103,6 +123,8 @@ button:not(:disabled) { cursor: pointer; }
   .hero-card { padding-left: 12px; padding-right: 12px; }
   .train-wrap { width: 166px; }
   .hero-actions { grid-template-columns: 1fr; }
+  .primary-action,
+  .secondary-action { width: 100%; }
 }
 
 @media (max-width: 350px) {
