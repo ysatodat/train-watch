@@ -37,7 +37,7 @@ if (!/id="notifyButton"[^>]*aria-pressed=/i.test(html)) {
   throw new Error('Notify toggle must expose aria-pressed');
 }
 
-for (const file of ['brand-refresh.css', 'mobile-fixes.css', 'native-ui.css']) {
+for (const file of ['styles.css', 'brand-refresh.css', 'mobile-fixes.css', 'native-ui.css']) {
   const css = fs.readFileSync(file, 'utf8');
   const tiny = [...css.matchAll(/font-size\s*:\s*(\d+(?:\.\d+)?)px/gi)]
     .map(m => Number(m[1]))
