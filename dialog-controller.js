@@ -4,6 +4,7 @@
   const DIALOG_IDS = ['stationDialog', 'settingsDialog', 'dataDialog'];
   const dialogs = () => DIALOG_IDS.map(id => document.getElementById(id)).filter(Boolean);
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const finePointer = window.matchMedia('(pointer: fine)').matches;
   let lastTrigger = null;
   let previousBodyOverflow = '';
 
@@ -14,8 +15,8 @@
     window.gsap.killTweensOf(shell);
     window.gsap.fromTo(
       shell,
-      { y: 14, opacity: 0, scale: 0.985 },
-      { y: 0, opacity: 1, scale: 1, duration: 0.26, ease: 'power3.out', clearProps: 'transform,opacity' }
+      { y: 10, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.22, ease: 'power2.out', clearProps: 'transform,opacity' }
     );
   }
 
@@ -34,16 +35,12 @@
 
   function closeNow(dialog, { restoreFocus = true } = {}) {
     if (!dialog) return;
-
     const wasOpen = dialog.open || dialog.hasAttribute('open') || dialog.classList.contains('fallback-open');
     if (!wasOpen) return;
 
     try {
-      if (typeof dialog.close === 'function' && dialog.open) {
-        dialog.close();
-      } else {
-        dialog.removeAttribute('open');
-      }
+      if (typeof dialog.close === 'function' && dialog.open) dialog.close();
+      else dialog.removeAttribute('open');
     } catch {
       dialog.removeAttribute('open');
     }
@@ -66,18 +63,32 @@
     });
   }
 
+  function prepareStationDialog(dialog) {
+    if (!dialog || dialog.id !== 'stationDialog') return;
+    const search = document.getElementById('stationSearch');
+    const list = document.getElementById('stationList');
+
+    if (search && search.value) {
+      search.value = '';
+      search.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    if (list) list.scrollTop = 0;
+
+    setTimeout(() => {
+      const current = dialog.querySelector('.station-row.current');
+      if (current) current.scrollIntoView({ block: 'center' });
+    }, 60);
+  }
+
   function openDialog(dialog, trigger, focusTarget) {
     if (!dialog) return;
     lastTrigger = trigger || document.activeElement;
     closeOthers(dialog);
 
-    if (dialog.open) {
-      if (focusTarget) requestAnimationFrame(() => focusTarget.focus({ preventScroll: true }));
-      return;
-    }
-
-    // bfcacheや過去実装由来のopen属性だけが残っていた場合を正規化する。
+    if (dialog.open) return;
     if (dialog.hasAttribute('open')) dialog.removeAttribute('open');
+
+    prepareStationDialog(dialog);
 
     try {
       if (typeof dialog.showModal === 'function') {
@@ -94,12 +105,14 @@
     lockPage();
     animateOpen(dialog);
 
-    if (focusTarget) {
+    // iPhoneではDialogを開いただけでキーボードを出さない。
+    // マウス/トラックパッド環境だけ検索欄へ自動フォーカスする。
+    if (focusTarget && finePointer) {
       setTimeout(() => {
         if (dialog.open || dialog.classList.contains('fallback-open')) {
           try { focusTarget.focus({ preventScroll: true }); } catch {}
         }
-      }, 90);
+      }, 80);
     }
   }
 
@@ -119,7 +132,6 @@
     return null;
   }
 
-  // app.jsに残る旧open属性操作より先に、Dialog操作をここで完結させる。
   document.addEventListener('click', event => {
     const target = event.target;
     if (!(target instanceof Element)) return;
@@ -127,7 +139,6 @@
     const info = triggerInfo(target);
     if (info) {
       event.preventDefault();
-      event.stopImmediatePropagation();
       openDialog(info.dialog, target.closest('button'), info.focus);
       return;
     }
@@ -135,17 +146,14 @@
     const closeButton = target.closest('[data-close-dialog]');
     if (closeButton) {
       event.preventDefault();
-      event.stopImmediatePropagation();
       closeNow(document.getElementById(closeButton.dataset.closeDialog));
       return;
     }
 
-    // 旧app.jsは駅選択後にremoveAttribute('open')するため、その前に正規のclose()でトップレイヤーから外す。
+    // 駅選択はapp.jsが値を更新する前に正規のclose()でトップレイヤーから外す。
     if (target.closest('.station-select')) {
       const stationDialog = document.getElementById('stationDialog');
-      if (stationDialog && stationDialog.open) {
-        closeNow(stationDialog, { restoreFocus: false });
-      }
+      if (stationDialog && stationDialog.open) closeNow(stationDialog, { restoreFocus: false });
     }
   }, true);
 
@@ -160,7 +168,6 @@
     });
 
     dialog.addEventListener('cancel', () => {
-      // Esc/システムキャンセルはブラウザ標準のcloseに任せる。
       requestAnimationFrame(unlockPageIfDone);
     });
   });
@@ -174,7 +181,6 @@
     unlockPageIfDone();
   }
 
-  // Safariのbfcache復帰時に古いトップレイヤー状態を持ち越さない。
   window.addEventListener('pageshow', event => {
     if (event.persisted) normalizeAllDialogs();
   });
