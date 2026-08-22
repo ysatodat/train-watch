@@ -1,0 +1,308 @@
+/* Brand refresh v2 — 駅のサイン計画 × 少し温かい絵本
+   “青白グラデーション + 大きな角丸 + ピル + 強い影”から離れ、
+   紙・鉄・信号色をベースにした落ち着いた親子向けUIへ。 */
+
+:root {
+  --brand-blue: #244d55;
+  --brand-blue-dark: #183a40;
+  --brand-sky: #e6ece8;
+  --brand-yellow: #dfb14c;
+  --brand-coral: #c9503d;
+  --brand-mint: #5f7f6a;
+  --ink: #252622;
+  --muted: #716f68;
+  --cloud: #f3efe6;
+  --surface: #fbf8f1;
+  --line: #d6cfc3;
+  --shadow: 0 5px 18px rgba(48, 51, 46, .08);
+}
+
+html { background: var(--cloud); }
+body {
+  color: var(--ink);
+  background: var(--cloud);
+  letter-spacing: 0;
+}
+
+/* typography: どこも極太、をやめる */
+.brand-lockup strong { font-weight: 800; letter-spacing: -.01em; }
+.brand-lockup small { color: var(--muted); font-weight: 700; letter-spacing: .14em; }
+.header-clock strong { font-weight: 700; }
+.header-clock small { color: var(--muted); }
+.section-heading h2 { font-weight: 800; }
+.eyebrow { display: none; }
+
+/* header / logo */
+.app-header { padding-bottom: 12px; }
+.brand-mark { color: var(--brand-blue); }
+
+/* station signage */
+.station-button {
+  min-height: 52px;
+  border: 1px solid #bbb4a8;
+  border-radius: 11px;
+  background: var(--surface);
+  box-shadow: none;
+  color: var(--ink);
+}
+.station-button:hover { background: #f8f4ec; }
+.station-code {
+  min-width: 50px;
+  height: 29px;
+  border-radius: 5px;
+  background: var(--brand-blue-dark);
+  font-weight: 800;
+  letter-spacing: .03em;
+}
+.favorite-toggle {
+  border-color: #bbb4a8;
+  border-radius: 11px;
+  background: var(--surface);
+  box-shadow: none;
+}
+.favorite-toggle.on {
+  color: #9b6d12;
+  background: #f5ead0;
+  border-color: #cfb46f;
+}
+.chevron { color: var(--muted); }
+
+/* data status: 控えめな注記へ */
+.data-notice { color: var(--muted); }
+.data-dot {
+  width: 7px;
+  height: 7px;
+  background: var(--brand-mint);
+  box-shadow: none;
+}
+.data-notice.reference .data-dot { background: #a8731d; box-shadow: none; }
+.data-notice button {
+  color: var(--brand-blue-dark);
+  text-decoration-thickness: 1px;
+  font-weight: 700;
+}
+
+/* hero: “SaaSカード”ではなく、時刻ボードの主面 */
+.hero-card {
+  border: 1px solid #cfc7bb;
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  padding-top: 18px;
+}
+.hero-card.soon {
+  border-color: #c8a75e;
+  background: #faf3df;
+}
+.hero-card.now {
+  border-color: var(--brand-coral);
+  background: #f7e7e1;
+}
+.hero-topline p { color: var(--muted); font-weight: 700; }
+.service-badge {
+  border: 1px solid #c8c2b7;
+  border-radius: 6px;
+  background: #eeeae1;
+  color: #42433f;
+  font-weight: 750;
+  padding: 5px 8px;
+}
+.countdown {
+  color: var(--ink);
+  font-weight: 800;
+  letter-spacing: -.055em;
+}
+.hero-message {
+  color: var(--ink);
+  font-weight: 800;
+}
+.ten-count {
+  border-radius: 7px;
+  background: var(--brand-coral);
+  font-weight: 800;
+}
+
+/* illustration: 雲を外し、電車と線路だけにする */
+.cloud { display: none; }
+.train-scene { margin-top: 4px; }
+.train-wrap { color: var(--brand-blue); }
+.train-illustration { filter: none; }
+.hero-card.soon .train-wrap { color: #ae7e1e; }
+.hero-card.now .train-wrap { color: var(--brand-coral); }
+.track {
+  border-top-color: #666b69;
+  border-bottom-color: #a49f95;
+}
+.track span { background: #aaa49a; }
+
+/* status chips: pillをやめ、駅サインっぽい小さなラベルへ */
+.hero-meta { gap: 6px; }
+.pill {
+  min-height: 27px;
+  border: 1px solid #d2cbc0;
+  border-radius: 6px;
+  background: #eeeae1;
+  color: #4d4d48;
+  font-weight: 700;
+  padding: 4px 8px;
+}
+.pill.down { background: #e7ede7; color: #365d4b; border-color: #c7d3c9; }
+.pill.up { background: #e8ecec; color: #31565d; border-color: #c5d0d1; }
+.pill.pass { background: #f4e8cf; color: #785617; border-color: #d9c18b; }
+
+/* CTA: 触れる道具として、フラットで明快に */
+.primary-action,
+.secondary-action {
+  border-radius: 11px;
+  box-shadow: none;
+}
+.primary-action {
+  background: var(--brand-blue-dark);
+  border-color: var(--brand-blue-dark);
+}
+.primary-action.enabled {
+  background: #466954;
+  border-color: #466954;
+}
+.secondary-action {
+  background: var(--surface);
+  border-color: #aaa398;
+  color: var(--ink);
+}
+.action-icon { display: none; }
+.action-copy b { font-weight: 800; }
+.action-copy small { font-weight: 600; }
+.session-note { color: var(--muted); }
+
+/* sections: “カードの島”ではなく、1枚の画面の中の情報としてつなぐ */
+.favorites-section,
+.timeline-section {
+  margin-top: 28px;
+  padding-top: 19px;
+  border-top: 1px solid #d8d1c5;
+}
+.section-heading { margin-bottom: 12px; }
+.add-station-button,
+.settings-link {
+  color: var(--brand-blue-dark);
+  font-weight: 700;
+}
+.add-station-button {
+  border: 1px solid #c8c0b4;
+  border-radius: 8px;
+  background: transparent;
+}
+
+.favorite-card {
+  border: 1px solid #cec7bb;
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: none;
+}
+.favorite-card.active {
+  border-color: var(--brand-blue);
+  box-shadow: inset 4px 0 0 var(--brand-blue);
+}
+.favorite-card .mini-code {
+  color: var(--brand-blue-dark);
+  font-weight: 750;
+}
+.favorite-card strong { font-weight: 800; }
+.favorite-card .mini-next { color: var(--muted); }
+.empty-favs {
+  border-color: #c8c0b4;
+  border-radius: 10px;
+  background: transparent;
+}
+
+.timeline { gap: 7px; }
+.event-row {
+  border: 1px solid #d1cabe;
+  border-radius: 9px;
+  background: rgba(251,248,241,.76);
+  box-shadow: none;
+}
+.event-row.next {
+  border-color: #9aa9a6;
+  border-left: 4px solid var(--brand-blue);
+  background: #efeee7;
+}
+.event-time { font-weight: 800; }
+.event-main strong { font-weight: 750; }
+.event-main small { color: var(--muted); }
+.event-remain { color: #4e5754; font-weight: 700; }
+
+/* brand statement: gradientカードをやめ、編集的な一節に */
+.brand-message {
+  margin-top: 32px;
+  padding: 16px 14px;
+  border-left: 4px solid var(--brand-yellow);
+  border-radius: 8px;
+  background: #eee9dd;
+}
+.brand-message-icon { display: none; }
+.brand-message strong { font-weight: 800; }
+.brand-message p { color: var(--muted); }
+
+.app-footer { color: var(--muted); }
+.app-footer a { color: var(--brand-blue-dark); }
+
+/* native dialogs */
+.native-dialog::backdrop {
+  background: rgba(33, 34, 31, .48);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+}
+.dialog-shell {
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: 0 18px 60px rgba(33,34,31,.20);
+}
+.dialog-header h2 { font-weight: 800; }
+.dialog-close {
+  border-color: #c8c0b4;
+  border-radius: 9px;
+  background: #eee9df;
+}
+.station-search {
+  border-color: #bdb5a9;
+  border-radius: 9px;
+  background: #fffdfa;
+}
+.station-search:focus {
+  border-color: var(--brand-blue);
+  box-shadow: 0 0 0 3px rgba(36,77,85,.12);
+}
+.station-row { border-radius: 8px; }
+.station-row.current { background: #e8ece8; }
+.station-row .station-code-mini {
+  border-radius: 5px;
+  background: #e4e7e2;
+  color: var(--brand-blue-dark);
+}
+.star-btn { border-radius: 8px; }
+.star-btn.on { color: #94680e; background: #f3e7c7; }
+.segmented {
+  border-radius: 10px;
+  background: #e9e3d8;
+}
+.segmented button { border-radius: 7px; font-weight: 700; }
+.segmented button.active {
+  background: var(--surface);
+  color: var(--brand-blue-dark);
+  box-shadow: inset 0 0 0 1px #c7bfb3;
+}
+.toggle-ui { background: #d1cabf; }
+.toggle-row input:checked + .toggle-ui { background: var(--brand-blue); }
+
+.app-toast {
+  border-radius: 10px;
+  background: #2e3735;
+  box-shadow: 0 12px 30px rgba(33,34,31,.20);
+}
+.app-toast.urgent { background: #8f3f32; }
+
+@media (max-width: 430px) {
+  .hero-card { border-radius: 16px; }
+  .dialog-shell { border-radius: 14px; }
+}
