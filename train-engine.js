@@ -12,12 +12,14 @@
     const UP = DATA.offsets.up;
     const BASES = DATA.daytimeBases;
     const TX19_EDGE = DATA.verifiedEdgeTimes?.TX19 || null;
+    const HOLIDAYS = new Set(DATA.calendar?.holidayDates || []);
 
     const ARRIVAL_LEAD_MS = 35_000;
     const DEPARTURE_WINDOW_MS = 60_000;
     const PASS_ACTIVE_BEFORE_MS = 10_000;
     const PASS_ACTIVE_AFTER_MS = 10_000;
     const LONG_WAIT_MS = 90 * 60_000;
+    const SERVICE_DAY_BOUNDARY_HOUR = 4;
 
     function stationById(id){ return STATIONS.find(s=>s.id===id)||STATIONS[18]; }
     function minutes(h,m){ return h*60+m; }
@@ -25,6 +27,17 @@
     function isOrigin(v){ return (v.dir==='down'&&v.stationId==='TX01')||(v.dir==='up'&&v.stationId==='TX20'); }
     function isTerminal(v){ return (v.dir==='down'&&v.stationId==='TX20')||(v.dir==='up'&&v.stationId==='TX01'); }
     function fmtTime(d){ return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; }
+    function dateKey(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+    function serviceDateForMoment(moment){
+      const d=new Date(moment);
+      if(d.getHours()<SERVICE_DAY_BOUNDARY_HOUR) d.setDate(d.getDate()-1);
+      d.setHours(12,0,0,0);
+      return d;
+    }
+    function dayTypeForMoment(moment){
+      const d=serviceDateForMoment(moment);
+      return [0,6].includes(d.getDay()) || HOLIDAYS.has(dateKey(d)) ? 'holiday' : 'weekday';
+    }
     function fmtClock(ms){
       const s=Math.max(0,Math.ceil(ms/1000));
       return `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
@@ -78,11 +91,16 @@
       if(stationId!=='TX19'||!TX19_EDGE) return [];
       const out=[];
       ['up','down'].forEach(dir=>{
-        TX19_EDGE[dir].forEach(([h,m,kind])=>{
+        const candidates=[];
+        ['weekday','holiday'].forEach(dayType=>{
+          (TX19_EDGE[dayType]?.[dir]||[]).forEach(([h,m,kind])=>candidates.push({dayType,h,m,kind}));
+        });
+        candidates.forEach(({dayType,h,m,kind})=>{
           const d=new Date(day); d.setHours(h,m,0,0);
+          if(dayTypeForMoment(d)!==dayType) return;
           out.push({
-            id:`verified-${dir}-${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}-${h}-${m}`,
-            kind,dir,stationId,stop:true,approx:false,verified:true,stationAt:d,time:fmtTime(d)
+            id:`verified-${dayType}-${dir}-${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}-${h}-${m}`,
+            kind,dir,stationId,stop:true,approx:false,verified:true,serviceDayType:dayType,stationAt:d,time:fmtTime(d)
           });
         });
       });
@@ -90,14 +108,23 @@
     }
 
     function buildExactVisits(now,stationId){
+      const yesterday=new Date(now); yesterday.setDate(yesterday.getDate()-1); yesterday.setHours(0,0,0,0);
       const today=new Date(now); today.setHours(0,0,0,0);
       const tomorrow=new Date(today); tomorrow.setDate(tomorrow.getDate()+1);
-      return [...exactVisitsForDate(today,stationId),...exactVisitsForDate(tomorrow,stationId)];
+      return [...exactVisitsForDate(yesterday,stationId),...exactVisitsForDate(today,stationId),...exactVisitsForDate(tomorrow,stationId)];
     }
 
     function buildVisits(now,stationId){
       const out=[...buildPatternVisits(now,stationId),...buildExactVisits(now,stationId)];
-      return out.filter(v=>v.stationAt-now>-90_000).sort((a,b)=>a.stationAt-b.stationAt);
+      const seen=new Set();
+      return out
+        .filter(v=>v.stationAt-now>-90_000)
+        .sort((a,b)=>a.stationAt-b.stationAt)
+        .filter(v=>{
+          const key=`${v.dir}-${+v.stationAt}-${v.stationId}`;
+          if(seen.has(key))return false;
+          seen.add(key);return true;
+        });
     }
 
     function filterVisits(visits,filters={}){
@@ -111,45 +138,25 @@
         const delta=stationMs-nowMs;
         if(delta<-PASS_ACTIVE_AFTER_MS)return null;
         const active=delta<=PASS_ACTIVE_BEFORE_MS&&delta>=-PASS_ACTIVE_AFTER_MS;
-        return {
-          visit:v,key:`${v.id}:pass`,type:'pass',typeLabel:'通過',target:new Date(stationMs),
-          status:active?'active':delta<=180_000?'soon':'future',deltaMs:delta,
-          approximate:true,activeUntil:new Date(stationMs+PASS_ACTIVE_AFTER_MS)
-        };
+        return {visit:v,key:`${v.id}:pass`,type:'pass',typeLabel:'通過',target:new Date(stationMs),status:active?'active':delta<=180_000?'soon':'future',deltaMs:delta,approximate:true,activeUntil:new Date(stationMs+PASS_ACTIVE_AFTER_MS)};
       }
       if(isOrigin(v)){
         const delta=stationMs-nowMs;
         if(delta<-DEPARTURE_WINDOW_MS)return null;
-        return {
-          visit:v,key:`${v.id}:departure`,type:'departure',typeLabel:'発車',target:new Date(stationMs),
-          status:delta<=0?'active':delta<=180_000?'soon':'future',deltaMs:delta,
-          approximate:!v.verified,activeUntil:new Date(stationMs+DEPARTURE_WINDOW_MS)
-        };
+        return {visit:v,key:`${v.id}:departure`,type:'departure',typeLabel:'発車',target:new Date(stationMs),status:delta<=0?'active':delta<=180_000?'soon':'future',deltaMs:delta,approximate:!v.verified,activeUntil:new Date(stationMs+DEPARTURE_WINDOW_MS)};
       }
       if(isTerminal(v)){
         const delta=stationMs-nowMs;
         if(delta<-30_000)return null;
-        return {
-          visit:v,key:`${v.id}:arrival-terminal`,type:'arrival',typeLabel:'到着',target:new Date(stationMs),
-          status:delta<=10_000?'active':delta<=180_000?'soon':'future',deltaMs:delta,
-          approximate:!v.verified||v.approx,activeUntil:new Date(stationMs+30_000)
-        };
+        return {visit:v,key:`${v.id}:arrival-terminal`,type:'arrival',typeLabel:'到着',target:new Date(stationMs),status:delta<=10_000?'active':delta<=180_000?'soon':'future',deltaMs:delta,approximate:!v.verified||v.approx,activeUntil:new Date(stationMs+30_000)};
       }
       const arrivalMs=stationMs-ARRIVAL_LEAD_MS;
       if(nowMs<stationMs){
         const delta=arrivalMs-nowMs;
-        return {
-          visit:v,key:`${v.id}:arrival`,type:'arrival',typeLabel:'到着',target:new Date(arrivalMs),
-          status:delta<=0?'active':delta<=180_000?'soon':'future',deltaMs:delta,
-          approximate:true,activeUntil:new Date(stationMs)
-        };
+        return {visit:v,key:`${v.id}:arrival`,type:'arrival',typeLabel:'到着',target:new Date(arrivalMs),status:delta<=0?'active':delta<=180_000?'soon':'future',deltaMs:delta,approximate:true,activeUntil:new Date(stationMs)};
       }
       if(nowMs<stationMs+DEPARTURE_WINDOW_MS){
-        return {
-          visit:v,key:`${v.id}:departure`,type:'departure',typeLabel:'発車',target:new Date(stationMs),
-          status:'active',deltaMs:stationMs-nowMs,approximate:!v.verified,
-          activeUntil:new Date(stationMs+DEPARTURE_WINDOW_MS)
-        };
+        return {visit:v,key:`${v.id}:departure`,type:'departure',typeLabel:'発車',target:new Date(stationMs),status:'active',deltaMs:stationMs-nowMs,approximate:!v.verified,activeUntil:new Date(stationMs+DEPARTURE_WINDOW_MS)};
       }
       return null;
     }
@@ -168,15 +175,17 @@
     }
 
     function getOvernightState(now,stationId){
-      if(stationId!=='TX19'||!TX19_EDGE?.overnight) return null;
-      const cfg=TX19_EDGE.overnight;
+      if(stationId!=='TX19'||!TX19_EDGE) return null;
+      const dayType=dayTypeForMoment(now);
+      const cfg=TX19_EDGE[dayType]?.overnight;
+      if(!cfg)return null;
       const [startH,startM]=cfg.startsAfter.split(':').map(Number);
       const [wakeH,wakeM]=cfg.endsBefore.split(':').map(Number);
       const start=new Date(now); start.setHours(startH,startM+1,0,0);
       const wake=new Date(now); wake.setHours(wakeH,wakeM,0,0);
       if(now<start||now>=wake) return null;
       return {
-        active:true,label:'終電後',message:'電車もひと休み。朝になったらまた見よう。',
+        active:true,label:'終電後',serviceDayType:dayType,message:'電車もひと休み。朝になったらまた見よう。',
         next:cfg.next.map(n=>{
           const [h,m]=n.time.split(':').map(Number),at=new Date(now); at.setHours(h,m,0,0);
           return {...n,at};
@@ -211,14 +220,10 @@
     }
 
     const engine={
-      DATA_META:{
-        dataVersion:DATA.dataVersion,checkedAt:DATA.checkedAt,timetableRevision:DATA.timetableRevision,
-        source:DATA.source,coverage:DATA.coverage
-      },
-      STATIONS,SERVICE,ARRIVAL_LEAD_MS,DEPARTURE_WINDOW_MS,LONG_WAIT_MS,
-      stationById,dirText,isOrigin,isTerminal,fmtTime,fmtClock,fmtRemain,
-      buildVisits,filterVisits,focusForVisit,getFocuses,getOvernightState,
-      focusTitle,focusMessage,focusCountdown
+      DATA_META:{dataVersion:DATA.dataVersion,checkedAt:DATA.checkedAt,timetableRevision:DATA.timetableRevision,validThrough:DATA.validThrough,source:DATA.source,coverage:DATA.coverage},
+      STATIONS,SERVICE,ARRIVAL_LEAD_MS,DEPARTURE_WINDOW_MS,LONG_WAIT_MS,SERVICE_DAY_BOUNDARY_HOUR,
+      stationById,dirText,isOrigin,isTerminal,fmtTime,fmtClock,fmtRemain,dateKey,serviceDateForMoment,dayTypeForMoment,
+      buildVisits,filterVisits,focusForVisit,getFocuses,getOvernightState,focusTitle,focusMessage,focusCountdown
     };
     window.TrainWatchEngine=engine;
     return engine;
