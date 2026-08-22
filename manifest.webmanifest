@@ -1,7 +1,7 @@
 {
   "name": "でんしゃくるよ！｜TRAIN WATCH",
   "short_name": "でんしゃくるよ！",
-  "description": "子どもと一緒に、次の電車までを楽しく数える親子向け電車カウントダウン。",
+  "description": "子どもと一緒に、電車の到着・発車・通過の瞬間を楽しく見る親子向け電車ウォッチ。",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
