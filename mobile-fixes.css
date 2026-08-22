@@ -7,13 +7,45 @@ html {
 }
 body { min-height: 100dvh; }
 
+/* Touch reliability */
+button,
+.touchable,
+.favorite-card,
+.station-select,
+.star-btn {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+button:not(:disabled) { cursor: pointer; }
+.touchable {
+  position: relative;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.touchable:focus-visible,
+.settings-link:focus-visible,
+.data-notice button:focus-visible,
+.segmented button:focus-visible,
+.favorite-card:focus-visible,
+.station-select:focus-visible,
+.star-btn:focus-visible {
+  outline: 3px solid rgba(20,119,255,.28);
+  outline-offset: 2px;
+}
+
 /* 日本語が1〜2文字だけ不自然に折り返されるのを避ける */
 .brand-lockup strong,
 .hero-topline p,
 .hero-message,
 .section-heading h2,
-.hero-actions wa-button::part(label),
-#openStations::part(label) {
+.primary-action,
+.secondary-action,
+.add-station-button {
   word-break: keep-all;
 }
 .hero-topline p,
@@ -21,25 +53,58 @@ body { min-height: 100dvh; }
 .session-note,
 .section-heading h2 { text-wrap: balance; }
 
-/* 駅セレクタ：TX19 と駅名が詰まって見える問題を実機で補正 */
-.station-button::part(base) { padding-inline: 14px; }
-.station-button::part(label) {
-  overflow: hidden;
-  white-space: nowrap;
+/* 駅セレクタ：主要操作はnative buttonで確実にタップできるようにする */
+.station-toolbar { grid-template-columns:minmax(0,1fr) 52px; }
+.station-button {
+  width:100%;
+  min-height:52px;
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr) auto;
+  align-items:center;
+  gap:0;
+  padding:0 14px;
+  border:1px solid #b8cade;
+  border-radius:18px;
+  background:#fff;
+  box-shadow:0 3px 10px rgba(31,67,105,.04);
+  text-align:left;
+  font-weight:900;
+}
+.station-button .chevron {
+  margin-left:10px;
+  color:#425b74;
+  font-size:18px;
+  line-height:1;
 }
 .station-code {
   flex: none;
   margin-right: 10px;
 }
 #stationName {
-  display: inline-block;
-  min-width: 0;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 18px;
-  line-height: 1.15;
+  display:block;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:18px;
+  line-height:1.15;
+}
+.favorite-toggle {
+  width:52px;
+  min-height:52px;
+  display:grid;
+  place-items:center;
+  border:1px solid #b8cade;
+  border-radius:18px;
+  background:#fff;
+  color:#71869a;
+  font-size:27px;
+  line-height:1;
+}
+.favorite-toggle.on {
+  color:#e0a000;
+  background:#fffaf0;
+  border-color:#f0cf6b;
 }
 
 /* 情報階層：主役のカウントダウンは保ちつつ、カードを少しコンパクトに */
@@ -73,29 +138,59 @@ body { min-height: 100dvh; }
 }
 .hero-meta { margin-top: 1px; }
 
-/* CTA：414px幅で日本語が「お知ら / せ」等に割れないようにする */
+/* CTA：native button + 1行を基本にして実機の不自然な改行をなくす */
 .hero-actions {
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1.18fr 1fr;
   gap: 8px;
   margin-top: 10px;
 }
-.hero-actions wa-button::part(base) {
-  min-height: 50px;
-  padding-inline: 9px;
+.primary-action,
+.secondary-action {
+  min-width:0;
+  min-height:52px;
+  border-radius:17px;
+  padding:8px 11px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  font-weight:900;
+  line-height:1.1;
+  text-align:left;
 }
-.hero-actions wa-button::part(label) {
-  font-size: 13px;
-  line-height: 1.15;
-  white-space: nowrap;
+.primary-action {
+  background:var(--brand-blue-dark);
+  border:1px solid var(--brand-blue-dark);
+  color:#fff;
 }
-.notify-button b {
-  font-size: 13px;
-  white-space: nowrap;
+.primary-action.enabled {
+  background:var(--brand-mint);
+  border-color:var(--brand-mint);
 }
-.notify-button small {
-  font-size: 9px;
-  white-space: nowrap;
+.secondary-action {
+  background:#fff;
+  border:1px solid #b8cade;
+  color:var(--ink);
 }
+.action-icon {
+  flex:none;
+  font-size:20px;
+  line-height:1;
+}
+.action-copy { min-width:0; }
+.action-copy b,
+.action-copy small {
+  display:block;
+  white-space:nowrap;
+}
+.action-copy b { font-size:12px; }
+.action-copy small {
+  margin-top:2px;
+  font-size:9px;
+  font-weight:700;
+  opacity:.8;
+}
+.secondary-action .action-copy b { font-size:12px; }
 .session-note {
   max-width: 360px;
   margin: 7px auto 0;
@@ -106,14 +201,20 @@ body { min-height: 100dvh; }
 .favorites-section,
 .timeline-section { margin-top: 22px; }
 .section-heading { align-items: center; }
-#openStations::part(base) {
-  min-height: 40px;
-  padding-inline: 12px;
-  border-radius: 14px;
-  font-size: 13px;
+.add-station-button {
+  min-height:40px;
+  padding:0 12px;
+  border:1px solid #b8cade;
+  border-radius:14px;
+  background:#fff;
+  color:var(--ink);
+  font-size:13px;
+  font-weight:850;
+  white-space:nowrap;
 }
-#openStations::part(label) { white-space: nowrap; }
 .favorite-card strong { line-height: 1.35; }
+.settings-link,
+.data-notice button { min-height:44px; }
 
 /* iOS Safari: 16px未満のinputフォーカス時に自動ズームされるのを防ぐ */
 .station-search { font-size: 16px; }
@@ -124,40 +225,61 @@ body { min-height: 100dvh; }
   padding-bottom: max(96px, calc(env(safe-area-inset-bottom) + 72px));
 }
 
+/* microinteraction helper */
+.motion-spark {
+  position:fixed;
+  z-index:99999;
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--brand-yellow);
+  pointer-events:none;
+  box-shadow:0 0 0 2px rgba(255,215,74,.16);
+}
+.is-pressing { will-change:transform; }
+
 @media (max-width: 430px) {
   .app-header {
-    padding-left: 14px;
-    padding-right: 14px;
-    padding-bottom: 8px;
+    padding-left:14px;
+    padding-right:14px;
+    padding-bottom:8px;
   }
   .app-shell {
-    padding-left: 12px;
-    padding-right: 12px;
+    padding-left:12px;
+    padding-right:12px;
   }
-  .brand-lockup strong { font-size: 17px; white-space: nowrap; }
-  .hero-card { border-radius: 28px; }
-  .section-heading { margin-bottom: 9px; }
+  .brand-lockup strong { font-size:17px; white-space:nowrap; }
+  .hero-card { border-radius:28px; }
+  .section-heading { margin-bottom:9px; }
 }
 
 @media (max-width: 390px) {
-  .brand-mark { width: 36px; height: 36px; }
-  .brand-lockup { gap: 8px; }
-  .brand-lockup strong { font-size: 16px; }
-  .header-clock strong { font-size: 14px; }
+  .brand-mark { width:36px; height:36px; }
+  .brand-lockup { gap:8px; }
+  .brand-lockup strong { font-size:16px; }
+  .header-clock strong { font-size:14px; }
   .hero-card {
-    padding-left: 12px;
-    padding-right: 12px;
+    padding-left:12px;
+    padding-right:12px;
   }
-  .countdown { font-size: clamp(68px, 20vw, 92px); }
-  .train-wrap { width: 166px; }
+  .countdown { font-size:clamp(68px,20vw,92px); }
+  .train-wrap { width:166px; }
+  .primary-action,
+  .secondary-action { padding-inline:8px; gap:5px; }
+  .action-icon { font-size:18px; }
+  .action-copy b { font-size:11px; }
+  .secondary-action .action-copy b { font-size:11px; }
 }
 
 @media (max-width: 360px) {
-  .hero-actions { grid-template-columns: 1fr; }
-  .hero-actions wa-button::part(label) { font-size: 14px; }
-  .section-heading { gap: 8px; }
-  #openStations::part(base) {
-    padding-inline: 9px;
-    font-size: 12px;
+  .hero-actions { grid-template-columns:1fr; }
+  .primary-action,
+  .secondary-action { justify-content:flex-start; padding-inline:14px; }
+  .action-copy b,
+  .secondary-action .action-copy b { font-size:13px; }
+  .section-heading { gap:8px; }
+  .add-station-button {
+    padding-inline:9px;
+    font-size:12px;
   }
 }
