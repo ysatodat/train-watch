@@ -5,6 +5,7 @@
     ['TX01','秋葉原','Akihabara'],['TX02','新御徒町','Shin-okachimachi'],['TX03','浅草','Asakusa'],['TX04','南千住','Minami-senju'],['TX05','北千住','Kita-senju'],['TX06','青井','Aoi'],['TX07','六町','Rokucho'],['TX08','八潮','Yashio'],['TX09','三郷中央','Misato-chuo'],['TX10','南流山','Minami-nagareyama'],['TX11','流山セントラルパーク','Nagareyama-centralpark'],['TX12','流山おおたかの森','Nagareyama-otakanomori'],['TX13','柏の葉キャンパス','Kashiwanoha-campus'],['TX14','柏たなか','Kashiwa-tanaka'],['TX15','守谷','Moriya'],['TX16','みらい平','Miraidaira'],['TX17','みどりの','Midorino'],['TX18','万博記念公園','Bampaku-kinenkoen'],['TX19','研究学園','Kenkyu-gakuen'],['TX20','つくば','Tsukuba']
   ].map((x, i) => ({ id:x[0], name:x[1], en:x[2], i }));
 
+  // β版の列車モデル。null は通過駅。offset は各方面の起点からの分数。
   const DOWN = {
     local:   [0,2,4,7,10,13,15,19,22,25,28,30,33,36,40,45,48,51,54,57],
     section: [0,2,4,7,10,null,null,17,20,23,null,26,30,null,35,40,43,46,49,52],
@@ -25,7 +26,7 @@
     station:'TX19', includePass:true, dir:'both', favorites:['TX19'], sound:true, vibrate:true
   };
   const state = { ...DEFAULT_STATE };
-  let alertsEnabled = false;
+  let alertsEnabled = false; // 毎回のユーザー操作が必要。誤解を避けるため永続化しない。
   let audioCtx = null;
   let toastTimer = null;
   const notified = new Set();
@@ -49,7 +50,6 @@
     if (STATIONS.some(s => s.id === q)) state.station = q;
     if (!Array.isArray(state.favorites)) state.favorites = ['TX19'];
     state.favorites = [...new Set(state.favorites)].filter(id => STATIONS.some(s => s.id === id));
-    if (!state.favorites.length) state.favorites = ['TX19'];
   }
   function saveState() { localStorage.setItem('denshaKuruyoV1', JSON.stringify(state)); }
   function stationById(id=state.station) { return STATIONS.find(s => s.id === id) || STATIONS[18]; }
@@ -69,6 +69,7 @@
   }
   function buildEvents(now, stationId) {
     const s=stationById(stationId), out=[], baseDay=new Date(now); baseDay.setHours(0,0,0,0);
+    // 日中〜夜の土休日モデル。時刻表改正時はここを更新。
     for (let h=8; h<=23; h++) {
       const downBases=[['rapid',0],['section',16],['local',27],['rapid',30],['section',46],['local',57]];
       const upBases=[['local',4],['rapid',12],['section',20],['local',34],['rapid',42],['section',50]];
@@ -129,6 +130,10 @@
 
   function renderFavorites(now) {
     el.favoriteCards.innerHTML='';
+    if (!state.favorites.length) {
+      el.favoriteCards.innerHTML='<div class="empty-favs">☆ よく見る駅をお気に入りにすると、ここからすぐ切り替えられるよ。</div>';
+      return;
+    }
     state.favorites.forEach(id => {
       const s=stationById(id), e=filteredEvents(now,id)[0];
       const b=document.createElement('button'); b.type='button'; b.className='favorite-card'+(id===state.station?' active':''); b.setAttribute('role','listitem');
@@ -143,7 +148,7 @@
       const row=document.createElement('div'); row.className='station-row'+(s.id===state.station?' current':''); row.hidden=!matches;
       const fav=state.favorites.includes(s.id);
       row.innerHTML=`<span class="station-code-mini">${s.id}</span><button type="button" class="station-select"><strong>${s.name}</strong><small>${s.en}</small></button><button type="button" class="star-btn ${fav?'on':''}" aria-label="${s.name}をお気に入り${fav?'から外す':'に追加'}">${fav?'★':'☆'}</button>`;
-      row.querySelector('.station-select').addEventListener('click',()=>{selectStation(s.id); el.stationDialog.open=false;});
+      row.querySelector('.station-select').addEventListener('click',()=>{selectStation(s.id); el.stationDialog.removeAttribute('open');});
       row.querySelector('.star-btn').addEventListener('click',()=>{toggleFavorite(s.id); renderStationList(el.stationSearch.value);});
       el.stationList.appendChild(row);
     });
@@ -152,13 +157,13 @@
     state.station=id; saveState(); const u=new URL(location.href); u.searchParams.set('station',id); history.replaceState(null,'',u); renderAll();
   }
   function toggleFavorite(id=state.station) {
-    const i=state.favorites.indexOf(id); if(i>=0 && state.favorites.length>1) state.favorites.splice(i,1); else if(i<0) state.favorites.push(id);
+    const i=state.favorites.indexOf(id); if(i>=0) state.favorites.splice(i,1); else state.favorites.push(id);
     saveState(); renderAll();
   }
   function syncControls() {
     document.querySelectorAll('#trainFilter button').forEach(b=>b.classList.toggle('active',(b.dataset.filter==='all')===state.includePass));
     document.querySelectorAll('#directionFilter button').forEach(b=>b.classList.toggle('active',b.dataset.dir===state.dir));
-    el.soundToggle.checked=state.sound!==false; el.vibrateToggle.checked=state.vibrate!==false;
+    el.soundToggle.toggleAttribute('checked',state.sound!==false); el.vibrateToggle.toggleAttribute('checked',state.vibrate!==false);
     el.notifyButton.classList.toggle('enabled',alertsEnabled);
     el.notifyButton.querySelector('b').textContent=alertsEnabled?'お知らせ中':'このページでお知らせ';
     el.sessionNote.textContent=alertsEnabled?'お知らせ中：3分前と30秒前に音や画面で知らせます。ページは開いたままにしてね。':'お知らせは、このページを開いている間だけ動きます。';
@@ -202,11 +207,11 @@
   }
 
   function bindEvents() {
-    el.stationButton.addEventListener('click',()=>{el.stationDialog.open=true; setTimeout(()=>el.stationSearch.focus(),160);});
-    $('openStations').addEventListener('click',()=>{el.stationDialog.open=true; setTimeout(()=>el.stationSearch.focus(),160);});
+    el.stationButton.addEventListener('click',()=>{el.stationDialog.setAttribute('open',''); setTimeout(()=>el.stationSearch.focus(),160);});
+    $('openStations').addEventListener('click',()=>{el.stationDialog.setAttribute('open',''); setTimeout(()=>el.stationSearch.focus(),160);});
     el.favoriteToggle.addEventListener('click',()=>toggleFavorite());
-    $('openSettings').addEventListener('click',()=>{el.settingsDialog.open=true;});
-    $('openDataInfo').addEventListener('click',()=>{el.dataDialog.open=true;});
+    $('openSettings').addEventListener('click',()=>{el.settingsDialog.setAttribute('open','');});
+    $('openDataInfo').addEventListener('click',()=>{el.dataDialog.setAttribute('open','');});
     el.notifyButton.addEventListener('click',toggleAlerts); $('shareButton').addEventListener('click',shareStation);
     el.stationSearch.addEventListener('input',()=>renderStationList(el.stationSearch.value));
     document.querySelectorAll('#trainFilter button').forEach(b=>b.addEventListener('click',()=>{state.includePass=b.dataset.filter==='all'; saveState(); renderAll();}));
