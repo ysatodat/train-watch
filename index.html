@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#244d55">
-  <meta name="description" content="子どもと一緒に、次の電車までを楽しく数える。つくばエクスプレスの親子向け電車カウントダウン。">
+  <meta name="description" content="子どもと一緒に、電車の到着・発車・通過の瞬間を楽しく見る。つくばエクスプレスの親子向け電車ウォッチ。">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="でんしゃくるよ！">
@@ -16,179 +16,66 @@
   <link rel="stylesheet" href="./mobile-fixes.css">
   <link rel="stylesheet" href="./native-ui.css">
   <link rel="stylesheet" href="./brand-refresh.css">
+  <link rel="stylesheet" href="./moments.css">
 </head>
 <body>
   <a class="skip-link" href="#main">メインへ移動</a>
-
   <header class="app-header">
     <div class="brand-lockup" aria-label="でんしゃくるよ！ TRAIN WATCH">
-      <span class="brand-mark" aria-hidden="true">
-        <svg viewBox="0 0 64 64"><rect x="9" y="8" width="46" height="39" rx="15" fill="currentColor"/><rect x="16" y="15" width="32" height="13" rx="5" fill="white"/><circle cx="20" cy="37" r="4" fill="white"/><circle cx="44" cy="37" r="4" fill="white"/><path d="M20 50l-6 7M44 50l6 7M16 55h32" stroke="currentColor" stroke-width="5" stroke-linecap="round"/></svg>
-      </span>
-      <span>
-        <strong>でんしゃくるよ！</strong>
-        <small>TRAIN WATCH</small>
-      </span>
+      <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 64 64"><rect x="9" y="8" width="46" height="39" rx="15" fill="currentColor"/><rect x="16" y="15" width="32" height="13" rx="5" fill="white"/><circle cx="20" cy="37" r="4" fill="white"/><circle cx="44" cy="37" r="4" fill="white"/><path d="M20 50l-6 7M44 50l6 7M16 55h32" stroke="currentColor" stroke-width="5" stroke-linecap="round"/></svg></span>
+      <span><strong>でんしゃくるよ！</strong><small>TRAIN WATCH</small></span>
     </div>
-    <div class="header-clock" aria-label="現在時刻">
-      <strong id="clock">--:--:--</strong>
-      <small id="date">--</small>
-    </div>
+    <div class="header-clock" aria-label="現在時刻"><strong id="clock">--:--:--</strong><small id="date">--</small></div>
   </header>
 
   <main id="main" class="app-shell">
     <section class="station-toolbar" aria-label="表示中の駅">
-      <button id="stationButton" type="button" class="station-button touchable" aria-haspopup="dialog" aria-controls="stationDialog" aria-label="駅を変更">
-        <span class="station-code" id="stationCode">TX19</span>
-        <span id="stationName">研究学園</span>
-        <span class="chevron" aria-hidden="true">⌄</span>
-      </button>
+      <button id="stationButton" type="button" class="station-button touchable" aria-haspopup="dialog" aria-controls="stationDialog" aria-label="駅を変更"><span class="station-code" id="stationCode">TX19</span><span id="stationName">研究学園</span><span class="chevron" aria-hidden="true">⌄</span></button>
       <button id="favoriteToggle" type="button" class="favorite-toggle touchable" aria-label="お気に入りに追加" title="お気に入り">☆</button>
     </section>
 
-    <section id="dataNotice" class="data-notice">
-      <span class="data-dot" aria-hidden="true"></span>
-      <span id="modeBadge">土休日ダイヤ（β）</span>
-      <button id="openDataInfo" type="button" aria-haspopup="dialog" aria-controls="dataDialog">時刻について</button>
-    </section>
+    <section id="dataNotice" class="data-notice"><span class="data-dot" aria-hidden="true"></span><span id="modeBadge">土休日ダイヤ（β）</span><button id="openDataInfo" type="button" aria-haspopup="dialog" aria-controls="dataDialog">時刻について</button></section>
 
-    <section class="hero-card" id="hero" aria-labelledby="heroLabel">
-      <div class="hero-topline">
-        <p id="heroLabel">つぎに駅へ来る電車まで</p>
-        <span id="serviceBadge" class="service-badge">普通</span>
-      </div>
-
-      <div class="countdown" id="countdown" aria-label="次の電車まで">--:--</div>
-      <p class="hero-message" id="heroMessage">時刻を確認しています</p>
-      <p class="ten-count" id="tenCount" hidden></p>
-
-      <div class="train-scene" aria-hidden="true">
-        <div class="train-wrap" id="trainWrap">
-          <svg class="train-illustration" viewBox="0 0 260 96">
-            <rect x="12" y="18" width="222" height="58" rx="24" fill="currentColor"/>
-            <rect x="30" y="29" width="128" height="25" rx="9" fill="#fff" opacity=".95"/>
-            <rect x="169" y="29" width="44" height="25" rx="9" fill="#fff" opacity=".95"/>
-            <path d="M234 34c10 6 15 15 15 24s-5 14-15 18V34z" fill="currentColor"/>
-            <circle cx="58" cy="78" r="10" fill="#1c2d43"/><circle cx="196" cy="78" r="10" fill="#1c2d43"/>
-            <circle cx="58" cy="78" r="4" fill="#d9e5f2"/><circle cx="196" cy="78" r="4" fill="#d9e5f2"/>
-          </svg>
-        </div>
-        <div class="track"><span></span><span></span><span></span><span></span><span></span></div>
-      </div>
-
+    <section class="hero-card" id="hero" aria-labelledby="heroLabel" data-moment="arrival">
+      <div class="hero-topline"><p id="heroLabel">つぎの見どころまで</p><span id="serviceBadge" class="service-badge">普通・到着</span></div>
+      <div class="countdown" id="countdown" aria-label="次の見どころまで">--:--</div>
+      <p class="hero-message" id="heroMessage">時刻を確認しています</p><p class="ten-count" id="tenCount" hidden></p>
+      <div class="train-scene" aria-hidden="true"><div class="train-wrap" id="trainWrap"><svg class="train-illustration" viewBox="0 0 260 96"><rect x="12" y="18" width="222" height="58" rx="24" fill="currentColor"/><rect x="30" y="29" width="128" height="25" rx="9" fill="#fff" opacity=".95"/><rect x="169" y="29" width="44" height="25" rx="9" fill="#fff" opacity=".95"/><path d="M234 34c10 6 15 15 15 24s-5 14-15 18V34z" fill="currentColor"/><circle cx="58" cy="78" r="10" fill="#1c2d43"/><circle cx="196" cy="78" r="10" fill="#1c2d43"/><circle cx="58" cy="78" r="4" fill="#d9e5f2"/><circle cx="196" cy="78" r="4" fill="#d9e5f2"/></svg></div><div class="track"><span></span><span></span><span></span><span></span><span></span></div></div>
       <div class="hero-meta" id="metaRow"></div>
-
       <div class="hero-actions">
-        <button id="notifyButton" type="button" class="primary-action notify-button touchable" aria-pressed="false">
-          <span class="action-copy"><b>このページでお知らせ</b><small>3分前・30秒前</small></span>
-        </button>
-        <button id="shareButton" type="button" class="secondary-action share-button touchable">
-          <span class="action-copy"><b>お友達に教える</b></span>
-        </button>
+        <button id="notifyButton" type="button" class="primary-action notify-button touchable" aria-pressed="false"><span class="action-copy"><b>このページでお知らせ</b><small>到着・発車・通過の3分前／30秒前</small></span></button>
+        <button id="shareButton" type="button" class="secondary-action share-button touchable"><span class="action-copy"><b>お友達に教える</b></span></button>
       </div>
       <p class="session-note" id="sessionNote">お知らせは、このページを開いている間だけ動きます。</p>
     </section>
 
-    <section class="favorites-section" aria-labelledby="favoritesTitle">
-      <div class="section-heading">
-        <h2 id="favoritesTitle">お気に入りの駅</h2>
-        <button id="openStations" type="button" class="add-station-button touchable" aria-haspopup="dialog" aria-controls="stationDialog">＋ 駅を追加</button>
-      </div>
-      <div id="favoriteCards" class="favorite-cards"></div>
+    <section class="moments-section" aria-labelledby="momentsTitle">
+      <div class="section-heading moments-heading"><div><h2 id="momentsTitle">いま・もうすぐ</h2><p>到着、発車、通過。動く瞬間をまとめて追います。</p></div><span id="watchedCount" class="watched-count">きょう 0本見た</span></div>
+      <div id="rareBanner" class="rare-banner" role="status" hidden><strong>レアタイム</strong><span class="rare-copy">2本がほぼ同時！</span><span class="rare-rails" aria-hidden="true"><i class="rare-train a"></i><i class="rare-train b"></i></span></div>
+      <div id="momentList" class="moment-list"></div>
     </section>
 
-    <section class="timeline-section" aria-labelledby="timelineTitle">
-      <div class="section-heading">
-        <h2 id="timelineTitle">このあと見られる電車</h2>
-        <button class="settings-link touchable" id="openSettings" type="button" aria-haspopup="dialog" aria-controls="settingsDialog">表示設定</button>
-      </div>
-      <div id="timeline" class="timeline"></div>
-    </section>
+    <section class="favorites-section" aria-labelledby="favoritesTitle"><div class="section-heading"><h2 id="favoritesTitle">お気に入りの駅</h2><button id="openStations" type="button" class="add-station-button touchable" aria-haspopup="dialog" aria-controls="stationDialog">＋ 駅を追加</button></div><div id="favoriteCards" class="favorite-cards"></div></section>
 
-    <section class="brand-message" aria-label="サービスについて">
-      <strong>あと何秒？を、親子のワクワクに。</strong>
-      <p>電車を待つ時間まで、ちいさなイベントに。</p>
-    </section>
+    <section class="timeline-section" aria-labelledby="timelineTitle"><div class="section-heading"><h2 id="timelineTitle">このあと見られる電車</h2><button class="settings-link touchable" id="openSettings" type="button" aria-haspopup="dialog" aria-controls="settingsDialog">表示設定</button></div><div id="timeline" class="timeline"></div></section>
+
+    <section class="brand-message" aria-label="サービスについて"><strong>来る瞬間も、動く瞬間も。</strong><p>電車を見る時間を、親子のちいさなイベントに。</p></section>
   </main>
 
-  <footer class="app-footer">
-    <p>でんしゃくるよ！ β · 時刻表ベースの参考表示です</p>
-    <a href="https://www.mir.co.jp/route_map/index.html" target="_blank" rel="noopener">つくばエクスプレス公式 ↗</a>
-  </footer>
+  <footer class="app-footer"><p>でんしゃくるよ！ β · 時刻表ベースの参考表示です</p><a href="https://www.mir.co.jp/route_map/index.html" target="_blank" rel="noopener">つくばエクスプレス公式 ↗</a></footer>
 
-  <dialog id="stationDialog" class="native-dialog" aria-labelledby="stationDialogTitle">
-    <div class="dialog-shell">
-      <header class="dialog-header">
-        <h2 id="stationDialogTitle">駅をえらぶ</h2>
-        <button type="button" class="dialog-close touchable" data-close-dialog="stationDialog" aria-label="閉じる">×</button>
-      </header>
-      <label class="search-label" for="stationSearch">駅名を検索</label>
-      <input id="stationSearch" class="station-search" type="search" inputmode="search" placeholder="例：研究学園、TX19" autocomplete="off">
-      <div id="stationList" class="station-list"></div>
-    </div>
-  </dialog>
+  <dialog id="stationDialog" class="native-dialog" aria-labelledby="stationDialogTitle"><div class="dialog-shell"><header class="dialog-header"><h2 id="stationDialogTitle">駅をえらぶ</h2><button type="button" class="dialog-close touchable" data-close-dialog="stationDialog" aria-label="閉じる">×</button></header><label class="search-label" for="stationSearch">駅名を検索</label><input id="stationSearch" class="station-search" type="search" inputmode="search" placeholder="例：研究学園、TX19" autocomplete="off"><div id="stationList" class="station-list"></div></div></dialog>
 
-  <dialog id="settingsDialog" class="native-dialog" aria-labelledby="settingsDialogTitle">
-    <div class="dialog-shell">
-      <header class="dialog-header">
-        <h2 id="settingsDialogTitle">表示とお知らせ</h2>
-        <button type="button" class="dialog-close touchable" data-close-dialog="settingsDialog" aria-label="閉じる">×</button>
-      </header>
-      <div class="setting-block">
-        <h3>見たい電車</h3>
-        <div class="segmented" id="trainFilter" role="group" aria-label="見たい電車">
-          <button type="button" data-filter="all" class="active" aria-pressed="true">通過も含める</button>
-          <button type="button" data-filter="stop" aria-pressed="false">停車だけ</button>
-        </div>
-      </div>
-      <div class="setting-block">
-        <h3>方面</h3>
-        <div class="segmented three" id="directionFilter" role="group" aria-label="方面">
-          <button type="button" data-dir="both" class="active" aria-pressed="true">両方</button>
-          <button type="button" data-dir="down" aria-pressed="false">つくば</button>
-          <button type="button" data-dir="up" aria-pressed="false">秋葉原</button>
-        </div>
-      </div>
-      <div class="setting-block switches">
-        <label class="toggle-row" for="soundToggle">
-          <span><strong>お知らせ音</strong><small>接近時に音で知らせる</small></span>
-          <input id="soundToggle" type="checkbox" checked>
-          <span class="toggle-ui" aria-hidden="true"></span>
-        </label>
-        <label class="toggle-row" for="vibrateToggle">
-          <span><strong>振動</strong><small>対応端末のみ</small></span>
-          <input id="vibrateToggle" type="checkbox" checked>
-          <span class="toggle-ui" aria-hidden="true"></span>
-        </label>
-      </div>
-      <p class="settings-help">設定はこの端末に保存されます。お知らせはページを開いている間だけ動きます。</p>
-    </div>
-  </dialog>
+  <dialog id="settingsDialog" class="native-dialog" aria-labelledby="settingsDialogTitle"><div class="dialog-shell"><header class="dialog-header"><h2 id="settingsDialogTitle">表示とお知らせ</h2><button type="button" class="dialog-close touchable" data-close-dialog="settingsDialog" aria-label="閉じる">×</button></header><div class="setting-block"><h3>見たい電車</h3><div class="segmented" id="trainFilter" role="group" aria-label="見たい電車"><button type="button" data-filter="all" class="active" aria-pressed="true">通過も含める</button><button type="button" data-filter="stop" aria-pressed="false">停車だけ</button></div></div><div class="setting-block"><h3>方面</h3><div class="segmented three" id="directionFilter" role="group" aria-label="方面"><button type="button" data-dir="both" class="active" aria-pressed="true">両方</button><button type="button" data-dir="down" aria-pressed="false">つくば</button><button type="button" data-dir="up" aria-pressed="false">秋葉原</button></div></div><div class="setting-block switches"><label class="toggle-row" for="soundToggle"><span><strong>お知らせ音</strong><small>見どころの接近時に音で知らせる</small></span><input id="soundToggle" type="checkbox" checked><span class="toggle-ui" aria-hidden="true"></span></label><label class="toggle-row" for="vibrateToggle"><span><strong>振動</strong><small>対応端末のみ</small></span><input id="vibrateToggle" type="checkbox" checked><span class="toggle-ui" aria-hidden="true"></span></label></div><p class="settings-help">設定はこの端末に保存されます。お知らせはページを開いている間だけ動きます。</p></div></dialog>
 
-  <dialog id="dataDialog" class="native-dialog" aria-labelledby="dataDialogTitle">
-    <div class="dialog-shell">
-      <header class="dialog-header">
-        <h2 id="dataDialogTitle">時刻について</h2>
-        <button type="button" class="dialog-close touchable" data-close-dialog="dataDialog" aria-label="閉じる">×</button>
-      </header>
-      <div class="data-copy">
-        <p><strong>このサービスは「電車を見る」ための参考カウントダウンです。</strong></p>
-        <p>現在は土休日の日中運行パターンを中心にしたβ版です。停車時刻・種別ごとの所要時間をもとに構成し、通過駅は前後駅から推定しています。</p>
-        <ul>
-          <li>実際の入線は表示より早いことがあります</li>
-          <li>遅延・運休・臨時列車は反映しません</li>
-          <li>「推定」と表示する時刻は目安として見てください</li>
-        </ul>
-        <p>線路やホームでは安全な場所から楽しんでね。</p>
-      </div>
-    </div>
-  </dialog>
+  <dialog id="dataDialog" class="native-dialog" aria-labelledby="dataDialogTitle"><div class="dialog-shell"><header class="dialog-header"><h2 id="dataDialogTitle">時刻について</h2><button type="button" class="dialog-close touchable" data-close-dialog="dataDialog" aria-label="閉じる">×</button></header><div class="data-copy"><p><strong>このサービスは「電車を見る」ための参考ウォッチです。</strong></p><p>公開時刻は基本的に分単位のため、発車秒を断定しません。停車列車は「発車の時間帯」として表示し、到着は時刻表と駅間モデルから目安を出しています。</p><ul><li>「いま停まった！」は、目の前の電車を親子で記録する端末内の機能です</li><li>通過時刻・到着時刻は推定を含みます</li><li>遅延・運休・臨時列車は反映しません</li><li>実際の電車を見ながら、表示は目安として使ってください</li></ul><p>ホームでは黄色い線の内側など、安全な場所から楽しんでね。</p></div></div></dialog>
 
   <div id="toast" class="app-toast" role="status" aria-live="assertive" hidden></div>
-
   <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js"></script>
   <script src="./dialog-controller.js" defer></script>
+  <script src="./train-engine.js" defer></script>
   <script src="./app.js" defer></script>
   <script src="./microinteractions.js" defer></script>
+  <script src="./moments-interactions.js" defer></script>
 </body>
 </html>
