@@ -1,13 +1,20 @@
 import fs from 'node:fs';
 import vm from 'node:vm';
 
+process.env.TZ='Asia/Tokyo';
 const code=fs.readFileSync('train-engine.js','utf8');
-const sandbox={window:{},Date,console};
+const data=JSON.parse(fs.readFileSync('data/timetable.json','utf8'));
+const copy=()=>JSON.parse(JSON.stringify(data));
+const sandbox={
+  window:{},Date,console,
+  fetch:async()=>({ok:true,status:200,json:async()=>copy()})
+};
 vm.createContext(sandbox);
 vm.runInContext(code,sandbox);
-const E=sandbox.window.TrainWatchEngine;
+const E=await sandbox.window.TrainWatchEngineReady;
 if(!E) throw new Error('TrainWatchEngine did not initialize');
 if(E.STATIONS.length!==20) throw new Error('TX station count must be 20');
+if(E.DATA_META.dataVersion!==data.dataVersion) throw new Error('Engine data version must match timetable JSON');
 
 const base=new Date(2026,7,23,12,0,0);
 const visits=E.buildVisits(base,'TX19');
@@ -44,7 +51,6 @@ const overnight=E.getOvernightState(afterLast,'TX19');
 if(!overnight?.active||overnight.next[0].time!=='05:09'||overnight.next[1].time!=='05:34'){
   throw new Error('Overnight state must expose first trains');
 }
-
 if(E.fmtRemain(5*60*60*1000).includes('300分')) throw new Error('Long waits must not use huge minute counts');
 
 const terminalVisit=E.buildVisits(base,'TX20').find(v=>v.dir==='down'&&v.stop);
