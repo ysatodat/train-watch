@@ -2,7 +2,7 @@ import fs from 'node:fs';
 
 const requiredFiles = [
   'index.html', 'train-engine.js', 'app.js', 'dialog-controller.js', 'microinteractions.js', 'moments-interactions.js',
-  'styles.css', 'mobile-fixes.css', 'native-ui.css', 'brand-refresh.css', 'moments.css',
+  'styles.css', 'mobile-fixes.css', 'native-ui.css', 'brand-refresh.css', 'moments.css', 'overnight.css',
   'manifest.webmanifest', 'icon.svg', 'sw.js'
 ];
 for (const file of requiredFiles) {
@@ -25,7 +25,7 @@ if (/class="hero-card"[^>]*aria-live=/i.test(html)) throw new Error('Hero countd
 if (!/id="notifyButton"[^>]*aria-pressed=/i.test(html)) throw new Error('Notify toggle must expose aria-pressed');
 if (!html.includes('./train-engine.js') || !html.includes('./moments.css')) throw new Error('Moment experience assets are not loaded');
 
-for (const file of ['styles.css','brand-refresh.css','mobile-fixes.css','native-ui.css','moments.css']) {
+for (const file of ['styles.css','brand-refresh.css','mobile-fixes.css','native-ui.css','moments.css','overnight.css']) {
   const css=fs.readFileSync(file,'utf8');
   const tiny=[...css.matchAll(/font-size\s*:\s*(\d+(?:\.\d+)?)px/gi)].map(m=>Number(m[1])).filter(size=>size<13);
   if (tiny.length) throw new Error(`${file} contains font sizes below 13px: ${tiny.join(', ')}`);
@@ -39,5 +39,10 @@ const appJs=fs.readFileSync('app.js','utf8');
 if (appJs.includes("setAttribute('open'")) throw new Error('app.js must not manage dialog open state');
 if (appJs.includes('Notification.requestPermission')) throw new Error('Do not request system notification permission for page-only alerts');
 if (!appJs.includes("action==='arrived'") || !appJs.includes("action==='departed'") || !appJs.includes("action==='seen'")) throw new Error('Observation actions for arrival/departure/pass are missing');
+if (!appJs.includes('getOvernightState')) throw new Error('Overnight service state is missing');
+
+const engineJs=fs.readFileSync('train-engine.js','utf8');
+if (!engineJs.includes("[0,41,'local']")) throw new Error('Verified TX19 00:41 service is missing');
+if (!engineJs.includes('LONG_WAIT_MS')) throw new Error('Long-wait formatting guard is missing');
 
 console.log('Static product QA passed');
