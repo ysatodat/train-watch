@@ -103,7 +103,7 @@ test('車両ずかんを開いたままでも写真DOMが毎秒作り直され�
   expect(await photo.evaluate(node => node.isConnected)).toBe(true);
 });
 
-test('長いモーダルをスクロールしてもヘッダーは不透明で閉じるボタンが残る', async ({ page }) => {
+test('長いモーダルをスクロールしても閉じるボタンが表示領域に残る・ヘッダーは不透明', async ({ page }) => {
   await prepare(page);
   await page.goto('/?station=TX19');
   await page.locator('#openTxVehicleGuide').click();
