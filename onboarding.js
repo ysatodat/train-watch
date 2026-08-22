@@ -16,13 +16,15 @@
     try{seen=localStorage.getItem(KEY)==='seen';}catch{}
     if(seen)return;
 
-    window.addEventListener('load',()=>{
+    const show=()=>{
       setTimeout(()=>{
-        if(!dialog.open&&!document.querySelector('dialog[open]')){
-          controller.openDialog(dialog,null,null);
-        }
+        const otherOpen=[...document.querySelectorAll('dialog[open]')].some(d=>d!==dialog);
+        if(!dialog.open&&!otherOpen) controller.openDialog(dialog,null,null);
       },420);
-    },{once:true});
+    };
+
+    if(document.readyState==='complete') show();
+    else window.addEventListener('load',show,{once:true});
   }
 
   init();
