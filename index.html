@@ -1,108 +1,165 @@
 <!doctype html>
-<html lang="ja">
+<html lang="ja" class="wa-theme-default wa-palette-default wa-brand-blue">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#08111f">
+  <meta name="theme-color" content="#1477ff">
+  <meta name="description" content="子どもと一緒に、次の電車までを楽しく数える。つくばエクスプレスの親子向け電車カウントダウン。">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Train Watch">
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="icon.svg">
-  <link rel="stylesheet" href="styles.css">
-  <title>TRAIN WATCH | TXでんしゃを見よう！</title>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="でんしゃくるよ！">
+  <title>でんしゃくるよ！｜TRAIN WATCH</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./icon.svg">
+  <link rel="stylesheet" href="https://ka-f.webawesome.com/@awesome.me/webawesome@3.11.0/styles/themes/default.css">
+  <link rel="stylesheet" href="https://ka-f.webawesome.com/@awesome.me/webawesome@3.11.0/styles/utilities.css">
+  <script type="module" src="https://ka-f.webawesome.com/@awesome.me/webawesome@3.11.0/webawesome.loader.js"></script>
+  <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-  <main class="app-shell">
-    <header class="topbar">
-      <div>
-        <div class="eyebrow">TSUKUBA EXPRESS · KIDS TRAIN WATCH</div>
-        <h1>TRAIN WATCH 🚆</h1>
-      </div>
-      <div class="clock"><strong id="clock">--:--:--</strong><span id="date">--</span></div>
-    </header>
+  <a class="skip-link" href="#main">メインへ移動</a>
+  <header class="app-header">
+    <div class="brand-lockup" aria-label="でんしゃくるよ！ TRAIN WATCH">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 64 64" role="img"><rect x="9" y="8" width="46" height="39" rx="15" fill="currentColor"/><rect x="16" y="15" width="32" height="13" rx="5" fill="white"/><circle cx="20" cy="37" r="4" fill="white"/><circle cx="44" cy="37" r="4" fill="white"/><path d="M20 50l-6 7M44 50l6 7M16 55h32" stroke="currentColor" stroke-width="5" stroke-linecap="round"/></svg>
+      </span>
+      <span>
+        <strong>でんしゃくるよ！</strong>
+        <small>TRAIN WATCH</small>
+      </span>
+    </div>
+    <div class="header-clock" aria-label="現在時刻">
+      <strong id="clock">--:--:--</strong>
+      <small id="date">--</small>
+    </div>
+  </header>
 
-    <section class="favorite-strip" aria-label="お気に入り駅">
-      <div class="section-head compact"><div><span>⭐</span><b>お気に入り</b></div><button id="openStations" class="text-btn">駅をえらぶ</button></div>
-      <div id="favoriteCards" class="favorite-cards"></div>
-    </section>
-
-    <section class="station-head">
-      <button id="stationButton" class="station-picker" type="button">
+  <main id="main" class="app-shell">
+    <section class="station-toolbar" aria-label="表示中の駅">
+      <wa-button id="stationButton" appearance="outlined" size="large" class="station-button">
         <span class="station-code" id="stationCode">TX19</span>
-        <span><b id="stationName">研究学園</b><small>タップして駅を変更</small></span>
-        <span aria-hidden="true">⌄</span>
-      </button>
-      <button id="favoriteToggle" class="round-btn" type="button" aria-label="お気に入りに追加">☆</button>
+        <span id="stationName">研究学園</span>
+        <span slot="end" aria-hidden="true">⌄</span>
+      </wa-button>
+      <wa-button id="favoriteToggle" appearance="plain" size="large" aria-label="お気に入りに追加" title="お気に入り">☆</wa-button>
     </section>
 
-    <section class="hero" id="hero" aria-live="polite">
-      <div class="hero-label" id="heroLabel">つぎに見られる電車まで</div>
-      <div class="countdown" id="countdown">--:--</div>
-      <div class="hero-message" id="heroMessage">電車をさがしてるよ…</div>
-      <div class="meta-row" id="metaRow"></div>
-      <div class="track-scene" aria-hidden="true">
-        <div class="sky-dot s1">⭐</div><div class="sky-dot s2">✨</div>
-        <div class="train" id="trainEmoji">🚆</div>
-        <div class="track"></div>
+    <section id="dataNotice" class="data-notice" aria-live="polite">
+      <span class="data-dot" aria-hidden="true"></span>
+      <span id="modeBadge">土休日モデル</span>
+      <button id="openDataInfo" type="button">時刻について</button>
+    </section>
+
+    <section class="hero-card" id="hero" aria-labelledby="heroLabel" aria-live="polite">
+      <div class="hero-topline">
+        <p id="heroLabel">つぎに駅へ来る電車まで</p>
+        <span id="serviceBadge" class="service-badge">🚆 普通</span>
       </div>
-      <div id="tenCount" class="ten-count" hidden></div>
-    </section>
 
-    <section class="action-grid">
-      <button id="notifyButton" class="action primary" type="button"><span>🔔</span><b>通知をONにする</b><small>3分前・30秒前</small></button>
-      <button id="shareButton" class="action" type="button"><span>💌</span><b>お友達に教える</b><small>LINEやAirDropで共有</small></button>
-    </section>
+      <div class="countdown" id="countdown" aria-label="次の電車まで">--:--</div>
+      <p class="hero-message" id="heroMessage">時刻を確認しています</p>
+      <p class="ten-count" id="tenCount" hidden></p>
 
-    <section class="filters" aria-label="表示設定">
-      <div class="segmented" id="trainFilter">
-        <button data-filter="all" class="active">通過も見る</button>
-        <button data-filter="stop">停車だけ</button>
+      <div class="train-scene" aria-hidden="true">
+        <div class="cloud cloud-a"></div><div class="cloud cloud-b"></div>
+        <div class="train-wrap" id="trainWrap">
+          <svg class="train-illustration" viewBox="0 0 260 96">
+            <rect x="12" y="18" width="222" height="58" rx="24" fill="currentColor"/>
+            <rect x="30" y="29" width="128" height="25" rx="9" fill="#fff" opacity=".95"/>
+            <rect x="169" y="29" width="44" height="25" rx="9" fill="#fff" opacity=".95"/>
+            <path d="M234 34c10 6 15 15 15 24s-5 14-15 18V34z" fill="currentColor"/>
+            <circle cx="58" cy="78" r="10" fill="#1c2d43"/><circle cx="196" cy="78" r="10" fill="#1c2d43"/>
+            <circle cx="58" cy="78" r="4" fill="#d9e5f2"/><circle cx="196" cy="78" r="4" fill="#d9e5f2"/>
+          </svg>
+        </div>
+        <div class="track"><span></span><span></span><span></span><span></span><span></span></div>
       </div>
-      <div class="segmented three" id="directionFilter">
-        <button data-dir="both" class="active">両方向</button>
-        <button data-dir="down">つくば方面</button>
-        <button data-dir="up">秋葉原方面</button>
+
+      <div class="hero-meta" id="metaRow"></div>
+
+      <div class="hero-actions">
+        <wa-button id="notifyButton" variant="brand" appearance="filled" size="large" class="notify-button">
+          <span slot="start" aria-hidden="true">🔔</span>
+          <span><b>このページでお知らせ</b><small>3分前・30秒前</small></span>
+        </wa-button>
+        <wa-button id="shareButton" appearance="outlined" size="large">
+          <span slot="start" aria-hidden="true">💌</span>お友達に教える
+        </wa-button>
       </div>
+      <p class="session-note" id="sessionNote">お知らせは、このページを開いている間だけ動きます。</p>
     </section>
 
-    <section>
-      <div class="section-head"><div><span>🕒</span><b>このあと来る電車</b></div><span id="modeBadge" class="mode-badge">土休日モデル</span></div>
-      <div class="timeline" id="timeline"></div>
+    <section class="favorites-section" aria-labelledby="favoritesTitle">
+      <div class="section-heading">
+        <div><span class="eyebrow">MY STATIONS</span><h2 id="favoritesTitle">お気に入りの駅</h2></div>
+        <wa-button id="openStations" appearance="plain" size="small">＋ 駅を追加</wa-button>
+      </div>
+      <div id="favoriteCards" class="favorite-cards" role="list"></div>
     </section>
 
-    <section class="kid-card">
-      <div class="kid-emoji">👀</div>
-      <div><b>でんしゃを見つけるコツ</b><p>「もうすぐ！」になったら、ホームや線路の安全な場所から電車をさがしてみよう。黄色い線の内側で見ようね！</p></div>
+    <section class="timeline-section" aria-labelledby="timelineTitle">
+      <div class="section-heading">
+        <div><span class="eyebrow">NEXT TRAINS</span><h2 id="timelineTitle">このあと見られる電車</h2></div>
+        <button class="settings-link" id="openSettings" type="button">表示設定 ⚙︎</button>
+      </div>
+      <div id="timeline" class="timeline"></div>
     </section>
 
-    <section class="settings-card">
-      <div class="section-head"><div><span>⚙️</span><b>お知らせ設定</b></div></div>
-      <label><input id="soundToggle" type="checkbox" checked> 音を鳴らす</label>
-      <label><input id="vibrateToggle" type="checkbox" checked> 対応端末ではブルッと知らせる</label>
-      <p>このページを開いている間に、3分前「そろそろ来るよ！」、30秒前「もう来るよ！」をお知らせします。始発駅では「そろそろ発車するよ！」になります。</p>
+    <section class="brand-message" aria-label="サービスについて">
+      <div class="brand-message-icon" aria-hidden="true">🚆</div>
+      <div><strong>あと何秒？を、親子のワクワクに。</strong><p>電車を待つ時間まで、ちいさなイベントに。</p></div>
     </section>
-
-    <aside class="notice">
-      <b>β版について</b><br>
-      現在はTX全20駅を選択できます。土休日の日中パターンを、TX公式の駅間標準所要時間と研究学園駅の確認済み時刻をもとに再構成しています。停車時刻も実際の運行・時刻表改正で変わる場合があり、<strong>通過時刻は特に推定</strong>です。遅延・運休は反映しません。電車を見る際は安全な場所からご利用ください。
-      <a href="https://www.mir.co.jp/route_map/index.html" target="_blank" rel="noopener">TX公式の駅・路線情報を見る</a>
-    </aside>
   </main>
 
-  <div id="toast" class="toast" role="status" aria-live="assertive" hidden></div>
+  <footer class="app-footer">
+    <p>でんしゃくるよ！ β · 時刻表ベースの参考表示です</p>
+    <a href="https://www.mir.co.jp/route_map/index.html" target="_blank" rel="noopener">つくばエクスプレス公式 ↗</a>
+  </footer>
 
-  <div id="stationModal" class="modal" hidden>
-    <div class="modal-backdrop" data-close="true"></div>
-    <section class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="stationModalTitle">
-      <div class="modal-grab"></div>
-      <div class="modal-title"><div><small>つくばエクスプレス</small><h2 id="stationModalTitle">どの駅で見る？ 🚆</h2></div><button id="closeStations" class="round-btn">×</button></div>
-      <p class="modal-help">駅名をタップで表示、☆をタップでお気に入り。お気に入りはこの端末に保存されます。</p>
-      <div id="stationList" class="station-list"></div>
-    </section>
-  </div>
+  <wa-dialog id="stationDialog" label="駅をえらぶ" light-dismiss class="app-dialog">
+    <label class="search-label" for="stationSearch">駅名を検索</label>
+    <input id="stationSearch" class="station-search" type="search" inputmode="search" placeholder="例：研究学園、TX19" autocomplete="off">
+    <div id="stationList" class="station-list"></div>
+  </wa-dialog>
 
-  <script src="app.js" defer></script>
+  <wa-dialog id="settingsDialog" label="表示とお知らせの設定" light-dismiss class="app-dialog">
+    <div class="setting-block">
+      <h3>見たい電車</h3>
+      <div class="segmented" id="trainFilter" role="group" aria-label="見たい電車">
+        <button type="button" data-filter="all" class="active">通過も含める</button>
+        <button type="button" data-filter="stop">停車だけ</button>
+      </div>
+    </div>
+    <div class="setting-block">
+      <h3>方面</h3>
+      <div class="segmented three" id="directionFilter" role="group" aria-label="方面">
+        <button type="button" data-dir="both" class="active">両方</button>
+        <button type="button" data-dir="down">つくば</button>
+        <button type="button" data-dir="up">秋葉原</button>
+      </div>
+    </div>
+    <div class="setting-block switches">
+      <wa-switch id="soundToggle" checked size="large">お知らせ音</wa-switch>
+      <wa-switch id="vibrateToggle" checked size="large">振動（対応端末）</wa-switch>
+    </div>
+    <p class="settings-help">設定はこの端末に保存されます。お知らせ自体はブラウザの制約上、ページを開いている間だけです。</p>
+  </wa-dialog>
+
+  <wa-dialog id="dataDialog" label="時刻について" light-dismiss class="app-dialog">
+    <div class="data-copy">
+      <p><strong>このサービスは「電車を見る」ための参考カウントダウンです。</strong></p>
+      <p>現在は土休日の日中運行パターンを中心にしたβ版です。停車時刻・種別ごとの所要時間をもとに構成し、通過駅は前後駅から推定しています。</p>
+      <ul>
+        <li>実際の入線は表示より早いことがあります</li>
+        <li>遅延・運休・臨時列車は反映しません</li>
+        <li>「推定」と表示する時刻は目安として見てください</li>
+      </ul>
+      <p>線路やホームでは安全な場所から楽しんでね。</p>
+    </div>
+  </wa-dialog>
+
+  <div id="toast" class="app-toast" role="status" aria-live="assertive" hidden></div>
+  <script src="./app.js" defer></script>
 </body>
 </html>
