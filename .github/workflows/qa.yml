@@ -24,8 +24,11 @@ jobs:
           node --check train-engine.js
           node --check app.js
           node --check dialog-controller.js
+          node --check onboarding.js
           node --check microinteractions.js
           node --check moments-interactions.js
+      - name: Validate timetable JSON
+        run: node -e "JSON.parse(require('fs').readFileSync('data/timetable.json','utf8')); console.log('Timetable JSON valid')"
       - name: Run product QA
         run: |
           node tests/static-qa.mjs
