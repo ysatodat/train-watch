@@ -103,18 +103,33 @@ test('車両ずかんを開いたままでも写真DOMが毎秒作り直され�
   expect(await photo.evaluate(node => node.isConnected)).toBe(true);
 });
 
-test('長いモーダルをスクロールしても閉じるボタンが表示領域に残る', async ({ page }) => {
+test('長いモーダルをスクロールしてもヘッダーは不透明で閉じるボタンが残る', async ({ page }) => {
   await prepare(page);
   await page.goto('/?station=TX19');
   await page.locator('#openTxVehicleGuide').click();
   const dialog = page.locator('#txVehicleDialog');
   const shell = dialog.locator('.dialog-shell');
+  const header = dialog.locator('.dialog-header');
   const close = dialog.locator('.dialog-close');
   await expect(dialog).toBeVisible();
 
   await shell.evaluate(el => { el.scrollTop = el.scrollHeight; });
   await page.waitForTimeout(100);
-  expect(await dialog.locator('.dialog-header').evaluate(el => getComputedStyle(el).position)).toBe('sticky');
+  const styles = await header.evaluate(el => {
+    const style = getComputedStyle(el);
+    return {
+      position: style.position,
+      backgroundColor: style.backgroundColor,
+      backdropFilter: style.backdropFilter,
+      webkitBackdropFilter: style.webkitBackdropFilter
+    };
+  });
+  expect(styles.position).toBe('sticky');
+  expect(styles.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
+  expect(styles.backgroundColor).not.toContain('0.96');
+  expect(styles.backdropFilter === 'none' || styles.backdropFilter === '').toBe(true);
+  expect(styles.webkitBackdropFilter === 'none' || styles.webkitBackdropFilter === '').toBe(true);
+
   const box = await close.boundingBox();
   const viewport = page.viewportSize();
   expect(box).toBeTruthy();
