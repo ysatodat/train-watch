@@ -3,10 +3,12 @@
 /* Three-screen tutorial: one message per screen, illustration first. */
 .tutorial-dialog { width: min(calc(100% - 20px), 500px); }
 .tutorial-shell {
+  --dialog-pad-x: 18px;
+  --dialog-pad-y: 18px;
   min-height: min(72dvh, 620px);
   display: flex;
   flex-direction: column;
-  padding: 18px 18px max(18px, env(safe-area-inset-bottom));
+  padding: var(--dialog-pad-y) var(--dialog-pad-x) max(18px, env(safe-area-inset-bottom));
 }
 .tutorial-header { margin-bottom: 2px; }
 .tutorial-header h2 { font-size: 1rem; font-weight: 700; color: #66645e; }
@@ -155,7 +157,7 @@
 }
 
 @media (max-width: 350px) {
-  .tutorial-shell { padding-inline: 14px; }
+  .tutorial-shell { --dialog-pad-x: 14px; padding-inline: var(--dialog-pad-x); }
   .tutorial-art { padding: 4px; }
   .tutorial-slide h3 { font-size: 1.5rem; }
 }
