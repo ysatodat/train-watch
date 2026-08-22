@@ -1,0 +1,163 @@
+/* Mobile QA fixes — 2026-08-22
+   iPhone Safari / 320–430px を中心に、改行・余白・タップ操作を補正する。 */
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-bottom: 120px;
+}
+body { min-height: 100dvh; }
+
+/* 日本語が1〜2文字だけ不自然に折り返されるのを避ける */
+.brand-lockup strong,
+.hero-topline p,
+.hero-message,
+.section-heading h2,
+.hero-actions wa-button::part(label),
+#openStations::part(label) {
+  word-break: keep-all;
+}
+.hero-topline p,
+.hero-message,
+.session-note,
+.section-heading h2 { text-wrap: balance; }
+
+/* 駅セレクタ：TX19 と駅名が詰まって見える問題を実機で補正 */
+.station-button::part(base) { padding-inline: 14px; }
+.station-button::part(label) {
+  overflow: hidden;
+  white-space: nowrap;
+}
+.station-code {
+  flex: none;
+  margin-right: 10px;
+}
+#stationName {
+  display: inline-block;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 18px;
+  line-height: 1.15;
+}
+
+/* 情報階層：主役のカウントダウンは保ちつつ、カードを少しコンパクトに */
+.data-notice { margin-top: 8px; }
+.hero-card {
+  padding-top: 17px;
+  padding-bottom: 14px;
+}
+.hero-topline p { line-height: 1.35; }
+.countdown { margin-top: 12px; }
+.hero-message { line-height: 1.24; }
+.train-scene {
+  height: 96px;
+  margin-top: 3px;
+  margin-bottom: 1px;
+}
+.train-wrap {
+  width: 176px;
+  bottom: 20px;
+}
+.track { bottom: 14px; }
+.cloud-a {
+  top: 14px;
+  transform: scale(.9);
+  transform-origin: left top;
+}
+.cloud-b {
+  top: 24px;
+  transform: scale(.9);
+  transform-origin: right top;
+}
+.hero-meta { margin-top: 1px; }
+
+/* CTA：414px幅で日本語が「お知ら / せ」等に割れないようにする */
+.hero-actions {
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+.hero-actions wa-button::part(base) {
+  min-height: 50px;
+  padding-inline: 9px;
+}
+.hero-actions wa-button::part(label) {
+  font-size: 13px;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+.notify-button b {
+  font-size: 13px;
+  white-space: nowrap;
+}
+.notify-button small {
+  font-size: 9px;
+  white-space: nowrap;
+}
+.session-note {
+  max-width: 360px;
+  margin: 7px auto 0;
+  line-height: 1.5;
+}
+
+/* セクション見出しと「駅を追加」の視覚バランスを揃える */
+.favorites-section,
+.timeline-section { margin-top: 22px; }
+.section-heading { align-items: center; }
+#openStations::part(base) {
+  min-height: 40px;
+  padding-inline: 12px;
+  border-radius: 14px;
+  font-size: 13px;
+}
+#openStations::part(label) { white-space: nowrap; }
+.favorite-card strong { line-height: 1.35; }
+
+/* iOS Safari: 16px未満のinputフォーカス時に自動ズームされるのを防ぐ */
+.station-search { font-size: 16px; }
+
+/* Safari下部ツールバーの上まで最後のコンテンツをスクロールできる余裕 */
+.app-shell { padding-bottom: 64px; }
+.app-footer {
+  padding-bottom: max(96px, calc(env(safe-area-inset-bottom) + 72px));
+}
+
+@media (max-width: 430px) {
+  .app-header {
+    padding-left: 14px;
+    padding-right: 14px;
+    padding-bottom: 8px;
+  }
+  .app-shell {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .brand-lockup strong { font-size: 17px; white-space: nowrap; }
+  .hero-card { border-radius: 28px; }
+  .section-heading { margin-bottom: 9px; }
+}
+
+@media (max-width: 390px) {
+  .brand-mark { width: 36px; height: 36px; }
+  .brand-lockup { gap: 8px; }
+  .brand-lockup strong { font-size: 16px; }
+  .header-clock strong { font-size: 14px; }
+  .hero-card {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .countdown { font-size: clamp(68px, 20vw, 92px); }
+  .train-wrap { width: 166px; }
+}
+
+@media (max-width: 360px) {
+  .hero-actions { grid-template-columns: 1fr; }
+  .hero-actions wa-button::part(label) { font-size: 14px; }
+  .section-heading { gap: 8px; }
+  #openStations::part(base) {
+    padding-inline: 9px;
+    font-size: 12px;
+  }
+}
