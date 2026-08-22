@@ -37,6 +37,7 @@ jobs:
           node tests/static-qa.mjs
           node tests/tx-static-qa.mjs
           node tests/moments-qa.mjs
+          node tests/observation-qa.mjs
 
   user-scenario-qa:
     needs: static-qa
