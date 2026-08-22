@@ -33,6 +33,7 @@
   position: sticky;
   z-index: 20;
   top: 0;
+  isolation: isolate;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -40,9 +41,9 @@
   margin: calc(-1 * var(--dialog-pad-y)) calc(-1 * var(--dialog-pad-x)) 18px;
   padding: 14px var(--dialog-pad-x) 11px;
   border-bottom: 1px solid var(--line, #cfc7ba);
-  background: color-mix(in srgb, var(--surface-strong, #fffdf8) 96%, transparent);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+  background: var(--surface-strong, #fffdf8);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 .dialog-header h2 {
   min-width: 0;
