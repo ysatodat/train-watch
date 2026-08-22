@@ -1,0 +1,38 @@
+/* Overnight state — 終電後を巨大なカウントダウンではなく、静かな専用状態として見せる */
+.hero-card.overnight {
+  background: #eee9df;
+  border-color: #bdb5a8;
+}
+.hero-card.overnight .countdown {
+  margin-block: 22px 10px;
+  font-size: clamp(3rem, 15vw, 4.75rem);
+  line-height: 1;
+  letter-spacing: -.04em;
+  font-weight: 760;
+}
+.hero-card.overnight .hero-message {
+  font-size: clamp(1.25rem, 5vw, 1.65rem);
+}
+.hero-card.overnight .train-wrap {
+  color: #6c7775;
+  opacity: .72;
+}
+.hero-card.overnight .service-badge {
+  background: #e2ddd3;
+  border-color: #bdb5a8;
+  color: #55534e;
+}
+.overnight-moment {
+  border-left-color: #78817f;
+  background: #f1ede4;
+}
+.overnight-moment .moment-direction {
+  background: #e0ddd5;
+  color: #505957;
+}
+.overnight-moment .moment-side > b {
+  font-size: 1rem;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-card.overnight .train-wrap { animation: none !important; }
+}
