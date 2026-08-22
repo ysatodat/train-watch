@@ -1,13 +1,13 @@
-/* Mobile QA fixes — 2026-08-22
-   iPhone Safari / 320–430px を中心に、改行・余白・タップ操作を補正する。 */
+/* Mobile layout layer — no typography shrinking.
+   iPhone Safari / 320–430px: layout changes instead of smaller text. */
 
 html {
   -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
   scroll-padding-bottom: 120px;
 }
 body { min-height: 100dvh; }
 
-/* Touch reliability */
 button,
 .touchable,
 .favorite-card,
@@ -21,24 +21,12 @@ button:not(:disabled) { cursor: pointer; }
   position: relative;
   appearance: none;
   -webkit-appearance: none;
-  border: 0;
   color: inherit;
   font: inherit;
   user-select: none;
   -webkit-user-select: none;
 }
-.touchable:focus-visible,
-.settings-link:focus-visible,
-.data-notice button:focus-visible,
-.segmented button:focus-visible,
-.favorite-card:focus-visible,
-.station-select:focus-visible,
-.star-btn:focus-visible {
-  outline: 3px solid rgba(20,119,255,.28);
-  outline-offset: 2px;
-}
 
-/* 日本語が1〜2文字だけ不自然に折り返されるのを避ける */
 .brand-lockup strong,
 .hero-topline p,
 .hero-message,
@@ -53,92 +41,23 @@ button:not(:disabled) { cursor: pointer; }
 .session-note,
 .section-heading h2 { text-wrap: balance; }
 
-/* 駅セレクタ：主要操作はnative buttonで確実にタップできるようにする */
-.station-toolbar { grid-template-columns:minmax(0,1fr) 52px; }
-.station-button {
-  width:100%;
-  min-height:52px;
-  display:grid;
-  grid-template-columns:auto minmax(0,1fr) auto;
-  align-items:center;
-  gap:0;
-  padding:0 14px;
-  border:1px solid #b8cade;
-  border-radius:18px;
-  background:#fff;
-  box-shadow:0 3px 10px rgba(31,67,105,.04);
-  text-align:left;
-  font-weight:900;
-}
-.station-button .chevron {
-  margin-left:10px;
-  color:#425b74;
-  font-size:18px;
-  line-height:1;
-}
-.station-code {
-  flex: none;
-  margin-right: 10px;
-}
+.station-toolbar { grid-template-columns: minmax(0,1fr) 52px; }
+.station-button { width: 100%; min-height: 52px; }
+.station-code { flex: none; }
 #stationName {
-  display:block;
-  min-width:0;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  font-size:18px;
-  line-height:1.15;
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.favorite-toggle {
-  width:52px;
-  min-height:52px;
-  display:grid;
-  place-items:center;
-  border:1px solid #b8cade;
-  border-radius:18px;
-  background:#fff;
-  color:#71869a;
-  font-size:27px;
-  line-height:1;
-}
-.favorite-toggle.on {
-  color:#e0a000;
-  background:#fffaf0;
-  border-color:#f0cf6b;
-}
+.favorite-toggle { width: 52px; min-height: 52px; }
 
-/* 情報階層：主役のカウントダウンは保ちつつ、カードを少しコンパクトに */
-.data-notice { margin-top: 8px; }
-.hero-card {
-  padding-top: 17px;
-  padding-bottom: 14px;
-}
-.hero-topline p { line-height: 1.35; }
-.countdown { margin-top: 12px; }
-.hero-message { line-height: 1.24; }
-.train-scene {
-  height: 96px;
-  margin-top: 3px;
-  margin-bottom: 1px;
-}
-.train-wrap {
-  width: 176px;
-  bottom: 20px;
-}
+.hero-card { padding-top: 18px; padding-bottom: 15px; }
+.train-scene { height: 96px; margin-top: 3px; margin-bottom: 1px; }
+.train-wrap { width: 176px; bottom: 20px; }
 .track { bottom: 14px; }
-.cloud-a {
-  top: 14px;
-  transform: scale(.9);
-  transform-origin: left top;
-}
-.cloud-b {
-  top: 24px;
-  transform: scale(.9);
-  transform-origin: right top;
-}
-.hero-meta { margin-top: 1px; }
 
-/* CTA：native button + 1行を基本にして実機の不自然な改行をなくす */
 .hero-actions {
   grid-template-columns: 1.18fr 1fr;
   gap: 8px;
@@ -146,140 +65,51 @@ button:not(:disabled) { cursor: pointer; }
 }
 .primary-action,
 .secondary-action {
-  min-width:0;
-  min-height:52px;
-  border-radius:17px;
-  padding:8px 11px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:7px;
-  font-weight:900;
-  line-height:1.1;
-  text-align:left;
-}
-.primary-action {
-  background:var(--brand-blue-dark);
-  border:1px solid var(--brand-blue-dark);
-  color:#fff;
-}
-.primary-action.enabled {
-  background:var(--brand-mint);
-  border-color:var(--brand-mint);
-}
-.secondary-action {
-  background:#fff;
-  border:1px solid #b8cade;
-  color:var(--ink);
-}
-.action-icon {
-  flex:none;
-  font-size:20px;
-  line-height:1;
-}
-.action-copy { min-width:0; }
-.action-copy b,
-.action-copy small {
-  display:block;
-  white-space:nowrap;
-}
-.action-copy b { font-size:12px; }
-.action-copy small {
-  margin-top:2px;
-  font-size:9px;
-  font-weight:700;
-  opacity:.8;
-}
-.secondary-action .action-copy b { font-size:12px; }
-.session-note {
-  max-width: 360px;
-  margin: 7px auto 0;
-  line-height: 1.5;
+  min-width: 0;
+  min-height: 52px;
 }
 
-/* セクション見出しと「駅を追加」の視覚バランスを揃える */
 .favorites-section,
-.timeline-section { margin-top: 22px; }
+.timeline-section { margin-top: 24px; }
 .section-heading { align-items: center; }
-.add-station-button {
-  min-height:40px;
-  padding:0 12px;
-  border:1px solid #b8cade;
-  border-radius:14px;
-  background:#fff;
-  color:var(--ink);
-  font-size:13px;
-  font-weight:850;
-  white-space:nowrap;
-}
-.favorite-card strong { line-height: 1.35; }
 .settings-link,
-.data-notice button { min-height:44px; }
+.data-notice button,
+.add-station-button { min-height: 44px; }
 
-/* iOS Safari: 16px未満のinputフォーカス時に自動ズームされるのを防ぐ */
 .station-search { font-size: 16px; }
 
-/* Safari下部ツールバーの上まで最後のコンテンツをスクロールできる余裕 */
 .app-shell { padding-bottom: 64px; }
 .app-footer {
   padding-bottom: max(96px, calc(env(safe-area-inset-bottom) + 72px));
 }
 
-/* microinteraction helper */
-.motion-spark {
-  position:fixed;
-  z-index:99999;
-  width:7px;
-  height:7px;
-  border-radius:50%;
-  background:var(--brand-yellow);
-  pointer-events:none;
-  box-shadow:0 0 0 2px rgba(255,215,74,.16);
-}
-.is-pressing { will-change:transform; }
+.is-pressing { will-change: transform; }
 
 @media (max-width: 430px) {
   .app-header {
-    padding-left:14px;
-    padding-right:14px;
-    padding-bottom:8px;
+    padding-left: 14px;
+    padding-right: 14px;
+    padding-bottom: 8px;
   }
   .app-shell {
-    padding-left:12px;
-    padding-right:12px;
+    padding-left: 12px;
+    padding-right: 12px;
   }
-  .brand-lockup strong { font-size:17px; white-space:nowrap; }
-  .hero-card { border-radius:28px; }
-  .section-heading { margin-bottom:9px; }
+  .section-heading { margin-bottom: 10px; }
 }
 
 @media (max-width: 390px) {
-  .brand-mark { width:36px; height:36px; }
-  .brand-lockup { gap:8px; }
-  .brand-lockup strong { font-size:16px; }
-  .header-clock strong { font-size:14px; }
-  .hero-card {
-    padding-left:12px;
-    padding-right:12px;
-  }
-  .countdown { font-size:clamp(68px,20vw,92px); }
-  .train-wrap { width:166px; }
-  .primary-action,
-  .secondary-action { padding-inline:8px; gap:5px; }
-  .action-icon { font-size:18px; }
-  .action-copy b { font-size:11px; }
-  .secondary-action .action-copy b { font-size:11px; }
+  .brand-lockup { gap: 8px; }
+  .hero-card { padding-left: 12px; padding-right: 12px; }
+  .train-wrap { width: 166px; }
+  .hero-actions { grid-template-columns: 1fr; }
 }
 
-@media (max-width: 360px) {
-  .hero-actions { grid-template-columns:1fr; }
-  .primary-action,
-  .secondary-action { justify-content:flex-start; padding-inline:14px; }
-  .action-copy b,
-  .secondary-action .action-copy b { font-size:13px; }
-  .section-heading { gap:8px; }
-  .add-station-button {
-    padding-inline:9px;
-    font-size:12px;
+@media (max-width: 350px) {
+  .section-heading {
+    align-items: flex-start;
+    flex-wrap: wrap;
   }
+  .add-station-button,
+  .settings-link { margin-left: auto; }
 }
