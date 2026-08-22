@@ -1,308 +1,754 @@
-/* Brand refresh v2 — 駅のサイン計画 × 少し温かい絵本
-   “青白グラデーション + 大きな角丸 + ピル + 強い影”から離れ、
-   紙・鉄・信号色をベースにした落ち着いた親子向けUIへ。 */
+/* Brand system v3 — 駅のサイン計画 × 親子の絵本
+   Product rules:
+   - visible text is 13px minimum; body/UI text is 16px by default
+   - primary touch targets are at least 44px
+   - one hero surface; lists stay lists instead of becoming card stacks
+   - motion and color reinforce hierarchy, never replace it
+*/
 
 :root {
   --brand-blue: #244d55;
   --brand-blue-dark: #183a40;
-  --brand-sky: #e6ece8;
-  --brand-yellow: #dfb14c;
-  --brand-coral: #c9503d;
-  --brand-mint: #5f7f6a;
-  --ink: #252622;
-  --muted: #716f68;
-  --cloud: #f3efe6;
-  --surface: #fbf8f1;
-  --line: #d6cfc3;
-  --shadow: 0 5px 18px rgba(48, 51, 46, .08);
+  --brand-sky: #e5ebe7;
+  --brand-yellow: #d9ac45;
+  --brand-coral: #c6533e;
+  --brand-mint: #5a7663;
+  --ink: #242722;
+  --muted: #66645e;
+  --cloud: #f4f0e6;
+  --surface: #fbf8f0;
+  --surface-strong: #fffdf8;
+  --line: #cfc7ba;
+  --line-strong: #aaa195;
+  --focus: #0c6375;
+  --shadow: 0 4px 14px rgba(42, 45, 40, .07);
+
+  --text-caption: .8125rem; /* 13 */
+  --text-small: .875rem;   /* 14 */
+  --text-body: 1rem;       /* 16 */
+  --text-lead: 1.125rem;   /* 18 */
+  --text-title: 1.375rem;  /* 22 */
+  --tap-min: 44px;
 }
 
-html { background: var(--cloud); }
+html {
+  font-size: 100%;
+  color-scheme: light;
+  background: var(--cloud);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
 body {
+  margin: 0;
+  min-height: 100dvh;
   color: var(--ink);
   background: var(--cloud);
+  font-size: var(--text-body);
+  line-height: 1.55;
   letter-spacing: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
+}
+button, input { font: inherit; }
+button, a, label { -webkit-tap-highlight-color: transparent; }
+button { touch-action: manipulation; }
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+.toggle-row:has(input:focus-visible) {
+  outline: 3px solid color-mix(in srgb, var(--focus) 30%, transparent);
+  outline-offset: 3px;
 }
 
-/* typography: どこも極太、をやめる */
-.brand-lockup strong { font-weight: 800; letter-spacing: -.01em; }
-.brand-lockup small { color: var(--muted); font-weight: 700; letter-spacing: .14em; }
-.header-clock strong { font-weight: 700; }
-.header-clock small { color: var(--muted); }
-.section-heading h2 { font-weight: 800; }
-.eyebrow { display: none; }
+/* header: ブランドは読ませる。極小ロゴコピーは禁止 */
+.app-header {
+  padding-bottom: 14px;
+  gap: 14px;
+}
+.brand-lockup { gap: 10px; }
+.brand-mark {
+  width: 42px;
+  height: 42px;
+  color: var(--brand-blue);
+}
+.brand-lockup strong {
+  font-size: 1.25rem;
+  line-height: 1.15;
+  font-weight: 800;
+  letter-spacing: -.015em;
+}
+.brand-lockup small {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: var(--text-caption);
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: .08em;
+}
+.header-clock strong {
+  font-size: 1.0625rem;
+  line-height: 1.15;
+  font-weight: 700;
+}
+.header-clock small {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: var(--text-caption);
+  line-height: 1.2;
+  font-weight: 500;
+}
 
-/* header / logo */
-.app-header { padding-bottom: 12px; }
-.brand-mark { color: var(--brand-blue); }
-
-/* station signage */
-.station-button {
+/* station selector: 駅名を読むのが主、装飾を従に */
+.station-toolbar {
+  grid-template-columns: minmax(0, 1fr) 52px;
+  gap: 8px;
+}
+.station-button,
+.favorite-toggle {
   min-height: 52px;
-  border: 1px solid #bbb4a8;
-  border-radius: 11px;
-  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: var(--surface-strong);
   box-shadow: none;
   color: var(--ink);
 }
-.station-button:hover { background: #f8f4ec; }
+.station-button {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  padding: 0 14px;
+  text-align: left;
+}
 .station-code {
-  min-width: 50px;
-  height: 29px;
-  border-radius: 5px;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  min-width: 52px;
+  height: 30px;
+  padding: 0 8px;
+  border-radius: 4px;
   background: var(--brand-blue-dark);
-  font-weight: 800;
+  color: #fff;
+  font-size: var(--text-small);
+  line-height: 1;
+  font-weight: 700;
   letter-spacing: .03em;
 }
+#stationName {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 1.125rem;
+  line-height: 1.2;
+  font-weight: 700;
+}
+.chevron {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 1.125rem;
+}
 .favorite-toggle {
-  border-color: #bbb4a8;
-  border-radius: 11px;
-  background: var(--surface);
-  box-shadow: none;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  padding: 0;
+  font-size: 1.625rem;
 }
 .favorite-toggle.on {
-  color: #9b6d12;
-  background: #f5ead0;
-  border-color: #cfb46f;
+  color: #875f10;
+  background: #f3e7c9;
+  border-color: #bfa45f;
 }
-.chevron { color: var(--muted); }
 
-/* data status: 控えめな注記へ */
-.data-notice { color: var(--muted); }
+/* data status */
+.data-notice {
+  min-height: var(--tap-min);
+  margin: 4px 2px 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: var(--text-small);
+  line-height: 1.35;
+}
 .data-dot {
-  width: 7px;
-  height: 7px;
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
   background: var(--brand-mint);
   box-shadow: none;
 }
-.data-notice.reference .data-dot { background: #a8731d; box-shadow: none; }
+.data-notice.reference .data-dot { background: #9b6d18; box-shadow: none; }
 .data-notice button {
+  min-height: var(--tap-min);
+  margin-left: auto;
+  padding: 8px 2px 8px 10px;
+  border: 0;
+  background: none;
   color: var(--brand-blue-dark);
-  text-decoration-thickness: 1px;
+  font-size: var(--text-small);
+  line-height: 1.25;
   font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
 }
 
-/* hero: “SaaSカード”ではなく、時刻ボードの主面 */
+/* hero: ここだけが“面”として主役 */
 .hero-card {
-  border: 1px solid #cfc7bb;
-  border-radius: 18px;
-  background: var(--surface);
+  position: relative;
+  overflow: hidden;
+  padding: 20px 16px 16px;
+  border: 1px solid #c7beb1;
+  border-radius: 12px;
+  background: var(--surface-strong);
   box-shadow: var(--shadow);
-  padding-top: 18px;
 }
 .hero-card.soon {
-  border-color: #c8a75e;
+  border-color: #b99445;
   background: #faf3df;
 }
 .hero-card.now {
   border-color: var(--brand-coral);
-  background: #f7e7e1;
+  background: #f8e9e3;
 }
-.hero-topline p { color: var(--muted); font-weight: 700; }
+.hero-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.hero-topline p {
+  margin: 0;
+  color: var(--muted);
+  font-size: .9375rem;
+  line-height: 1.35;
+  font-weight: 600;
+}
 .service-badge {
-  border: 1px solid #c8c2b7;
-  border-radius: 6px;
-  background: #eeeae1;
-  color: #42433f;
-  font-weight: 750;
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
   padding: 5px 8px;
+  border: 1px solid #c6beb2;
+  border-radius: 4px;
+  background: #eee9df;
+  color: #3f433f;
+  font-size: var(--text-small);
+  line-height: 1.2;
+  font-weight: 700;
+  white-space: nowrap;
 }
 .countdown {
+  margin: 14px 0 7px;
   color: var(--ink);
+  font-size: clamp(4.5rem, 21vw, 7rem);
+  line-height: .92;
   font-weight: 800;
+  font-variant-numeric: tabular-nums;
   letter-spacing: -.055em;
+  text-align: center;
 }
 .hero-message {
+  margin: 7px 0 0;
   color: var(--ink);
+  font-size: clamp(1.375rem, 5.6vw, 1.75rem);
+  line-height: 1.25;
   font-weight: 800;
+  letter-spacing: -.02em;
+  text-align: center;
+  text-wrap: balance;
 }
 .ten-count {
-  border-radius: 7px;
+  width: max-content;
+  max-width: 100%;
+  margin: 10px auto 0;
+  padding: 8px 11px;
+  border-radius: 5px;
   background: var(--brand-coral);
-  font-weight: 800;
-}
-
-/* illustration: 雲を外し、電車と線路だけにする */
-.cloud { display: none; }
-.train-scene { margin-top: 4px; }
-.train-wrap { color: var(--brand-blue); }
-.train-illustration { filter: none; }
-.hero-card.soon .train-wrap { color: #ae7e1e; }
-.hero-card.now .train-wrap { color: var(--brand-coral); }
-.track {
-  border-top-color: #666b69;
-  border-bottom-color: #a49f95;
-}
-.track span { background: #aaa49a; }
-
-/* status chips: pillをやめ、駅サインっぽい小さなラベルへ */
-.hero-meta { gap: 6px; }
-.pill {
-  min-height: 27px;
-  border: 1px solid #d2cbc0;
-  border-radius: 6px;
-  background: #eeeae1;
-  color: #4d4d48;
+  color: #fff;
+  font-size: 1rem;
+  line-height: 1.2;
   font-weight: 700;
-  padding: 4px 8px;
 }
-.pill.down { background: #e7ede7; color: #365d4b; border-color: #c7d3c9; }
-.pill.up { background: #e8ecec; color: #31565d; border-color: #c5d0d1; }
-.pill.pass { background: #f4e8cf; color: #785617; border-color: #d9c18b; }
 
-/* CTA: 触れる道具として、フラットで明快に */
+/* illustration */
+.cloud { display: none; }
+.train-scene {
+  height: 96px;
+  margin: 5px -2px 2px;
+}
+.train-wrap {
+  width: 176px;
+  color: var(--brand-blue);
+}
+.train-illustration { filter: none; }
+.hero-card.soon .train-wrap { color: #a87a21; }
+.hero-card.now .train-wrap { color: var(--brand-coral); }
+.track { border-top-color: #5d6461; border-bottom-color: #9b978e; }
+.track span { background: #a39e94; }
+
+/* metadata: 小さなチップではなく読めるラベル */
+.hero-meta {
+  min-height: 34px;
+  margin-top: 4px;
+  gap: 6px;
+}
+.pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 6px 9px;
+  border: 1px solid #cec6ba;
+  border-radius: 4px;
+  background: #eee9df;
+  color: #454943;
+  font-size: var(--text-small);
+  line-height: 1.2;
+  font-weight: 600;
+}
+.pill.down { background: #e6ece6; color: #315846; border-color: #c3d0c5; }
+.pill.up { background: #e7ecec; color: #2c535b; border-color: #c2ced0; }
+.pill.pass { background: #f3e7cd; color: #6c4c12; border-color: #d6bd82; }
+
+/* CTA */
+.hero-actions {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
 .primary-action,
 .secondary-action {
-  border-radius: 11px;
+  min-height: 52px;
+  padding: 9px 13px;
+  border-radius: 8px;
   box-shadow: none;
+  font-size: 1rem;
+  line-height: 1.2;
+  font-weight: 700;
 }
 .primary-action {
+  border: 1px solid var(--brand-blue-dark);
   background: var(--brand-blue-dark);
-  border-color: var(--brand-blue-dark);
+  color: #fff;
 }
 .primary-action.enabled {
-  background: #466954;
-  border-color: #466954;
+  border-color: #486553;
+  background: #486553;
 }
 .secondary-action {
-  background: var(--surface);
-  border-color: #aaa398;
+  border: 1px solid var(--line-strong);
+  background: var(--surface-strong);
   color: var(--ink);
 }
 .action-icon { display: none; }
-.action-copy b { font-weight: 800; }
-.action-copy small { font-weight: 600; }
-.session-note { color: var(--muted); }
+.action-copy { display: block; min-width: 0; }
+.action-copy b {
+  display: block;
+  font-size: 1rem;
+  line-height: 1.2;
+  font-weight: 700;
+  white-space: normal;
+}
+.action-copy small {
+  display: block;
+  margin-top: 3px;
+  font-size: var(--text-caption);
+  line-height: 1.2;
+  font-weight: 500;
+}
+.session-note {
+  max-width: 34rem;
+  margin: 10px auto 0;
+  color: var(--muted);
+  font-size: var(--text-small);
+  line-height: 1.5;
+  text-align: center;
+}
 
-/* sections: “カードの島”ではなく、1枚の画面の中の情報としてつなぐ */
+/* sections: card stackではなく、編集された1画面としてつなぐ */
 .favorites-section,
 .timeline-section {
-  margin-top: 28px;
-  padding-top: 19px;
-  border-top: 1px solid #d8d1c5;
+  margin-top: 30px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
 }
-.section-heading { margin-bottom: 12px; }
+.section-heading {
+  align-items: center;
+  margin: 0 0 12px;
+  gap: 12px;
+}
+.section-heading h2 {
+  margin: 0;
+  font-size: var(--text-title);
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -.02em;
+}
+.eyebrow { display: none; }
 .add-station-button,
 .settings-link {
+  min-height: var(--tap-min);
+  padding: 8px 10px;
+  border: 0;
+  background: transparent;
   color: var(--brand-blue-dark);
+  font-size: .9375rem;
+  line-height: 1.2;
   font-weight: 700;
+  white-space: nowrap;
 }
 .add-station-button {
-  border: 1px solid #c8c0b4;
-  border-radius: 8px;
-  background: transparent;
+  border: 1px solid #bfb6aa;
+  border-radius: 6px;
 }
 
+.favorite-cards {
+  gap: 8px;
+  padding: 2px 1px 6px;
+}
 .favorite-card {
-  border: 1px solid #cec7bb;
-  border-radius: 10px;
-  background: var(--surface);
+  min-width: 166px;
+  max-width: 190px;
+  min-height: 96px;
+  padding: 13px;
+  border: 1px solid #c9c1b5;
+  border-radius: 6px;
+  background: var(--surface-strong);
   box-shadow: none;
+  text-align: left;
 }
 .favorite-card.active {
   border-color: var(--brand-blue);
-  box-shadow: inset 4px 0 0 var(--brand-blue);
+  box-shadow: inset 3px 0 0 var(--brand-blue);
 }
 .favorite-card .mini-code {
   color: var(--brand-blue-dark);
-  font-weight: 750;
+  font-size: var(--text-caption);
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: .04em;
 }
-.favorite-card strong { font-weight: 800; }
-.favorite-card .mini-next { color: var(--muted); }
+.favorite-card strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 1.0625rem;
+  line-height: 1.3;
+  font-weight: 700;
+}
+.favorite-card .mini-next {
+  display: block;
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: var(--text-small);
+  line-height: 1.3;
+  font-weight: 500;
+}
 .empty-favs {
-  border-color: #c8c0b4;
-  border-radius: 10px;
+  min-width: 100%;
+  padding: 16px;
+  border: 1px dashed #bdb5a9;
+  border-radius: 6px;
+  color: var(--muted);
   background: transparent;
+  font-size: var(--text-small);
+  line-height: 1.5;
+  text-align: left;
 }
 
-.timeline { gap: 7px; }
+/* next trains: “カード7枚”をやめ、時刻表らしいリストへ */
+.timeline {
+  display: grid;
+  gap: 0;
+  border-top: 1px solid var(--line);
+}
 .event-row {
-  border: 1px solid #d1cabe;
-  border-radius: 9px;
-  background: rgba(251,248,241,.76);
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  min-height: 68px;
+  padding: 12px 2px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
   box-shadow: none;
 }
 .event-row.next {
-  border-color: #9aa9a6;
-  border-left: 4px solid var(--brand-blue);
-  background: #efeee7;
+  padding-left: 10px;
+  border-left: 3px solid var(--brand-blue);
+  border-bottom-color: #bbb4a9;
+  background: #ebe9df;
 }
-.event-time { font-weight: 800; }
-.event-main strong { font-weight: 750; }
-.event-main small { color: var(--muted); }
-.event-remain { color: #4e5754; font-weight: 700; }
+.event-time {
+  font-size: 1.25rem;
+  line-height: 1.15;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.event-main strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: .9375rem;
+  line-height: 1.3;
+  font-weight: 700;
+}
+.event-main small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: var(--text-caption);
+  line-height: 1.35;
+  font-weight: 500;
+}
+.event-remain {
+  color: #48514e;
+  font-size: var(--text-small);
+  line-height: 1.25;
+  font-weight: 700;
+  white-space: nowrap;
+}
 
-/* brand statement: gradientカードをやめ、編集的な一節に */
+/* brand statement: “もう1枚のカード”にしない */
 .brand-message {
-  margin-top: 32px;
-  padding: 16px 14px;
-  border-left: 4px solid var(--brand-yellow);
-  border-radius: 8px;
-  background: #eee9dd;
+  margin-top: 34px;
+  padding: 22px 0 0;
+  display: block;
+  border: 0;
+  border-top: 3px solid var(--brand-yellow);
+  border-radius: 0;
+  background: transparent;
 }
 .brand-message-icon { display: none; }
-.brand-message strong { font-weight: 800; }
-.brand-message p { color: var(--muted); }
+.brand-message strong {
+  display: block;
+  font-size: 1.125rem;
+  line-height: 1.4;
+  font-weight: 800;
+}
+.brand-message p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: .9375rem;
+  line-height: 1.55;
+}
 
-.app-footer { color: var(--muted); }
-.app-footer a { color: var(--brand-blue-dark); }
+.app-footer {
+  color: var(--muted);
+  font-size: var(--text-caption);
+  line-height: 1.5;
+}
+.app-footer p { margin-bottom: 9px; }
+.app-footer a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-min);
+  color: var(--brand-blue-dark);
+  font-size: var(--text-small);
+  font-weight: 700;
+}
 
-/* native dialogs */
+/* dialogs */
+.native-dialog {
+  width: min(calc(100% - 20px), 560px);
+}
 .native-dialog::backdrop {
-  background: rgba(33, 34, 31, .48);
+  background: rgba(31, 34, 30, .50);
   -webkit-backdrop-filter: blur(2px);
   backdrop-filter: blur(2px);
 }
 .dialog-shell {
-  border-radius: 16px;
-  background: var(--surface);
-  box-shadow: 0 18px 60px rgba(33,34,31,.20);
+  padding: 20px;
+  border-radius: 12px;
+  background: var(--surface-strong);
+  box-shadow: 0 16px 54px rgba(30, 33, 29, .20);
 }
-.dialog-header h2 { font-weight: 800; }
+.dialog-header { margin-bottom: 18px; }
+.dialog-header h2 {
+  margin: 0;
+  font-size: var(--text-title);
+  line-height: 1.2;
+  font-weight: 800;
+}
 .dialog-close {
-  border-color: #c8c0b4;
-  border-radius: 9px;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  border: 1px solid #bfb6aa;
+  border-radius: 6px;
   background: #eee9df;
+  color: var(--ink);
+  font-size: 1.625rem;
+}
+.search-label {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--muted);
+  font-size: var(--text-small);
+  line-height: 1.3;
+  font-weight: 600;
 }
 .station-search {
-  border-color: #bdb5a9;
-  border-radius: 9px;
-  background: #fffdfa;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 13px;
+  border: 1px solid #b9b0a4;
+  border-radius: 6px;
+  background: #fffdf8;
+  color: var(--ink);
+  font-size: 1rem;
+  line-height: 1.3;
 }
 .station-search:focus {
-  border-color: var(--brand-blue);
-  box-shadow: 0 0 0 3px rgba(36,77,85,.12);
+  border-color: var(--focus);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 16%, transparent);
 }
-.station-row { border-radius: 8px; }
-.station-row.current { background: #e8ece8; }
+.station-list { gap: 0; margin-top: 12px; }
+.station-row {
+  grid-template-columns: 52px minmax(0, 1fr) 48px;
+  gap: 9px;
+  min-height: 60px;
+  padding: 5px 2px;
+  border-bottom: 1px solid #ded7cc;
+  border-radius: 0;
+}
+.station-row.current { background: #e8ece7; }
 .station-row .station-code-mini {
-  border-radius: 5px;
-  background: #e4e7e2;
+  height: 34px;
+  border-radius: 4px;
+  background: #e1e5df;
   color: var(--brand-blue-dark);
+  font-size: var(--text-caption);
+  font-weight: 700;
 }
-.star-btn { border-radius: 8px; }
-.star-btn.on { color: #94680e; background: #f3e7c7; }
+.station-select {
+  min-height: 48px;
+  padding: 5px;
+  text-align: left;
+}
+.station-select strong {
+  display: block;
+  font-size: 1rem;
+  line-height: 1.25;
+  font-weight: 700;
+}
+.station-select small {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: var(--text-caption);
+  line-height: 1.25;
+}
+.star-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 6px;
+  font-size: 1.375rem;
+}
+.star-btn.on { color: #855e11; background: #f2e5c4; }
+.setting-block + .setting-block { margin-top: 24px; }
+.setting-block h3 {
+  margin: 0 0 10px;
+  font-size: 1rem;
+  line-height: 1.3;
+  font-weight: 700;
+}
 .segmented {
-  border-radius: 10px;
-  background: #e9e3d8;
+  padding: 4px;
+  border-radius: 8px;
+  background: #e8e2d7;
 }
-.segmented button { border-radius: 7px; font-weight: 700; }
+.segmented button {
+  min-height: 44px;
+  border-radius: 5px;
+  font-size: .9375rem;
+  line-height: 1.2;
+  font-weight: 600;
+}
 .segmented button.active {
-  background: var(--surface);
+  background: var(--surface-strong);
   color: var(--brand-blue-dark);
-  box-shadow: inset 0 0 0 1px #c7bfb3;
+  box-shadow: inset 0 0 0 1px #bfb7aa;
 }
-.toggle-ui { background: #d1cabf; }
+.toggle-row {
+  min-height: 60px;
+  font-size: 1rem;
+}
+.toggle-row > span:first-child strong {
+  font-size: 1rem;
+  line-height: 1.3;
+  font-weight: 700;
+}
+.toggle-row > span:first-child small {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: var(--text-caption);
+  line-height: 1.3;
+}
 .toggle-row input:checked + .toggle-ui { background: var(--brand-blue); }
+.settings-help,
+.data-copy {
+  color: var(--muted);
+  font-size: var(--text-small);
+  line-height: 1.65;
+}
+.data-copy { font-size: 1rem; }
+.data-copy strong { color: var(--ink); }
 
 .app-toast {
-  border-radius: 10px;
-  background: #2e3735;
-  box-shadow: 0 12px 30px rgba(33,34,31,.20);
+  width: min(calc(100% - 24px), 520px);
+  padding: 14px 16px;
+  border-radius: 8px;
+  background: #2e3734;
+  color: #fff;
+  font-size: .9375rem;
+  line-height: 1.4;
+  font-weight: 700;
+  box-shadow: 0 10px 28px rgba(31,34,30,.20);
 }
-.app-toast.urgent { background: #8f3f32; }
+.app-toast.urgent { background: #873f33; }
 
+/* 高コントラスト設定 */
+@media (prefers-contrast: more) {
+  :root { --line: #8f887e; --line-strong: #69635b; --muted: #56544f; }
+  .hero-card, .station-button, .favorite-toggle, .favorite-card { border-width: 2px; }
+}
+
+/* 狭い画面でも文字を縮めない。レイアウトを変える */
 @media (max-width: 430px) {
-  .hero-card { border-radius: 16px; }
-  .dialog-shell { border-radius: 14px; }
+  .app-shell { padding-left: 12px; padding-right: 12px; }
+  .hero-card { padding-left: 14px; padding-right: 14px; }
+  .section-heading { gap: 8px; }
+  .dialog-shell { padding: 18px 16px max(18px, env(safe-area-inset-bottom)); }
+}
+@media (max-width: 390px) {
+  .brand-mark { width: 38px; height: 38px; }
+  .brand-lockup strong { font-size: 1.125rem; }
+  .header-clock strong { font-size: 1rem; }
+  .hero-actions { grid-template-columns: 1fr; }
+  .event-row { grid-template-columns: 58px minmax(0, 1fr); }
+  .event-remain { grid-column: 2; justify-self: start; margin-top: -5px; }
+}
+@media (max-width: 350px) {
+  .app-header { align-items: flex-start; }
+  .header-clock small { max-width: 82px; }
+  .section-heading { align-items: flex-start; }
+  .section-heading h2 { font-size: 1.25rem; }
+  .add-station-button, .settings-link { padding-inline: 7px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
