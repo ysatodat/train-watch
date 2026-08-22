@@ -14,11 +14,11 @@
     stationButton:$('stationButton'),favoriteToggle:$('favoriteToggle'),dataNotice:$('dataNotice'),modeBadge:$('modeBadge'),
     hero:$('hero'),heroLabel:$('heroLabel'),countdown:$('countdown'),heroMessage:$('heroMessage'),tenCount:$('tenCount'),
     serviceBadge:$('serviceBadge'),metaRow:$('metaRow'),trainWrap:$('trainWrap'),heroMomentAction:$('heroMomentAction'),notifyButton:$('notifyButton'),
-    sessionNote:$('sessionNote'),favoriteCards:$('favoriteCards'),timeline:$('timeline'),
+    notifyToggleButton:$('notifyToggleButton'),notifyStatusText:$('notifyStatusText'),sessionNote:$('sessionNote'),favoriteCards:$('favoriteCards'),timeline:$('timeline'),
     stationDialog:$('stationDialog'),stationSearch:$('stationSearch'),stationList:$('stationList'),
     settingsDialog:$('settingsDialog'),soundToggle:$('soundToggle'),vibrateToggle:$('vibrateToggle'),
     dataDialog:$('dataDialog'),toast:$('toast'),momentList:$('momentList'),rareBanner:$('rareBanner'),watchedCount:$('watchedCount'),
-    aboutDataFreshness:$('aboutDataFreshness'),dataVersionCopy:$('dataVersionCopy')
+    dataVersionCopy:$('dataVersionCopy')
   };
 
   const todayKey=()=>{
@@ -218,8 +218,12 @@
   function syncControls(){
     document.querySelectorAll('#trainFilter button').forEach(b=>{const active=(b.dataset.filter==='all')===state.includePass;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});
     document.querySelectorAll('#directionFilter button').forEach(b=>{const active=b.dataset.dir===state.dir;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});
-    el.soundToggle.checked=state.sound!==false;el.vibrateToggle.checked=state.vibrate!==false;el.notifyButton.classList.toggle('enabled',alertsEnabled);el.notifyButton.setAttribute('aria-pressed',String(alertsEnabled));
-    el.notifyButton.querySelector('b').textContent=alertsEnabled?'お知らせ ON':'お知らせ';
+    el.soundToggle.checked=state.sound!==false;el.vibrateToggle.checked=state.vibrate!==false;
+    el.notifyButton.classList.toggle('enabled',alertsEnabled);el.notifyButton.setAttribute('aria-pressed',String(alertsEnabled));
+    el.notifyButton.querySelector('b').textContent='お知らせ';
+    el.notifyButton.setAttribute('aria-label',alertsEnabled?'お知らせ中。詳しく見る':'お知らせについて見る');
+    if(el.notifyToggleButton){el.notifyToggleButton.textContent=alertsEnabled?'お知らせをOFFにする':'お知らせをONにする';el.notifyToggleButton.setAttribute('aria-pressed',String(alertsEnabled));}
+    if(el.notifyStatusText)el.notifyStatusText.textContent=alertsEnabled?'お知らせ中':'いまはOFF';
     el.sessionNote.textContent=alertsEnabled?'到着・発車・通過を3分前と30秒前に知らせます。':'お知らせは、このページを開いている間だけ動きます。';
   }
 
@@ -248,11 +252,11 @@
   }
 
   function updateDataCopy(){
-    const meta=E.DATA_META,checked=new Date(meta.checkedAt),date=`${checked.getFullYear()}/${checked.getMonth()+1}/${checked.getDate()}`;
-    const summary=`${meta.timetableRevision}改正 · ${date}データ確認`;
-    if(el.modeBadge)el.modeBadge.textContent=summary;
-    if(el.aboutDataFreshness)el.aboutDataFreshness.textContent=`時刻: ${summary}。現在は全20駅を参考モデルで表示し、研究学園駅の深夜・早朝は確認時刻を優先しています。`;
-    if(el.dataVersionCopy)el.dataVersionCopy.textContent=`データ版 ${meta.dataVersion}（${summary}）。時刻データは data/timetable.json に保存し、取得元と確認日時も一緒に管理しています。`;
+    const meta=E.DATA_META,checked=new Date(meta.checkedAt),checkedText=`${checked.getFullYear()}/${checked.getMonth()+1}/${checked.getDate()}`;
+    const [ry,rm,rd]=String(meta.timetableRevision).split('-');
+    const revisionText=`${ry}年${Number(rm)}月${Number(rd)}日改正`;
+    if(el.modeBadge)el.modeBadge.textContent=`${checkedText} 確認`;
+    if(el.dataVersionCopy)el.dataVersionCopy.textContent=`${revisionText}の時刻表をもとに、${checkedText}に内容を確認しています。`;
   }
 
   function renderAll(){
@@ -265,7 +269,9 @@
   }
 
   function bindEvents(){
-    el.favoriteToggle.addEventListener('click',()=>toggleFavorite());el.notifyButton.addEventListener('click',toggleAlerts);$('shareButton').addEventListener('click',shareStation);
+    el.favoriteToggle.addEventListener('click',()=>toggleFavorite());
+    if(el.notifyToggleButton)el.notifyToggleButton.addEventListener('click',toggleAlerts);
+    $('shareButton').addEventListener('click',shareStation);
     el.stationSearch.addEventListener('input',()=>renderStationList(el.stationSearch.value));
     document.querySelectorAll('#trainFilter button').forEach(b=>b.addEventListener('click',()=>{state.includePass=b.dataset.filter==='all';saveState();renderAll();}));
     document.querySelectorAll('#directionFilter button').forEach(b=>b.addEventListener('click',()=>{state.dir=b.dataset.dir;saveState();renderAll();}));
