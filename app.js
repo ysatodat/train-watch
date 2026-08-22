@@ -5,7 +5,6 @@
     ['TX01','秋葉原','Akihabara'],['TX02','新御徒町','Shin-okachimachi'],['TX03','浅草','Asakusa'],['TX04','南千住','Minami-senju'],['TX05','北千住','Kita-senju'],['TX06','青井','Aoi'],['TX07','六町','Rokucho'],['TX08','八潮','Yashio'],['TX09','三郷中央','Misato-chuo'],['TX10','南流山','Minami-nagareyama'],['TX11','流山セントラルパーク','Nagareyama-centralpark'],['TX12','流山おおたかの森','Nagareyama-otakanomori'],['TX13','柏の葉キャンパス','Kashiwanoha-campus'],['TX14','柏たなか','Kashiwa-tanaka'],['TX15','守谷','Moriya'],['TX16','みらい平','Miraidaira'],['TX17','みどりの','Midorino'],['TX18','万博記念公園','Bampaku-kinenkoen'],['TX19','研究学園','Kenkyu-gakuen'],['TX20','つくば','Tsukuba']
   ].map((x, i) => ({ id:x[0], name:x[1], en:x[2], i }));
 
-  // β版の列車モデル。null は通過駅。offset は各方面の起点からの分数。
   const DOWN = {
     local:   [0,2,4,7,10,13,15,19,22,25,28,30,33,36,40,45,48,51,54,57],
     section: [0,2,4,7,10,null,null,17,20,23,null,26,30,null,35,40,43,46,49,52],
@@ -94,7 +93,7 @@
   function heroMessage(e, sec) {
     const origin=isOrigin(e);
     if (sec<=10) return origin ? 'もうすぐ発車！いっしょに数えよう！' : 'きたきた！いっしょに数えよう！';
-    if (sec<=30) return origin ? 'そろそろ発車するよ！' : 'もう来るよ！線路を見よう！';
+    if (sec<=30) return origin ? 'そろそろ発車するよ！' : 'もう来るよ！電車を見よう！';
     if (sec<=180) return origin ? '発車のじゅんびをしよう！' : 'そろそろ来るよ！';
     return e.stop ? 'でんしゃを待とう！' : 'ビューンと通る電車を待とう！';
   }
@@ -115,11 +114,8 @@
   function fireAlert(e, threshold) {
     const key=`${e.id}-${threshold}`; if(notified.has(key)) return; notified.add(key);
     const origin=isOrigin(e);
-    const text=threshold===30 ? (origin?'🚆 もうすぐ発車するよ！':'👀 もう来るよ！線路を見よう！') : (origin?'🔔 そろそろ発車するよ！':'🚆 そろそろ電車が来るよ！');
+    const text=threshold===30 ? (origin?'🚆 もうすぐ発車するよ！':'👀 もう来るよ！電車を見よう！') : (origin?'🔔 そろそろ発車するよ！':'🚆 そろそろ電車が来るよ！');
     showToast(text, threshold===30); beep(threshold===30); if(threshold===30) buzz();
-    if ('Notification' in window && Notification.permission==='granted') {
-      try { new Notification(text,{body:`${stationById().name}駅・${dirText(e)} ${SERVICE[e.kind].label}`}); } catch {}
-    }
   }
   function maybeAlert(e, sec) {
     if (!alertsEnabled) return;
@@ -135,22 +131,35 @@
     }
     state.favorites.forEach(id => {
       const s=stationById(id), e=filteredEvents(now,id)[0];
-      const b=document.createElement('button'); b.type='button'; b.className='favorite-card'+(id===state.station?' active':''); b.setAttribute('role','listitem');
+      const b=document.createElement('button');
+      b.type='button';
+      b.className='favorite-card'+(id===state.station?' active':'');
       b.innerHTML=`<span class="mini-code">${s.id}</span><strong>${s.name}</strong><span class="mini-next">${e?`${SERVICE[e.kind].label} · ${fmtRemain(e.target-now)}`:'今日はおしまい'}</span>`;
-      b.addEventListener('click',()=>selectStation(id)); el.favoriteCards.appendChild(b);
+      b.setAttribute('aria-label',`${s.name}駅を見る。${e?`${SERVICE[e.kind].label}、${fmtRemain(e.target-now)}`:'今日はおしまい'}`);
+      b.addEventListener('click',()=>selectStation(id));
+      el.favoriteCards.appendChild(b);
     });
   }
   function renderStationList(filter='') {
-    const q=filter.trim().toLowerCase(); el.stationList.innerHTML='';
+    const q=filter.trim().toLowerCase();
+    el.stationList.innerHTML='';
+    let visibleCount=0;
     STATIONS.forEach(s => {
       const matches=!q || s.name.toLowerCase().includes(q) || s.en.toLowerCase().includes(q) || s.id.toLowerCase().includes(q);
+      if (matches) visibleCount++;
       const row=document.createElement('div'); row.className='station-row'+(s.id===state.station?' current':''); row.hidden=!matches;
       const fav=state.favorites.includes(s.id);
-      row.innerHTML=`<span class="station-code-mini">${s.id}</span><button type="button" class="station-select"><strong>${s.name}</strong><small>${s.en}</small></button><button type="button" class="star-btn ${fav?'on':''}" aria-label="${s.name}をお気に入り${fav?'から外す':'に追加'}">${fav?'★':'☆'}</button>`;
+      row.innerHTML=`<span class="station-code-mini">${s.id}</span><button type="button" class="station-select" ${s.id===state.station?'aria-current="true"':''}><strong>${s.name}</strong><small>${s.en}</small></button><button type="button" class="star-btn ${fav?'on':''}" aria-label="${s.name}をお気に入り${fav?'から外す':'に追加'}">${fav?'★':'☆'}</button>`;
       row.querySelector('.station-select').addEventListener('click',()=>selectStation(s.id));
       row.querySelector('.star-btn').addEventListener('click',()=>{toggleFavorite(s.id); renderStationList(el.stationSearch.value);});
       el.stationList.appendChild(row);
     });
+    if (!visibleCount) {
+      const empty=document.createElement('p');
+      empty.className='station-empty';
+      empty.textContent='該当する駅がありません。';
+      el.stationList.appendChild(empty);
+    }
   }
   function selectStation(id) {
     state.station=id; saveState(); const u=new URL(location.href); u.searchParams.set('station',id); history.replaceState(null,'',u); renderAll();
@@ -160,11 +169,20 @@
     saveState(); renderAll();
   }
   function syncControls() {
-    document.querySelectorAll('#trainFilter button').forEach(b=>b.classList.toggle('active',(b.dataset.filter==='all')===state.includePass));
-    document.querySelectorAll('#directionFilter button').forEach(b=>b.classList.toggle('active',b.dataset.dir===state.dir));
+    document.querySelectorAll('#trainFilter button').forEach(b=>{
+      const active=(b.dataset.filter==='all')===state.includePass;
+      b.classList.toggle('active',active);
+      b.setAttribute('aria-pressed',String(active));
+    });
+    document.querySelectorAll('#directionFilter button').forEach(b=>{
+      const active=b.dataset.dir===state.dir;
+      b.classList.toggle('active',active);
+      b.setAttribute('aria-pressed',String(active));
+    });
     el.soundToggle.checked=state.sound!==false;
     el.vibrateToggle.checked=state.vibrate!==false;
     el.notifyButton.classList.toggle('enabled',alertsEnabled);
+    el.notifyButton.setAttribute('aria-pressed',String(alertsEnabled));
     el.notifyButton.querySelector('b').textContent=alertsEnabled?'お知らせ中':'このページでお知らせ';
     el.sessionNote.textContent=alertsEnabled?'3分前と30秒前にお知らせします。ページは開いたままにしてください。':'お知らせは、このページを開いている間だけ動きます。';
   }
@@ -183,7 +201,7 @@
     el.tenCount.hidden=sec>10; el.tenCount.textContent=sec<=10?`いっしょに数えよう！ ${sec}`:'';
     el.metaRow.innerHTML=`<span class="pill ${e.dir}">${dirText(e)}</span><span class="pill">${e.time}ごろ</span><span class="pill ${e.stop?'':'pass'}">${e.stop?'停車':'通過・推定'}</span>`;
     maybeAlert(e,sec);
-    el.timeline.innerHTML=events.slice(0,7).map((x,i)=>`<article class="event-row ${i===0?'next':''}"><div class="event-time">${x.time}</div><div class="event-main"><strong>${SERVICE[x.kind].label} · ${dirText(x)}</strong><small>${x.stop?'停車':'通過（推定）'}${x.approx?' · 参考時刻':''}</small></div><div class="event-remain">${fmtRemain(x.target-now)}</div></article>`).join('');
+    el.timeline.innerHTML=events.slice(0,7).map((x,i)=>`<article class="event-row ${i===0?'next':''}" ${i===0?'aria-current="true"':''}><div class="event-time">${x.time}</div><div class="event-main"><strong>${SERVICE[x.kind].label} · ${dirText(x)}</strong><small>${x.stop?'停車':'通過（推定）'}${x.approx?' · 参考時刻':''}</small></div><div class="event-remain">${fmtRemain(x.target-now)}</div></article>`).join('');
     renderFavorites(now); syncControls();
   }
 
@@ -191,7 +209,6 @@
     alertsEnabled=!alertsEnabled;
     if(alertsEnabled) {
       beep(false);
-      if ('Notification' in window && Notification.permission==='default') { try { await Notification.requestPermission(); } catch {} }
       const e=filteredEvents(new Date())[0]; if(e && secondsLeft(e,new Date())<=180) fireAlert(e,180);
       showToast('🔔 お知らせをONにしました。ページを開いたまま待ってね。');
     } else showToast('お知らせをOFFにしました');
@@ -220,7 +237,11 @@
     const now=new Date(); el.clock.textContent=now.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}); el.date.textContent=now.toLocaleDateString('ja-JP',{month:'numeric',day:'numeric',weekday:'short'}); renderAll();
   }
   function init() {
-    loadState(); bindEvents(); renderStationList(); syncControls(); tick(); setInterval(tick,1000);
+    loadState();
+    el.hero.removeAttribute('aria-live');
+    el.favoriteCards.removeAttribute('role');
+    const settingsButton=$('openSettings'); if(settingsButton) settingsButton.textContent='表示設定';
+    bindEvents(); renderStationList(); syncControls(); tick(); setInterval(tick,1000);
     if ('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
   }
   init();
