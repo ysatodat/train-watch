@@ -1,4 +1,59 @@
-/* TX-specialized experience — route knowledge as product value, not generic rail UI. */
+/* TX-specialized experience — route knowledge as product value, not generic rail UI.
+   Colors are sRGB approximations inspired by the official TX concept colors.
+   No official TX logo assets are used. */
+
+:root {
+  --tx-blue: #003b8f;
+  --tx-blue-deep: #002b68;
+  --tx-blue-soft: #eaf0f8;
+  --tx-red: #e40046;
+  --tx-red-deep: #b80038;
+  --tx-line: #c7d3e3;
+
+  --brand-blue: var(--tx-blue);
+  --brand-blue-dark: var(--tx-blue-deep);
+  --brand-sky: var(--tx-blue-soft);
+  --brand-coral: var(--tx-red);
+  --focus: #0057b8;
+  --cloud: #f3f6fa;
+  --surface: #f8fafe;
+  --surface-strong: #ffffff;
+  --line: #cbd4df;
+  --line-strong: #a8b5c6;
+  --muted: #5e6772;
+}
+
+html, body { background: var(--cloud); }
+.brand-mark { color: var(--tx-blue); }
+.brand-lockup small {
+  color: var(--tx-red-deep);
+  font-weight: 800;
+  letter-spacing: .025em;
+}
+.station-code { background: var(--tx-blue-deep); }
+.station-button,
+.favorite-toggle { border-color: #aebccd; background: #fff; }
+.hero-card {
+  border-color: #a9bbd1;
+  background: #fff;
+}
+.hero-card.soon {
+  border-color: #7595bc;
+  background: #f7f9fd;
+}
+.hero-card.now {
+  border-color: var(--tx-red);
+  background: #fff7f9;
+}
+.train-wrap { color: var(--tx-blue); }
+.hero-card.soon .train-wrap { color: #2e609f; }
+.hero-card.now .train-wrap { color: var(--tx-red); }
+.quick-tool.enabled { color: var(--tx-blue); }
+.quick-tool.enabled > span { color: var(--tx-red-deep); }
+.hero-moment-action,
+.notify-toggle-button,
+.tutorial-primary,
+.tx-found-button { background: var(--tx-blue-deep); border-color: var(--tx-blue-deep); }
 
 /* Station chooser becomes a schematic TX line. The vertical line is the railway itself,
    not a generic selection accent. */
@@ -7,7 +62,7 @@
 #stationDialog .dialog-shell { max-width: 520px; }
 .tx-route-intro {
   margin: -4px 0 12px;
-  color: #66645e;
+  color: #5e6772;
   font-size: .875rem;
   line-height: 1.5;
 }
@@ -35,8 +90,9 @@
   left: 26px;
   top: 0;
   bottom: 0;
-  width: 2px;
-  background: #9ba8a4;
+  width: 3px;
+  background: var(--tx-blue);
+  opacity: .42;
 }
 #stationDialog .station-row:first-child::before { top: 50%; }
 #stationDialog .station-row:last-child::before { bottom: 50%; }
@@ -48,19 +104,19 @@
   width: 42px;
   height: 42px;
   margin-left: 5px;
-  border: 2px solid #6d817d;
+  border: 2px solid #6e8ab0;
   border-radius: 50%;
-  background: #fffdf8;
-  color: #244d55;
+  background: #fff;
+  color: var(--tx-blue-deep);
   font-size: .8125rem;
   line-height: 1;
   font-weight: 800;
   letter-spacing: -.01em;
 }
-#stationDialog .station-row.current { background: #eeece4; }
+#stationDialog .station-row.current { background: #eef3fa; }
 #stationDialog .station-row.current .station-code-mini {
-  border-color: #183a40;
-  background: #183a40;
+  border-color: var(--tx-red);
+  background: var(--tx-red);
   color: #fff;
 }
 #stationDialog .station-select {
@@ -73,9 +129,7 @@
 #stationDialog .star-btn { position: relative; z-index: 1; }
 
 /* TX-specific moments are intentionally rows, not a stack of cards. */
-.tx-special-section {
-  margin-top: 30px;
-}
+.tx-special-section { margin-top: 30px; }
 .tx-special-heading {
   display: flex;
   align-items: end;
@@ -85,13 +139,22 @@
 }
 .tx-special-heading h2 {
   margin: 0;
+  color: var(--tx-blue-deep);
   font-size: 1.25rem;
   line-height: 1.2;
   font-weight: 800;
 }
+.tx-special-heading h2::after {
+  content: "";
+  display: block;
+  width: 28px;
+  height: 3px;
+  margin-top: 5px;
+  background: var(--tx-red);
+}
 .tx-special-heading p {
   margin: 4px 0 0;
-  color: #6a6861;
+  color: #626b76;
   font-size: .875rem;
   line-height: 1.4;
 }
@@ -100,13 +163,13 @@
   padding: 5px 2px;
   border: 0;
   background: transparent;
-  color: #183a40;
+  color: var(--tx-blue-deep);
   font-size: .9375rem;
   font-weight: 700;
   text-decoration: underline;
   text-underline-offset: 4px;
 }
-.tx-highlight-list { border-top: 1px solid #bbb3a7; }
+.tx-highlight-list { border-top: 1px solid #aebccd; }
 .tx-highlight-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -114,12 +177,12 @@
   align-items: center;
   min-height: 66px;
   padding: 11px 0;
-  border-bottom: 1px solid #d8d1c6;
+  border-bottom: 1px solid #d7dee8;
 }
 .tx-highlight-copy { min-width: 0; }
 .tx-highlight-copy span {
   display: block;
-  color: #6b6962;
+  color: #66707c;
   font-size: .8125rem;
   line-height: 1.25;
   font-weight: 700;
@@ -127,14 +190,14 @@
 .tx-highlight-copy strong {
   display: block;
   margin-top: 3px;
-  color: #242722;
+  color: #242a31;
   font-size: 1.0625rem;
   line-height: 1.3;
   font-weight: 800;
   overflow-wrap: anywhere;
 }
 .tx-highlight-time {
-  color: #183a40;
+  color: var(--tx-blue-deep);
   font-size: 1rem;
   line-height: 1.25;
   font-weight: 800;
@@ -145,7 +208,7 @@
 .tx-highlight-meta {
   grid-column: 1 / -1;
   margin: 0;
-  color: #6a6861;
+  color: #626b76;
   font-size: .875rem;
   line-height: 1.4;
 }
@@ -155,21 +218,21 @@
 .tx-vehicle-dialog { width: min(calc(100% - 20px), 660px); }
 .tx-vehicle-lead {
   margin: 0 0 12px;
-  color: #474944;
+  color: #3e4650;
   font-size: 1rem;
   line-height: 1.5;
 }
 .tx-vehicle-summary {
   margin: 0 0 10px;
-  color: #183a40;
+  color: var(--tx-blue-deep);
   font-size: .9375rem;
   line-height: 1.4;
   font-weight: 750;
 }
-.tx-vehicle-list { border-top: 1px solid #bbb3a7; }
+.tx-vehicle-list { border-top: 1px solid #aebccd; }
 .tx-vehicle-item {
   padding: 16px 0 18px;
-  border-bottom: 1px solid #d8d1c6;
+  border-bottom: 1px solid #d7dee8;
 }
 .tx-vehicle-photo {
   display: block;
@@ -177,7 +240,7 @@
   aspect-ratio: 4 / 3;
   object-fit: cover;
   border-radius: 5px;
-  background: #e9e4da;
+  background: #e6ebf2;
 }
 .tx-vehicle-item.is-unavailable .tx-vehicle-photo { filter: saturate(.35); opacity: .62; }
 .tx-vehicle-head {
@@ -189,12 +252,13 @@
 }
 .tx-vehicle-head h3 {
   margin: 0;
+  color: #242a31;
   font-size: 1.25rem;
   line-height: 1.2;
   font-weight: 800;
 }
 .tx-vehicle-range {
-  color: #66645e;
+  color: #626b76;
   font-size: .8125rem;
   line-height: 1.3;
   font-weight: 700;
@@ -202,18 +266,18 @@
 }
 .tx-vehicle-hint {
   margin: 7px 0 0;
-  color: #555750;
+  color: #4c5661;
   font-size: .9375rem;
   line-height: 1.5;
 }
 .tx-vehicle-status {
   margin: 8px 0 0;
-  color: #244d55;
+  color: var(--tx-blue);
   font-size: .875rem;
   line-height: 1.4;
   font-weight: 750;
 }
-.tx-vehicle-item.is-unavailable .tx-vehicle-status { color: #706e67; }
+.tx-vehicle-item.is-unavailable .tx-vehicle-status { color: #69727d; }
 .tx-vehicle-actions {
   display: flex;
   align-items: center;
@@ -224,18 +288,20 @@
 .tx-found-button {
   min-height: 44px;
   padding: 7px 13px;
-  border: 1px solid #183a40;
   border-radius: 4px;
-  background: #183a40;
   color: #fff;
   font-size: .9375rem;
   font-weight: 750;
 }
-.tx-found-button[aria-pressed="true"] { background: #fffdf8; color: #183a40; }
-.tx-found-button:disabled { border-color: #b5afa5; background: #ece7de; color: #77736c; }
+.tx-found-button[aria-pressed="true"] {
+  border-color: var(--tx-red);
+  background: #fff;
+  color: var(--tx-red-deep);
+}
+.tx-found-button:disabled { border-color: #b5beca; background: #edf0f4; color: #737d89; }
 .tx-vehicle-credit {
   margin: 0;
-  color: #77736c;
+  color: #68727e;
   font-size: .8125rem;
   line-height: 1.4;
   text-align: right;
@@ -243,10 +309,15 @@
 .tx-vehicle-credit a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
 .tx-media-note {
   margin: 14px 0 0;
-  color: #6c6a64;
+  color: #626b76;
   font-size: .8125rem;
   line-height: 1.5;
 }
+
+/* Dialog chrome follows TX blue/red while remaining clearly non-official. */
+.dialog-header { border-bottom-color: #d3dbe6; }
+.dialog-close { border-color: #b9c5d4; color: var(--tx-blue-deep); }
+.dialog-close:focus-visible { outline-color: color-mix(in srgb, var(--tx-red) 35%, transparent); }
 
 @media (min-width: 600px) {
   .tx-vehicle-list { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 0 18px; }
@@ -256,7 +327,10 @@
 @media (max-width: 430px) {
   .tx-special-heading { align-items: center; }
   .tx-highlight-row { gap: 5px 10px; }
-  .tx-vehicle-dialog .dialog-shell { padding-inline: 14px; }
+  .tx-vehicle-dialog .dialog-shell {
+    --dialog-pad-x: 14px;
+    padding-inline: var(--dialog-pad-x);
+  }
 }
 
 @media (max-width: 350px) {

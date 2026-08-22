@@ -27,6 +27,23 @@
     return E.stationById(id).i;
   }
 
+  function applyTxIdentity() {
+    document.documentElement.dataset.rail = 'tx';
+    document.body.classList.add('tx-dedicated-app');
+
+    const brandSub = document.querySelector('.brand-lockup small');
+    if (brandSub) {
+      brandSub.textContent = 'TX専用・非公式';
+      brandSub.setAttribute('aria-label', 'つくばエクスプレス専用の非公式ファンツール');
+    }
+
+    const footerLabel = document.querySelector('.app-footer p');
+    if (footerLabel) footerLabel.textContent = 'でんしゃくるよ！ β · TX専用・非公式';
+
+    const firstTutorialCopy = document.querySelector('[data-tutorial-step="0"] > p:last-child');
+    if (firstTutorialCopy) firstTutorialCopy.textContent = 'TX01 秋葉原〜TX20 つくば。20駅から選ぶだけ。';
+  }
+
   function enhanceStationChooser() {
     stationDialog.classList.add('tx-route-dialog');
     const title = $('stationDialogTitle');
@@ -34,7 +51,7 @@
     if (!stationDialog.querySelector('.tx-route-intro')) {
       const intro = document.createElement('p');
       intro.className = 'tx-route-intro';
-      intro.textContent = '秋葉原 TX01 から つくば TX20 まで。20駅の路線図からえらべます。';
+      intro.textContent = 'つくばエクスプレス専用。秋葉原 TX01 から つくば TX20 まで、20駅の路線図からえらべます。';
       stationList.before(intro);
     }
     stationList.setAttribute('aria-label', 'つくばエクスプレス20駅の模式路線図');
@@ -140,12 +157,19 @@
 
   let vehicleDialog = null;
   let vehicleTrigger = null;
+  let renderedVehicleStationId = null;
 
   function isVehicleAvailable(vehicle, stationId) {
     const index = stationIndex(stationId);
     const from = stationIndex(vehicle.serviceRange.from);
     const to = stationIndex(vehicle.serviceRange.to);
     return index >= Math.min(from, to) && index <= Math.max(from, to);
+  }
+
+  function updateFoundButton(button, isFound) {
+    if (!button || button.disabled) return;
+    button.setAttribute('aria-pressed', String(isFound));
+    button.textContent = isFound ? '見つけた ✓' : '見つけた！';
   }
 
   function ensureVehicleDialog() {
@@ -163,7 +187,7 @@
         <p class="tx-vehicle-lead">TXには3つの車種があります。見つけたら、ずかんに記録してみよう。</p>
         <p class="tx-vehicle-summary" id="txVehicleSummary"></p>
         <div class="tx-vehicle-list" id="txVehicleList"></div>
-        <p class="tx-media-note">車両の特徴はTX公式「車両紹介」を参考にしています。写真はWikimedia Commonsの再利用可能な作品で、作者とライセンスを各写真に表示しています。</p>
+        <p class="tx-media-note">写真はWikimedia Commonsの再利用可能な作品です。作者とライセンスを各写真に表示しています。</p>
       </div>`;
     document.body.appendChild(vehicleDialog);
 
@@ -179,14 +203,15 @@
       if (!button || button.disabled) return;
       const found = vehicleCollection();
       const id = button.dataset.vehicleId;
-      if (found.has(id)) found.delete(id); else found.add(id);
+      const nextFound = !found.has(id);
+      if (nextFound) found.add(id); else found.delete(id);
       saveVehicleCollection(found);
-      renderVehicleDialog();
+      updateFoundButton(button, nextFound);
     });
     return vehicleDialog;
   }
 
-  function renderVehicleDialog() {
+  function renderVehicleDialog({ force = false } = {}) {
     const dialog = ensureVehicleDialog();
     if (!dialog || !profile) return;
     const stationId = currentStationId();
@@ -198,6 +223,12 @@
     if (summary) summary.textContent = `${station.name}駅で会えるのは ${available.length}種類。`;
     if (!list) return;
 
+    if (!force && renderedVehicleStationId === stationId && list.childElementCount === profile.vehicles.length) {
+      list.querySelectorAll('.tx-found-button').forEach(button => updateFoundButton(button, found.has(button.dataset.vehicleId)));
+      return;
+    }
+
+    renderedVehicleStationId = stationId;
     list.innerHTML = profile.vehicles.map(vehicle => {
       const canMeet = isVehicleAvailable(vehicle, stationId);
       const isFound = found.has(vehicle.id);
@@ -300,17 +331,25 @@
     section.dataset.station = stationId;
   }
 
+  applyTxIdentity();
   enhanceStationChooser();
   ensureSpecialSection();
   if (profile?.vehicles?.length) ensureVehicleDialog();
   refreshSpecial();
 
+  let observedStationId = currentStationId();
   const observer = new MutationObserver(() => {
+    const nextStationId = currentStationId();
+    if (nextStationId === observedStationId) return;
+    observedStationId = nextStationId;
     refreshSpecial();
-    if (vehicleDialog?.open) renderVehicleDialog();
+    if (vehicleDialog?.open) renderVehicleDialog({ force: true });
   });
   observer.observe(stationCode, { childList: true, subtree: true, characterData: true });
 
   const timer = window.setInterval(refreshSpecial, 15_000);
-  window.addEventListener('pagehide', () => window.clearInterval(timer), { once: true });
+  window.addEventListener('pagehide', () => {
+    window.clearInterval(timer);
+    observer.disconnect();
+  }, { once: true });
 })();

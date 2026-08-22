@@ -34,6 +34,7 @@ test('初回ユーザーが3画面チュートリアルを読んで使い始め�
   await expect(dialog).not.toBeVisible();
   await expect(page.locator('#countdown')).toBeVisible();
   await expect(page.locator('#txSpecial')).toBeVisible();
+  await expect(page.locator('.brand-lockup small')).toHaveText('TX専用・非公式');
 });
 
 test('TX路線図から駅を変更でき、20駅が選択肢として見える', async ({ page }) => {
@@ -43,7 +44,7 @@ test('TX路線図から駅を変更でき、20駅が選択肢として見える'
 
   await page.locator('#stationButton').click();
   await expect(page.locator('#stationDialog')).toBeVisible();
-  await expect(page.locator('.tx-route-intro')).toContainText('20駅');
+  await expect(page.locator('.tx-route-intro')).toContainText('つくばエクスプレス専用');
   await expect(page.locator('#stationDialog .station-search')).toBeHidden();
   await expect(page.locator('#stationDialog .station-row')).toHaveCount(20);
 
@@ -88,6 +89,39 @@ test('研究学園では2000系・3000系だけを会える車両として案内
   await expect(tx2000Button).toBeEnabled();
   await tx2000Button.click();
   await expect(tx2000Button).toHaveAttribute('aria-pressed', 'true');
+});
+
+test('車両ずかんを開いたままでも写真DOMが毎秒作り直されない', async ({ page }) => {
+  await prepare(page);
+  await page.goto('/?station=TX19');
+  await page.locator('#openTxVehicleGuide').click();
+  await expect(page.locator('#txVehicleDialog')).toBeVisible();
+
+  const photo = await page.locator('[data-vehicle="TX-2000"] .tx-vehicle-photo').elementHandle();
+  expect(photo).toBeTruthy();
+  await page.waitForTimeout(2300);
+  expect(await photo.evaluate(node => node.isConnected)).toBe(true);
+});
+
+test('長いモーダルをスクロールしても閉じるボタンが表示領域に残る', async ({ page }) => {
+  await prepare(page);
+  await page.goto('/?station=TX19');
+  await page.locator('#openTxVehicleGuide').click();
+  const dialog = page.locator('#txVehicleDialog');
+  const shell = dialog.locator('.dialog-shell');
+  const close = dialog.locator('.dialog-close');
+  await expect(dialog).toBeVisible();
+
+  await shell.evaluate(el => { el.scrollTop = el.scrollHeight; });
+  await page.waitForTimeout(100);
+  expect(await dialog.locator('.dialog-header').evaluate(el => getComputedStyle(el).position)).toBe('sticky');
+  const box = await close.boundingBox();
+  const viewport = page.viewportSize();
+  expect(box).toBeTruthy();
+  expect(box.y).toBeGreaterThanOrEqual(0);
+  expect(box.y + box.height).toBeLessThanOrEqual(viewport.height);
+  await close.click();
+  await expect(dialog).not.toBeVisible();
 });
 
 test('守谷より手前ではTXの3車種すべてを候補として案内する', async ({ page }) => {
