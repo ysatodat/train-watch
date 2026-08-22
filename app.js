@@ -17,16 +17,16 @@
     rapid:   [45,43,41,38,35,null,null,28,null,24,null,20,null,null,13,null,null,null,null,0]
   };
   const SERVICE = {
-    local:{ label:'普通', icon:'🚆' },
-    section:{ label:'区間快速', icon:'🚈' },
-    rapid:{ label:'快速', icon:'🚄' }
+    local:{ label:'普通' },
+    section:{ label:'区間快速' },
+    rapid:{ label:'快速' }
   };
 
   const DEFAULT_STATE = {
     station:'TX19', includePass:true, dir:'both', favorites:['TX19'], sound:true, vibrate:true
   };
   const state = { ...DEFAULT_STATE };
-  let alertsEnabled = false; // 毎回のユーザー操作が必要。誤解を避けるため永続化しない。
+  let alertsEnabled = false;
   let audioCtx = null;
   let toastTimer = null;
   const notified = new Set();
@@ -69,7 +69,6 @@
   }
   function buildEvents(now, stationId) {
     const s=stationById(stationId), out=[], baseDay=new Date(now); baseDay.setHours(0,0,0,0);
-    // 日中〜夜の土休日モデル。時刻表改正時はここを更新。
     for (let h=8; h<=23; h++) {
       const downBases=[['rapid',0],['section',16],['local',27],['rapid',30],['section',46],['local',57]];
       const upBases=[['local',4],['rapid',12],['section',20],['local',34],['rapid',42],['section',50]];
@@ -131,13 +130,13 @@
   function renderFavorites(now) {
     el.favoriteCards.innerHTML='';
     if (!state.favorites.length) {
-      el.favoriteCards.innerHTML='<div class="empty-favs">☆ よく見る駅をお気に入りにすると、ここからすぐ切り替えられるよ。</div>';
+      el.favoriteCards.innerHTML='<div class="empty-favs">よく見る駅をお気に入りにすると、ここからすぐ切り替えられます。</div>';
       return;
     }
     state.favorites.forEach(id => {
       const s=stationById(id), e=filteredEvents(now,id)[0];
       const b=document.createElement('button'); b.type='button'; b.className='favorite-card'+(id===state.station?' active':''); b.setAttribute('role','listitem');
-      b.innerHTML=`<span class="mini-code">${s.id}</span><strong>${s.name}</strong><span class="mini-next">${e?`${SERVICE[e.kind].icon} ${fmtRemain(e.target-now)}`:'今日はおしまい'}</span>`;
+      b.innerHTML=`<span class="mini-code">${s.id}</span><strong>${s.name}</strong><span class="mini-next">${e?`${SERVICE[e.kind].label} · ${fmtRemain(e.target-now)}`:'今日はおしまい'}</span>`;
       b.addEventListener('click',()=>selectStation(id)); el.favoriteCards.appendChild(b);
     });
   }
@@ -148,7 +147,7 @@
       const row=document.createElement('div'); row.className='station-row'+(s.id===state.station?' current':''); row.hidden=!matches;
       const fav=state.favorites.includes(s.id);
       row.innerHTML=`<span class="station-code-mini">${s.id}</span><button type="button" class="station-select"><strong>${s.name}</strong><small>${s.en}</small></button><button type="button" class="star-btn ${fav?'on':''}" aria-label="${s.name}をお気に入り${fav?'から外す':'に追加'}">${fav?'★':'☆'}</button>`;
-      row.querySelector('.station-select').addEventListener('click',()=>{selectStation(s.id); el.stationDialog.removeAttribute('open');});
+      row.querySelector('.station-select').addEventListener('click',()=>selectStation(s.id));
       row.querySelector('.star-btn').addEventListener('click',()=>{toggleFavorite(s.id); renderStationList(el.stationSearch.value);});
       el.stationList.appendChild(row);
     });
@@ -163,27 +162,28 @@
   function syncControls() {
     document.querySelectorAll('#trainFilter button').forEach(b=>b.classList.toggle('active',(b.dataset.filter==='all')===state.includePass));
     document.querySelectorAll('#directionFilter button').forEach(b=>b.classList.toggle('active',b.dataset.dir===state.dir));
-    el.soundToggle.toggleAttribute('checked',state.sound!==false); el.vibrateToggle.toggleAttribute('checked',state.vibrate!==false);
+    el.soundToggle.checked=state.sound!==false;
+    el.vibrateToggle.checked=state.vibrate!==false;
     el.notifyButton.classList.toggle('enabled',alertsEnabled);
     el.notifyButton.querySelector('b').textContent=alertsEnabled?'お知らせ中':'このページでお知らせ';
-    el.sessionNote.textContent=alertsEnabled?'お知らせ中：3分前と30秒前に音や画面で知らせます。ページは開いたままにしてね。':'お知らせは、このページを開いている間だけ動きます。';
+    el.sessionNote.textContent=alertsEnabled?'3分前と30秒前にお知らせします。ページは開いたままにしてください。':'お知らせは、このページを開いている間だけ動きます。';
   }
   function renderAll() {
     const now=new Date(), s=stationById(), events=filteredEvents(now);
     document.title=`${s.name}駅｜でんしゃくるよ！`; el.stationCode.textContent=s.id; el.stationName.textContent=s.name;
     const fav=state.favorites.includes(s.id); el.favoriteToggle.textContent=fav?'★':'☆'; el.favoriteToggle.classList.toggle('on',fav); el.favoriteToggle.setAttribute('aria-label',fav?'お気に入りから外す':'お気に入りに追加');
-    const weekend=[0,6].includes(now.getDay()); el.modeBadge.textContent=weekend?'土休日モデル':'平日は参考表示'; el.dataNotice.classList.toggle('reference',!weekend);
+    const weekend=[0,6].includes(now.getDay()); el.modeBadge.textContent=weekend?'土休日ダイヤ（β）':'平日参考ダイヤ（β）'; el.dataNotice.classList.toggle('reference',!weekend);
     const e=events[0];
     if (!e) {
-      el.countdown.textContent='--:--'; el.heroMessage.textContent='今日の電車はおしまい。またあした！'; el.heroLabel.textContent='つぎの電車まで'; el.serviceBadge.textContent='🌙 おしまい'; el.metaRow.innerHTML=''; el.timeline.innerHTML='<div class="event-row"><div class="event-main"><strong>また明日、電車を見よう！</strong><small>現在のβ版は8:00〜23:59を中心に表示します。</small></div></div>'; renderFavorites(now); syncControls(); return;
+      el.countdown.textContent='--:--'; el.heroMessage.textContent='今日の電車はおしまい。またあした！'; el.heroLabel.textContent='つぎの電車まで'; el.serviceBadge.textContent='本日は終了'; el.metaRow.innerHTML=''; el.timeline.innerHTML='<div class="event-row"><div class="event-main"><strong>また明日、電車を見よう！</strong><small>現在のβ版は8:00〜23:59を中心に表示します。</small></div></div>'; renderFavorites(now); syncControls(); return;
     }
     const sec=secondsLeft(e,now); el.countdown.textContent=fmtClock(e.target-now); el.heroMessage.textContent=heroMessage(e,sec);
     el.heroLabel.textContent=e.stop?(isOrigin(e)?'つぎの電車の発車まで':'つぎに駅へ来る電車まで'):'つぎに通る電車まで';
-    el.serviceBadge.textContent=`${SERVICE[e.kind].icon} ${SERVICE[e.kind].label}`; el.hero.classList.toggle('soon',sec<=180); el.hero.classList.toggle('now',sec<=30);
+    el.serviceBadge.textContent=SERVICE[e.kind].label; el.hero.classList.toggle('soon',sec<=180); el.hero.classList.toggle('now',sec<=30);
     el.tenCount.hidden=sec>10; el.tenCount.textContent=sec<=10?`いっしょに数えよう！ ${sec}`:'';
     el.metaRow.innerHTML=`<span class="pill ${e.dir}">${dirText(e)}</span><span class="pill">${e.time}ごろ</span><span class="pill ${e.stop?'':'pass'}">${e.stop?'停車':'通過・推定'}</span>`;
     maybeAlert(e,sec);
-    el.timeline.innerHTML=events.slice(0,7).map((x,i)=>`<article class="event-row ${i===0?'next':''}"><div class="event-time">${x.time}</div><div class="event-main"><strong>${SERVICE[x.kind].icon} ${SERVICE[x.kind].label} · ${dirText(x)}</strong><small>${x.stop?'停車':'通過（推定）'}${x.approx?' · モデル時刻':''}</small></div><div class="event-remain">${fmtRemain(x.target-now)}</div></article>`).join('');
+    el.timeline.innerHTML=events.slice(0,7).map((x,i)=>`<article class="event-row ${i===0?'next':''}"><div class="event-time">${x.time}</div><div class="event-main"><strong>${SERVICE[x.kind].label} · ${dirText(x)}</strong><small>${x.stop?'停車':'通過（推定）'}${x.approx?' · 参考時刻':''}</small></div><div class="event-remain">${fmtRemain(x.target-now)}</div></article>`).join('');
     renderFavorites(now); syncControls();
   }
 
@@ -193,25 +193,21 @@
       beep(false);
       if ('Notification' in window && Notification.permission==='default') { try { await Notification.requestPermission(); } catch {} }
       const e=filteredEvents(new Date())[0]; if(e && secondsLeft(e,new Date())<=180) fireAlert(e,180);
-      showToast('🔔 お知らせをONにしたよ！ページを開いて待ってね。');
+      showToast('🔔 お知らせをONにしました。ページを開いたまま待ってね。');
     } else showToast('お知らせをOFFにしました');
     syncControls();
   }
   async function shareStation() {
     const s=stationById(), u=new URL(location.href); u.searchParams.set('station',s.id);
-    const text=`🚆 ${s.name}駅で電車を見よう！\n「でんしゃくるよ！」で次の電車までカウントダウンできるよ。`;
+    const text=`${s.name}駅で電車を見よう！\n「でんしゃくるよ！」で次の電車までカウントダウンできます。`;
     try {
       if (navigator.share) await navigator.share({title:`${s.name}駅｜でんしゃくるよ！`,text,url:u.href});
-      else { await navigator.clipboard.writeText(`${text}\n${u.href}`); showToast('💌 URLをコピーしたよ！'); }
+      else { await navigator.clipboard.writeText(`${text}\n${u.href}`); showToast('URLをコピーしました'); }
     } catch(e) { if(e.name!=='AbortError') showToast('共有できませんでした'); }
   }
 
   function bindEvents() {
-    el.stationButton.addEventListener('click',()=>{el.stationDialog.setAttribute('open',''); setTimeout(()=>el.stationSearch.focus(),160);});
-    $('openStations').addEventListener('click',()=>{el.stationDialog.setAttribute('open',''); setTimeout(()=>el.stationSearch.focus(),160);});
     el.favoriteToggle.addEventListener('click',()=>toggleFavorite());
-    $('openSettings').addEventListener('click',()=>{el.settingsDialog.setAttribute('open','');});
-    $('openDataInfo').addEventListener('click',()=>{el.dataDialog.setAttribute('open','');});
     el.notifyButton.addEventListener('click',toggleAlerts); $('shareButton').addEventListener('click',shareStation);
     el.stationSearch.addEventListener('input',()=>renderStationList(el.stationSearch.value));
     document.querySelectorAll('#trainFilter button').forEach(b=>b.addEventListener('click',()=>{state.includePass=b.dataset.filter==='all'; saveState(); renderAll();}));
