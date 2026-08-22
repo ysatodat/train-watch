@@ -1,5 +1,5 @@
-const CACHE='densha-kuruyo-v22';
-const CORE=['./','./index.html','./styles.css','./mobile-fixes.css','./native-ui.css','./brand-refresh.css','./moments.css','./overnight.css','./product-v4.css','./product-v5.css','./dialog-controller.js','./train-engine.js','./app.js','./onboarding.js','./microinteractions.js','./moments-interactions.js','./data/timetable.json','./manifest.webmanifest','./icon.svg'];
+const CACHE='densha-kuruyo-v23';
+const CORE=['./','./index.html','./styles.css','./mobile-fixes.css','./native-ui.css','./brand-refresh.css','./moments.css','./overnight.css','./product-v4.css','./product-v5.css','./tx-special.css','./dialog-controller.js','./train-engine.js','./app.js','./onboarding.js','./tx-special.js','./microinteractions.js','./moments-interactions.js','./data/timetable.json','./data/tx-profile.json','./manifest.webmanifest','./icon.svg'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',e=>{
