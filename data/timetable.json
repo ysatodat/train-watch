@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "dataVersion": "2026-08-23.1",
+  "checkedAt": "2026-08-23T00:51:00+09:00",
+  "timetableRevision": "2025-03-15",
+  "source": {
+    "mode": "versioned-static-snapshot",
+    "officialTimetable": "https://transfer-train.navitime.biz/tx",
+    "odpt": {
+      "available": true,
+      "requiresApiKey": true,
+      "stationTimetableDataset": "https://ckan.odpt.org/dataset/r_station_timetable-mir",
+      "realtimeDataset": "https://ckan.odpt.org/dataset/r_train_gtfs_rt-odpt_train-mir",
+      "apiBase": "https://api.odpt.org/api/v4/",
+      "status": "not-connected-key-required"
+    }
+  },
+  "coverage": {
+    "allStations": "daytime-pattern-model",
+    "TX19": "daytime-model-plus-verified-edge-times",
+    "passingTrains": "interpolated-model",
+    "note": "ODPT API key is not stored in this public repository. Until an authenticated sync is configured, the app uses this versioned snapshot and clearly labels modeled/estimated values."
+  },
+  "stations": [
+    ["TX01","秋葉原","Akihabara"],["TX02","新御徒町","Shin-okachimachi"],["TX03","浅草","Asakusa"],
+    ["TX04","南千住","Minami-senju"],["TX05","北千住","Kitasenju"],["TX06","青井","Aoi"],
+    ["TX07","六町","Rokucho"],["TX08","八潮","Yashio"],["TX09","三郷中央","Misato-chuo"],
+    ["TX10","南流山","Minami-nagareyama"],["TX11","流山セントラルパーク","Nagareyama-centralpark"],
+    ["TX12","流山おおたかの森","Nagareyama-otakanomori"],["TX13","柏の葉キャンパス","Kashiwanoha-campus"],
+    ["TX14","柏たなか","Kashiwa-tanaka"],["TX15","守谷","Moriya"],["TX16","みらい平","Miraidaira"],
+    ["TX17","みどりの","Midorino"],["TX18","万博記念公園","Bampaku-kinenkoen"],
+    ["TX19","研究学園","Kenkyu-gakuen"],["TX20","つくば","Tsukuba"]
+  ],
+  "services": {
+    "local": "普通",
+    "section": "区間快速",
+    "rapid": "快速",
+    "train": "電車"
+  },
+  "offsets": {
+    "down": {
+      "local": [0,2,4,7,10,13,15,19,22,25,28,30,33,36,40,45,48,51,54,57],
+      "section": [0,2,4,7,10,null,null,17,20,23,null,26,30,null,35,40,43,46,49,52],
+      "rapid": [0,2,4,7,10,null,null,17,null,21,null,25,null,null,32,null,null,null,null,45]
+    },
+    "up": {
+      "local": [66,63,61,58,55,52,50,46,43,40,37,34,31,29,24,13,9,6,3,0],
+      "section": [54,51,49,46,43,null,null,37,33,30,null,27,23,null,18,13,10,7,3,0],
+      "rapid": [45,43,41,38,35,null,null,28,null,24,null,20,null,null,13,null,null,null,null,0]
+    }
+  },
+  "daytimeBases": {
+    "startHour": 8,
+    "endHour": 23,
+    "down": [["rapid",0],["section",16],["local",27],["rapid",30],["section",46],["local",57]],
+    "up": [["local",4],["rapid",12],["section",20],["local",34],["rapid",42],["section",50]]
+  },
+  "verifiedEdgeTimes": {
+    "TX19": {
+      "sourceCheckedAt": "2026-08-23T00:51:00+09:00",
+      "up": [
+        [0,3,"local"],[5,9,"section"],[5,35,"section"],[5,50,"section"],
+        [6,5,"section"],[6,14,"local"],[6,23,"local"],[6,40,"section"],[6,53,"local"],
+        [7,10,"section"],[7,23,"local"],[7,40,"section"],[7,53,"local"],
+        [23,2,"local"],[23,17,"local"],[23,25,"local"],[23,37,"local"],[23,49,"local"]
+      ],
+      "down": [
+        [0,6,"local"],[0,18,"local"],[0,41,"local"],
+        [5,34,"local"],[5,54,"local"],[6,3,"local"],[6,25,"local"],[6,43,"local"],
+        [6,55,"local"],[7,7,"local"],[7,23,"local"],[7,34,"local"],[7,51,"local"],
+        [23,6,"local"],[23,21,"local"],[23,36,"local"],[23,51,"local"]
+      ],
+      "overnight": {
+        "startsAfter": "00:41",
+        "endsBefore": "05:09",
+        "next": [
+          {"dir":"up","time":"05:09","label":"秋葉原方面"},
+          {"dir":"down","time":"05:34","label":"つくば方面"}
+        ]
+      }
+    }
+  }
+}
