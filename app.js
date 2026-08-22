@@ -1,42 +1,226 @@
-(()=>{
-const STATIONS=[
-['TX01','秋葉原','Akihabara'],['TX02','新御徒町','Shin-okachimachi'],['TX03','浅草','Asakusa'],['TX04','南千住','Minami-senju'],['TX05','北千住','Kita-senju'],['TX06','青井','Aoi'],['TX07','六町','Rokucho'],['TX08','八潮','Yashio'],['TX09','三郷中央','Misato-chuo'],['TX10','南流山','Minami-nagareyama'],['TX11','流山セントラルパーク','Nagareyama-centralpark'],['TX12','流山おおたかの森','Nagareyama-otakanomori'],['TX13','柏の葉キャンパス','Kashiwanoha-campus'],['TX14','柏たなか','Kashiwa-tanaka'],['TX15','守谷','Moriya'],['TX16','みらい平','Miraidaira'],['TX17','みどりの','Midorino'],['TX18','万博記念公園','Bampaku-kinenkoen'],['TX19','研究学園','Kenkyu-gakuen'],['TX20','つくば','Tsukuba']
-].map((x,i)=>({id:x[0],name:x[1],en:x[2],i}));
-const DOWN={local:[0,2,4,7,10,13,15,19,22,25,28,30,33,36,40,45,48,51,54,57],section:[0,2,4,7,10,null,null,17,20,23,null,26,30,null,35,40,43,46,49,52],rapid:[0,2,4,7,10,null,null,17,null,21,null,25,null,null,32,null,null,null,null,45]};
-const UP={local:[66,63,61,58,55,52,50,46,43,40,37,34,31,29,24,13,9,6,3,0],section:[54,51,49,46,43,null,null,37,33,30,null,27,23,null,18,13,10,7,3,0],rapid:[45,43,41,38,35,null,null,28,null,24,null,20,null,null,13,null,null,null,null,0]};
-const SERVICE={local:{label:'普通',emoji:'🚆'},section:{label:'区間快速',emoji:'🚈'},rapid:{label:'快速',emoji:'🚄'}};
-const state={station:'TX19',includePass:true,dir:'both',favorites:['TX19'],alerts:false,sound:true,vibrate:true};
-const $=id=>document.getElementById(id);
-const el={clock:$('clock'),date:$('date'),stationCode:$('stationCode'),stationName:$('stationName'),stationButton:$('stationButton'),favoriteToggle:$('favoriteToggle'),hero:$('hero'),heroLabel:$('heroLabel'),countdown:$('countdown'),heroMessage:$('heroMessage'),metaRow:$('metaRow'),trainEmoji:$('trainEmoji'),tenCount:$('tenCount'),timeline:$('timeline'),favoriteCards:$('favoriteCards'),stationModal:$('stationModal'),stationList:$('stationList'),toast:$('toast'),notifyButton:$('notifyButton'),soundToggle:$('soundToggle'),vibrateToggle:$('vibrateToggle'),modeBadge:$('modeBadge')};
-const notified=new Set();let audioCtx=null;let toastTimer=null;
-function load(){try{Object.assign(state,JSON.parse(localStorage.getItem('trainWatchV2')||'{}'))}catch{}const q=new URLSearchParams(location.search).get('station');if(STATIONS.some(s=>s.id===q))state.station=q;if(!Array.isArray(state.favorites)||!state.favorites.length)state.favorites=['TX19'];state.alerts=false;el.soundToggle.checked=state.sound!==false;el.vibrateToggle.checked=state.vibrate!==false;}
-function save(){localStorage.setItem('trainWatchV2',JSON.stringify(state));}
-function mins(h,m){return h*60+m}
-function interpolate(arr,index,baseline){if(arr[index]!=null)return {offset:arr[index],approx:false};let l=index-1,r=index+1;while(l>=0&&arr[l]==null)l--;while(r<arr.length&&arr[r]==null)r++;if(l<0||r>=arr.length)return {offset:null,approx:true};const p=(baseline[index]-baseline[l])/(baseline[r]-baseline[l]);return {offset:arr[l]+(arr[r]-arr[l])*p,approx:true};}
-function eventAt(baseMin,offset,day,extra){const total=baseMin+offset,d=new Date(day);d.setHours(0,0,0,0);d.setMinutes(total);return {...extra,target:d,time:`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`};}
-function buildEvents(now,stationId){const s=STATIONS.find(x=>x.id===stationId)||STATIONS[18],out=[],baseDay=new Date(now);baseDay.setHours(0,0,0,0);for(let h=8;h<=23;h++){[['rapid',0],['section',16],['local',27],['rapid',30],['section',46],['local',57]].forEach(([kind,m])=>{const inf=interpolate(DOWN[kind],s.i,DOWN.local);if(inf.offset==null)return;out.push(eventAt(mins(h,m),inf.offset,baseDay,{kind,dir:'down',stop:DOWN[kind][s.i]!=null,approx:inf.approx,id:`d-${h}-${m}-${kind}-${s.id}`}));});[['local',4],['rapid',12],['section',20],['local',34],['rapid',42],['section',50]].forEach(([kind,m])=>{const inf=interpolate(UP[kind],s.i,UP.local);if(inf.offset==null)return;out.push(eventAt(mins(h,m),inf.offset,baseDay,{kind,dir:'up',stop:UP[kind][s.i]!=null,approx:inf.approx,id:`u-${h}-${m}-${kind}-${s.id}`}));});}return out.filter(e=>e.target-now>-3500).sort((a,b)=>a.target-b.target);}
-function filteredEvents(now,stationId=state.station){return buildEvents(now,stationId).filter(e=>(state.includePass||e.stop)&&(state.dir==='both'||e.dir===state.dir));}
-function fmtRemain(ms){const sec=Math.max(0,Math.ceil(ms/1000));if(sec<60)return `あと ${sec}秒`;return `あと ${Math.floor(sec/60)}分${String(sec%60).padStart(2,'0')}秒`;}
-function countText(ms){const sec=Math.max(0,Math.ceil(ms/1000));return `${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;}
-function dirText(e){return e.dir==='down'?'つくば方面':'秋葉原方面'}
-function station(){return STATIONS.find(s=>s.id===state.station)||STATIONS[18]}
-function messageFor(e,sec){const terminal=(e.dir==='down'&&state.station==='TX01')||(e.dir==='up'&&state.station==='TX20');if(sec<=10)return terminal?'もうすぐ発車！ 🚆💨':'きたきた！ もうすぐ！！ 👀';if(sec<=30)return terminal?'そろそろ発車するよ！ 🔔':'もう来るよ！ 線路を見よう 👀';if(sec<=180)return terminal?'発車のじゅんびをしよう！':'そろそろ来るよ！ 🚆';return e.stop?'でんしゃを待とう！':'ビューンと通る電車を待とう！';}
-function beep(urgent=false){if(!state.sound)return;try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=urgent?880:660;g.gain.setValueAtTime(.0001,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.12,audioCtx.currentTime+.02);g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+.22);o.start();o.stop(audioCtx.currentTime+.24)}catch{}}
-function buzz(){if(state.vibrate&&navigator.vibrate)navigator.vibrate([120,60,120]);}
-function showToast(text,urgent=false){clearTimeout(toastTimer);el.toast.textContent=text;el.toast.hidden=false;el.toast.classList.toggle('urgent',urgent);toastTimer=setTimeout(()=>el.toast.hidden=true,4500);}
-function fireAlert(e,threshold){const key=`${e.id}-${threshold}`;if(notified.has(key))return;notified.add(key);const terminal=(e.dir==='down'&&state.station==='TX01')||(e.dir==='up'&&state.station==='TX20');const text=threshold===30?(terminal?'🚆 もうすぐ発車するよ！':'👀 もう来るよ！ 線路を見よう！'):(terminal?'🔔 そろそろ発車するよ！':'🚆 そろそろ電車が来るよ！');showToast(text,threshold===30);beep(threshold===30);if(threshold===30)buzz();if(state.alerts&&'Notification'in window&&Notification.permission==='granted'){try{new Notification(text,{body:`${station().name}駅・${dirText(e)} ${SERVICE[e.kind].label}`})}catch{}}}
-function maybeAlerts(e,sec){if(!state.alerts)return;if(sec<=180&&sec>174)fireAlert(e,180);if(sec<=30&&sec>24)fireAlert(e,30);}
-function renderFavorites(now){el.favoriteCards.innerHTML='';if(!state.favorites.length){el.favoriteCards.innerHTML='<div class="empty-favs">☆ 駅をお気に入りにすると、ここからすぐ切り替えられるよ。</div>';return}state.favorites.forEach(id=>{const s=STATIONS.find(x=>x.id===id),e=filteredEvents(now,id)[0],b=document.createElement('button');b.className='fav-card'+(id===state.station?' active':'');b.innerHTML=`<span class="code">${s.id}</span><b>${s.name}</b><span class="mini">${e?`${SERVICE[e.kind].emoji} ${fmtRemain(e.target-now)}`:'今日はおしまい'}</span>`;b.onclick=()=>selectStation(id);el.favoriteCards.appendChild(b);});}
-function renderStationList(){el.stationList.innerHTML='';STATIONS.forEach(s=>{const row=document.createElement('div');row.className='station-row'+(s.id===state.station?' current':'');const star=state.favorites.includes(s.id);row.innerHTML=`<span class="station-code">${s.id}</span><button class="station-select"><b>${s.name}</b><small>${s.en}</small></button><button class="star-btn ${star?'on':''}" aria-label="${s.name}をお気に入り${star?'から外す':'に追加'}">${star?'★':'☆'}</button>`;row.querySelector('.station-select').onclick=()=>{selectStation(s.id);closeModal()};row.querySelector('.star-btn').onclick=()=>{toggleFavorite(s.id);renderStationList()};el.stationList.appendChild(row);});}
-function selectStation(id){state.station=id;save();const u=new URL(location.href);u.searchParams.set('station',id);history.replaceState(null,'',u);renderAll();}
-function toggleFavorite(id=state.station){const i=state.favorites.indexOf(id);if(i>=0)state.favorites.splice(i,1);else state.favorites.push(id);save();renderAll();}
-function renderAll(){const now=new Date(),s=station(),events=filteredEvents(now);document.title=`${s.name}駅 | TRAIN WATCH`;el.stationCode.textContent=s.id;el.stationName.textContent=s.name;const fav=state.favorites.includes(s.id);el.favoriteToggle.textContent=fav?'★':'☆';el.favoriteToggle.classList.toggle('on',fav);el.favoriteToggle.setAttribute('aria-label',fav?'お気に入りから外す':'お気に入りに追加');const weekend=[0,6].includes(now.getDay());el.modeBadge.textContent=weekend?'土休日モデル':'平日は参考表示';const e=events[0];if(!e){el.countdown.textContent='--:--';el.heroMessage.textContent='登録時間帯はおしまい';el.metaRow.innerHTML='';el.timeline.innerHTML='';renderFavorites(now);return}const sec=Math.max(0,Math.ceil((e.target-now)/1000));el.countdown.textContent=countText(e.target-now);el.heroMessage.textContent=messageFor(e,sec);el.heroLabel.textContent=e.stop?(state.station==='TX01'||state.station==='TX20'?'つぎの電車の発車まで':'つぎに駅へ来る電車まで'):'つぎに通る電車まで';el.trainEmoji.textContent=SERVICE[e.kind].emoji;el.hero.classList.toggle('soon',sec<=180);el.hero.classList.toggle('now',sec<=30);el.tenCount.hidden=sec>10;el.tenCount.textContent=sec<=10?`いっしょに数えよう！ ${sec}`:'';el.metaRow.innerHTML=`<span class="pill ${e.dir}">${dirText(e)}</span><span class="pill">${e.time}ごろ</span><span class="pill type-${e.kind} ${e.stop?'':'pass'}">${SERVICE[e.kind].label}・${e.stop?'停車':'通過（推定）'}</span>`;maybeAlerts(e,sec);el.timeline.innerHTML=events.slice(0,8).map((x,i)=>`<div class="event-row ${i===0?'next':''}"><div class="event-time">${x.time}</div><div class="event-main"><b>${SERVICE[x.kind].emoji} ${SERVICE[x.kind].label} · ${dirText(x)}</b><small>${x.stop?'停車':'通過（推定）'}${x.approx?' · モデル時刻':''}</small></div><div class="event-remain">${fmtRemain(x.target-now)}</div></div>`).join('');renderFavorites(now);renderStationList();}
-function openModal(){el.stationModal.hidden=false;document.body.style.overflow='hidden';renderStationList()}
-function closeModal(){el.stationModal.hidden=true;document.body.style.overflow=''}
-async function enableAlerts(){state.alerts=!state.alerts;if(state.alerts){beep(false);if('Notification'in window&&Notification.permission==='default'){try{await Notification.requestPermission()}catch{}}const e=filteredEvents(new Date())[0];if(e){const sec=Math.max(0,Math.ceil((e.target-new Date())/1000));if(sec<=30)fireAlert(e,30);else if(sec<=180)fireAlert(e,180);else showToast('🔔 お知らせをONにしたよ！ ページを開いて待ってね。')}else showToast('🔔 お知らせをONにしたよ！')}else showToast('お知らせをOFFにしました');save();syncButtons()}
-function syncButtons(){el.notifyButton.classList.toggle('enabled',state.alerts);el.notifyButton.querySelector('b').textContent=state.alerts?'お知らせON':'通知をONにする';}
-async function share(){const s=station(),u=new URL(location.href);u.searchParams.set('station',s.id);const text=`🚆 ${s.name}駅で電車を見よう！\n次の電車までカウントダウンできるよ。`;try{if(navigator.share){await navigator.share({title:'TRAIN WATCH',text,url:u.href})}else{await navigator.clipboard.writeText(`${text}\n${u.href}`);showToast('💌 URLをコピーしたよ！')}}catch(e){if(e.name!=='AbortError')showToast('共有できませんでした')}}
-$('openStations').onclick=openModal;el.stationButton.onclick=openModal;$('closeStations').onclick=closeModal;el.stationModal.addEventListener('click',e=>{if(e.target.dataset.close)closeModal()});el.favoriteToggle.onclick=()=>toggleFavorite();el.notifyButton.onclick=enableAlerts;$('shareButton').onclick=share;document.querySelectorAll('#trainFilter button').forEach(b=>b.onclick=()=>{state.includePass=b.dataset.filter==='all';document.querySelectorAll('#trainFilter button').forEach(x=>x.classList.toggle('active',x===b));save();renderAll()});document.querySelectorAll('#directionFilter button').forEach(b=>b.onclick=()=>{state.dir=b.dataset.dir;document.querySelectorAll('#directionFilter button').forEach(x=>x.classList.toggle('active',x===b));save();renderAll()});el.soundToggle.onchange=()=>{state.sound=el.soundToggle.checked;save();if(state.sound)beep()};el.vibrateToggle.onchange=()=>{state.vibrate=el.vibrateToggle.checked;save()};
-function tick(){const n=new Date();el.clock.textContent=n.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});el.date.textContent=n.toLocaleDateString('ja-JP',{month:'numeric',day:'numeric',weekday:'short'});renderAll()}
-load();syncButtons();document.querySelectorAll('#trainFilter button').forEach(b=>b.classList.toggle('active',(state.includePass&&b.dataset.filter==='all')||(!state.includePass&&b.dataset.filter==='stop')));document.querySelectorAll('#directionFilter button').forEach(b=>b.classList.toggle('active',b.dataset.dir===state.dir));tick();setInterval(tick,1000);if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+(() => {
+  'use strict';
+
+  const STATIONS = [
+    ['TX01','秋葉原','Akihabara'],['TX02','新御徒町','Shin-okachimachi'],['TX03','浅草','Asakusa'],['TX04','南千住','Minami-senju'],['TX05','北千住','Kita-senju'],['TX06','青井','Aoi'],['TX07','六町','Rokucho'],['TX08','八潮','Yashio'],['TX09','三郷中央','Misato-chuo'],['TX10','南流山','Minami-nagareyama'],['TX11','流山セントラルパーク','Nagareyama-centralpark'],['TX12','流山おおたかの森','Nagareyama-otakanomori'],['TX13','柏の葉キャンパス','Kashiwanoha-campus'],['TX14','柏たなか','Kashiwa-tanaka'],['TX15','守谷','Moriya'],['TX16','みらい平','Miraidaira'],['TX17','みどりの','Midorino'],['TX18','万博記念公園','Bampaku-kinenkoen'],['TX19','研究学園','Kenkyu-gakuen'],['TX20','つくば','Tsukuba']
+  ].map((x, i) => ({ id:x[0], name:x[1], en:x[2], i }));
+
+  const DOWN = {
+    local:   [0,2,4,7,10,13,15,19,22,25,28,30,33,36,40,45,48,51,54,57],
+    section: [0,2,4,7,10,null,null,17,20,23,null,26,30,null,35,40,43,46,49,52],
+    rapid:   [0,2,4,7,10,null,null,17,null,21,null,25,null,null,32,null,null,null,null,45]
+  };
+  const UP = {
+    local:   [66,63,61,58,55,52,50,46,43,40,37,34,31,29,24,13,9,6,3,0],
+    section: [54,51,49,46,43,null,null,37,33,30,null,27,23,null,18,13,10,7,3,0],
+    rapid:   [45,43,41,38,35,null,null,28,null,24,null,20,null,null,13,null,null,null,null,0]
+  };
+  const SERVICE = {
+    local:{ label:'普通', icon:'🚆' },
+    section:{ label:'区間快速', icon:'🚈' },
+    rapid:{ label:'快速', icon:'🚄' }
+  };
+
+  const DEFAULT_STATE = {
+    station:'TX19', includePass:true, dir:'both', favorites:['TX19'], sound:true, vibrate:true
+  };
+  const state = { ...DEFAULT_STATE };
+  let alertsEnabled = false;
+  let audioCtx = null;
+  let toastTimer = null;
+  const notified = new Set();
+
+  const $ = id => document.getElementById(id);
+  const el = {
+    clock:$('clock'), date:$('date'), stationCode:$('stationCode'), stationName:$('stationName'),
+    stationButton:$('stationButton'), favoriteToggle:$('favoriteToggle'), dataNotice:$('dataNotice'), modeBadge:$('modeBadge'),
+    hero:$('hero'), heroLabel:$('heroLabel'), countdown:$('countdown'), heroMessage:$('heroMessage'), tenCount:$('tenCount'),
+    serviceBadge:$('serviceBadge'), metaRow:$('metaRow'), trainWrap:$('trainWrap'), notifyButton:$('notifyButton'),
+    sessionNote:$('sessionNote'), favoriteCards:$('favoriteCards'), timeline:$('timeline'),
+    stationDialog:$('stationDialog'), stationSearch:$('stationSearch'), stationList:$('stationList'),
+    settingsDialog:$('settingsDialog'), soundToggle:$('soundToggle'), vibrateToggle:$('vibrateToggle'),
+    dataDialog:$('dataDialog'), toast:$('toast')
+  };
+
+  function loadState() {
+    try { Object.assign(state, JSON.parse(localStorage.getItem('denshaKuruyoV1') || '{}')); } catch {}
+    const params = new URLSearchParams(location.search);
+    const q = params.get('station');
+    if (STATIONS.some(s => s.id === q)) state.station = q;
+    if (!Array.isArray(state.favorites)) state.favorites = ['TX19'];
+    state.favorites = [...new Set(state.favorites)].filter(id => STATIONS.some(s => s.id === id));
+    if (!state.favorites.length) state.favorites = ['TX19'];
+  }
+  function saveState() { localStorage.setItem('denshaKuruyoV1', JSON.stringify(state)); }
+  function stationById(id=state.station) { return STATIONS.find(s => s.id === id) || STATIONS[18]; }
+  function minutes(h,m) { return h*60+m; }
+  function targetFrom(baseMin, offset, day, extra) {
+    const d = new Date(day); d.setHours(0,0,0,0); d.setMinutes(baseMin + offset);
+    return { ...extra, target:d, time:`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}` };
+  }
+  function interpolate(arr, index, baseline) {
+    if (arr[index] != null) return { offset:arr[index], approx:false };
+    let l=index-1, r=index+1;
+    while (l>=0 && arr[l]==null) l--;
+    while (r<arr.length && arr[r]==null) r++;
+    if (l<0 || r>=arr.length) return { offset:null, approx:true };
+    const p=(baseline[index]-baseline[l])/(baseline[r]-baseline[l]);
+    return { offset:arr[l] + (arr[r]-arr[l])*p, approx:true };
+  }
+  function buildEvents(now, stationId) {
+    const s=stationById(stationId), out=[], baseDay=new Date(now); baseDay.setHours(0,0,0,0);
+    for (let h=8; h<=23; h++) {
+      const downBases=[['rapid',0],['section',16],['local',27],['rapid',30],['section',46],['local',57]];
+      const upBases=[['local',4],['rapid',12],['section',20],['local',34],['rapid',42],['section',50]];
+      downBases.forEach(([kind,m]) => {
+        const inf=interpolate(DOWN[kind],s.i,DOWN.local); if(inf.offset==null) return;
+        out.push(targetFrom(minutes(h,m),inf.offset,baseDay,{kind,dir:'down',stop:DOWN[kind][s.i]!=null,approx:inf.approx,id:`d-${h}-${m}-${kind}-${s.id}`}));
+      });
+      upBases.forEach(([kind,m]) => {
+        const inf=interpolate(UP[kind],s.i,UP.local); if(inf.offset==null) return;
+        out.push(targetFrom(minutes(h,m),inf.offset,baseDay,{kind,dir:'up',stop:UP[kind][s.i]!=null,approx:inf.approx,id:`u-${h}-${m}-${kind}-${s.id}`}));
+      });
+    }
+    return out.filter(e => e.target-now > -3500).sort((a,b)=>a.target-b.target);
+  }
+  function filteredEvents(now, stationId=state.station) {
+    return buildEvents(now, stationId).filter(e => (state.includePass || e.stop) && (state.dir==='both' || e.dir===state.dir));
+  }
+  function secondsLeft(e, now) { return Math.max(0, Math.ceil((e.target-now)/1000)); }
+  function fmtClock(ms) { const s=Math.max(0,Math.ceil(ms/1000)); return `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`; }
+  function fmtRemain(ms) { const s=Math.max(0,Math.ceil(ms/1000)); return s<60 ? `あと${s}秒` : `あと${Math.floor(s/60)}分${String(s%60).padStart(2,'0')}秒`; }
+  function dirText(e) { return e.dir==='down' ? 'つくば方面' : '秋葉原方面'; }
+  function isOrigin(e, stationId=state.station) { return (e.dir==='down'&&stationId==='TX01') || (e.dir==='up'&&stationId==='TX20'); }
+  function heroMessage(e, sec) {
+    const origin=isOrigin(e);
+    if (sec<=10) return origin ? 'もうすぐ発車！いっしょに数えよう！' : 'きたきた！いっしょに数えよう！';
+    if (sec<=30) return origin ? 'そろそろ発車するよ！' : 'もう来るよ！線路を見よう！';
+    if (sec<=180) return origin ? '発車のじゅんびをしよう！' : 'そろそろ来るよ！';
+    return e.stop ? 'でんしゃを待とう！' : 'ビューンと通る電車を待とう！';
+  }
+  function showToast(text, urgent=false) {
+    clearTimeout(toastTimer); el.toast.textContent=text; el.toast.hidden=false; el.toast.classList.toggle('urgent', urgent);
+    toastTimer=setTimeout(()=>{el.toast.hidden=true;},4500);
+  }
+  function beep(urgent=false) {
+    if (!state.sound) return;
+    try {
+      audioCtx=audioCtx || new (window.AudioContext||window.webkitAudioContext)();
+      if (audioCtx.state==='suspended') audioCtx.resume();
+      const o=audioCtx.createOscillator(), g=audioCtx.createGain(); o.connect(g); g.connect(audioCtx.destination);
+      o.frequency.value=urgent?880:660; g.gain.setValueAtTime(.0001,audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(.11,audioCtx.currentTime+.02); g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+.22); o.start(); o.stop(audioCtx.currentTime+.24);
+    } catch {}
+  }
+  function buzz() { if (state.vibrate && navigator.vibrate) navigator.vibrate([110,60,110]); }
+  function fireAlert(e, threshold) {
+    const key=`${e.id}-${threshold}`; if(notified.has(key)) return; notified.add(key);
+    const origin=isOrigin(e);
+    const text=threshold===30 ? (origin?'🚆 もうすぐ発車するよ！':'👀 もう来るよ！線路を見よう！') : (origin?'🔔 そろそろ発車するよ！':'🚆 そろそろ電車が来るよ！');
+    showToast(text, threshold===30); beep(threshold===30); if(threshold===30) buzz();
+    if ('Notification' in window && Notification.permission==='granted') {
+      try { new Notification(text,{body:`${stationById().name}駅・${dirText(e)} ${SERVICE[e.kind].label}`}); } catch {}
+    }
+  }
+  function maybeAlert(e, sec) {
+    if (!alertsEnabled) return;
+    if (sec<=180 && sec>175) fireAlert(e,180);
+    if (sec<=30 && sec>25) fireAlert(e,30);
+  }
+
+  function renderFavorites(now) {
+    el.favoriteCards.innerHTML='';
+    state.favorites.forEach(id => {
+      const s=stationById(id), e=filteredEvents(now,id)[0];
+      const b=document.createElement('button'); b.type='button'; b.className='favorite-card'+(id===state.station?' active':''); b.setAttribute('role','listitem');
+      b.innerHTML=`<span class="mini-code">${s.id}</span><strong>${s.name}</strong><span class="mini-next">${e?`${SERVICE[e.kind].icon} ${fmtRemain(e.target-now)}`:'今日はおしまい'}</span>`;
+      b.addEventListener('click',()=>selectStation(id)); el.favoriteCards.appendChild(b);
+    });
+  }
+  function renderStationList(filter='') {
+    const q=filter.trim().toLowerCase(); el.stationList.innerHTML='';
+    STATIONS.forEach(s => {
+      const matches=!q || s.name.toLowerCase().includes(q) || s.en.toLowerCase().includes(q) || s.id.toLowerCase().includes(q);
+      const row=document.createElement('div'); row.className='station-row'+(s.id===state.station?' current':''); row.hidden=!matches;
+      const fav=state.favorites.includes(s.id);
+      row.innerHTML=`<span class="station-code-mini">${s.id}</span><button type="button" class="station-select"><strong>${s.name}</strong><small>${s.en}</small></button><button type="button" class="star-btn ${fav?'on':''}" aria-label="${s.name}をお気に入り${fav?'から外す':'に追加'}">${fav?'★':'☆'}</button>`;
+      row.querySelector('.station-select').addEventListener('click',()=>{selectStation(s.id); el.stationDialog.open=false;});
+      row.querySelector('.star-btn').addEventListener('click',()=>{toggleFavorite(s.id); renderStationList(el.stationSearch.value);});
+      el.stationList.appendChild(row);
+    });
+  }
+  function selectStation(id) {
+    state.station=id; saveState(); const u=new URL(location.href); u.searchParams.set('station',id); history.replaceState(null,'',u); renderAll();
+  }
+  function toggleFavorite(id=state.station) {
+    const i=state.favorites.indexOf(id); if(i>=0 && state.favorites.length>1) state.favorites.splice(i,1); else if(i<0) state.favorites.push(id);
+    saveState(); renderAll();
+  }
+  function syncControls() {
+    document.querySelectorAll('#trainFilter button').forEach(b=>b.classList.toggle('active',(b.dataset.filter==='all')===state.includePass));
+    document.querySelectorAll('#directionFilter button').forEach(b=>b.classList.toggle('active',b.dataset.dir===state.dir));
+    el.soundToggle.checked=state.sound!==false; el.vibrateToggle.checked=state.vibrate!==false;
+    el.notifyButton.classList.toggle('enabled',alertsEnabled);
+    el.notifyButton.querySelector('b').textContent=alertsEnabled?'お知らせ中':'このページでお知らせ';
+    el.sessionNote.textContent=alertsEnabled?'お知らせ中：3分前と30秒前に音や画面で知らせます。ページは開いたままにしてね。':'お知らせは、このページを開いている間だけ動きます。';
+  }
+  function renderAll() {
+    const now=new Date(), s=stationById(), events=filteredEvents(now);
+    document.title=`${s.name}駅｜でんしゃくるよ！`; el.stationCode.textContent=s.id; el.stationName.textContent=s.name;
+    const fav=state.favorites.includes(s.id); el.favoriteToggle.textContent=fav?'★':'☆'; el.favoriteToggle.classList.toggle('on',fav); el.favoriteToggle.setAttribute('aria-label',fav?'お気に入りから外す':'お気に入りに追加');
+    const weekend=[0,6].includes(now.getDay()); el.modeBadge.textContent=weekend?'土休日モデル':'平日は参考表示'; el.dataNotice.classList.toggle('reference',!weekend);
+    const e=events[0];
+    if (!e) {
+      el.countdown.textContent='--:--'; el.heroMessage.textContent='今日の電車はおしまい。またあした！'; el.heroLabel.textContent='つぎの電車まで'; el.serviceBadge.textContent='🌙 おしまい'; el.metaRow.innerHTML=''; el.timeline.innerHTML='<div class="event-row"><div class="event-main"><strong>また明日、電車を見よう！</strong><small>現在のβ版は8:00〜23:59を中心に表示します。</small></div></div>'; renderFavorites(now); syncControls(); return;
+    }
+    const sec=secondsLeft(e,now); el.countdown.textContent=fmtClock(e.target-now); el.heroMessage.textContent=heroMessage(e,sec);
+    el.heroLabel.textContent=e.stop?(isOrigin(e)?'つぎの電車の発車まで':'つぎに駅へ来る電車まで'):'つぎに通る電車まで';
+    el.serviceBadge.textContent=`${SERVICE[e.kind].icon} ${SERVICE[e.kind].label}`; el.hero.classList.toggle('soon',sec<=180); el.hero.classList.toggle('now',sec<=30);
+    el.tenCount.hidden=sec>10; el.tenCount.textContent=sec<=10?`いっしょに数えよう！ ${sec}`:'';
+    el.metaRow.innerHTML=`<span class="pill ${e.dir}">${dirText(e)}</span><span class="pill">${e.time}ごろ</span><span class="pill ${e.stop?'':'pass'}">${e.stop?'停車':'通過・推定'}</span>`;
+    maybeAlert(e,sec);
+    el.timeline.innerHTML=events.slice(0,7).map((x,i)=>`<article class="event-row ${i===0?'next':''}"><div class="event-time">${x.time}</div><div class="event-main"><strong>${SERVICE[x.kind].icon} ${SERVICE[x.kind].label} · ${dirText(x)}</strong><small>${x.stop?'停車':'通過（推定）'}${x.approx?' · モデル時刻':''}</small></div><div class="event-remain">${fmtRemain(x.target-now)}</div></article>`).join('');
+    renderFavorites(now); syncControls();
+  }
+
+  async function toggleAlerts() {
+    alertsEnabled=!alertsEnabled;
+    if(alertsEnabled) {
+      beep(false);
+      if ('Notification' in window && Notification.permission==='default') { try { await Notification.requestPermission(); } catch {} }
+      const e=filteredEvents(new Date())[0]; if(e && secondsLeft(e,new Date())<=180) fireAlert(e,180);
+      showToast('🔔 お知らせをONにしたよ！ページを開いて待ってね。');
+    } else showToast('お知らせをOFFにしました');
+    syncControls();
+  }
+  async function shareStation() {
+    const s=stationById(), u=new URL(location.href); u.searchParams.set('station',s.id);
+    const text=`🚆 ${s.name}駅で電車を見よう！\n「でんしゃくるよ！」で次の電車までカウントダウンできるよ。`;
+    try {
+      if (navigator.share) await navigator.share({title:`${s.name}駅｜でんしゃくるよ！`,text,url:u.href});
+      else { await navigator.clipboard.writeText(`${text}\n${u.href}`); showToast('💌 URLをコピーしたよ！'); }
+    } catch(e) { if(e.name!=='AbortError') showToast('共有できませんでした'); }
+  }
+
+  function bindEvents() {
+    el.stationButton.addEventListener('click',()=>{el.stationDialog.open=true; setTimeout(()=>el.stationSearch.focus(),160);});
+    $('openStations').addEventListener('click',()=>{el.stationDialog.open=true; setTimeout(()=>el.stationSearch.focus(),160);});
+    el.favoriteToggle.addEventListener('click',()=>toggleFavorite());
+    $('openSettings').addEventListener('click',()=>{el.settingsDialog.open=true;});
+    $('openDataInfo').addEventListener('click',()=>{el.dataDialog.open=true;});
+    el.notifyButton.addEventListener('click',toggleAlerts); $('shareButton').addEventListener('click',shareStation);
+    el.stationSearch.addEventListener('input',()=>renderStationList(el.stationSearch.value));
+    document.querySelectorAll('#trainFilter button').forEach(b=>b.addEventListener('click',()=>{state.includePass=b.dataset.filter==='all'; saveState(); renderAll();}));
+    document.querySelectorAll('#directionFilter button').forEach(b=>b.addEventListener('click',()=>{state.dir=b.dataset.dir; saveState(); renderAll();}));
+    el.soundToggle.addEventListener('change',()=>{state.sound=el.soundToggle.checked; saveState(); if(state.sound) beep(false);});
+    el.vibrateToggle.addEventListener('change',()=>{state.vibrate=el.vibrateToggle.checked; saveState();});
+    document.addEventListener('visibilitychange',()=>{if(!document.hidden) renderAll();});
+  }
+  function tick() {
+    const now=new Date(); el.clock.textContent=now.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}); el.date.textContent=now.toLocaleDateString('ja-JP',{month:'numeric',day:'numeric',weekday:'short'}); renderAll();
+  }
+  function init() {
+    loadState(); bindEvents(); renderStationList(); syncControls(); tick(); setInterval(tick,1000);
+    if ('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+  }
+  init();
 })();
