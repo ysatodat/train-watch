@@ -4,14 +4,33 @@
   const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function ensureStyles(){
-    if(document.querySelector('link[data-product-v5]'))return;
-    const link=document.createElement('link');
-    link.rel='stylesheet';
-    link.href='./product-v5.css';
-    link.dataset.productV5='1';
-    document.head.appendChild(link);
+    if(!document.querySelector('link[data-product-v5]')){
+      const link=document.createElement('link');
+      link.rel='stylesheet';
+      link.href='./product-v5.css';
+      link.dataset.productV5='1';
+      document.head.appendChild(link);
+    }
+    if(!document.querySelector('link[data-tx-special]')){
+      const link=document.createElement('link');
+      link.rel='stylesheet';
+      link.href='./tx-special.css';
+      link.dataset.txSpecial='1';
+      document.head.appendChild(link);
+    }
   }
+
+  function ensureTxSpecialScript(){
+    if(document.querySelector('script[data-tx-special]'))return;
+    const script=document.createElement('script');
+    script.src='./tx-special.js';
+    script.async=false;
+    script.dataset.txSpecial='1';
+    document.head.appendChild(script);
+  }
+
   ensureStyles();
+  ensureTxSpecialScript();
 
   async function init(){
     try { await (window.TrainWatchEngineReady || Promise.resolve()); } catch {}

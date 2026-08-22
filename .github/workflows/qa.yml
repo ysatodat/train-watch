@@ -25,11 +25,41 @@ jobs:
           node --check app.js
           node --check dialog-controller.js
           node --check onboarding.js
+          node --check tx-special.js
           node --check microinteractions.js
           node --check moments-interactions.js
-      - name: Validate timetable JSON
-        run: node -e "JSON.parse(require('fs').readFileSync('data/timetable.json','utf8')); console.log('Timetable JSON valid')"
+      - name: Validate data JSON
+        run: |
+          node -e "JSON.parse(require('fs').readFileSync('data/timetable.json','utf8')); console.log('Timetable JSON valid')"
+          node -e "JSON.parse(require('fs').readFileSync('data/tx-profile.json','utf8')); console.log('TX profile JSON valid')"
       - name: Run product QA
         run: |
           node tests/static-qa.mjs
+          node tests/tx-static-qa.mjs
           node tests/moments-qa.mjs
+
+  user-scenario-qa:
+    needs: static-qa
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install scenario test runner
+        run: npm install --no-audit --no-fund
+      - name: Install WebKit
+        run: npx playwright install --with-deps webkit
+      - name: Start local app
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/train-watch-server.log 2>&1 &
+          for i in {1..20}; do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 0.5
+          done
+          cat /tmp/train-watch-server.log
+          exit 1
+      - name: Run user scenarios on mobile WebKit
+        run: npm run test:scenario

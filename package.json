@@ -1,0 +1,11 @@
+{
+  "name": "train-watch-qa",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "test:scenario": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.55.0"
+  }
+}

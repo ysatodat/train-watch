@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-08-23T02:25:00+09:00",
+  "line": {
+    "name": "つくばエクスプレス",
+    "shortName": "TX",
+    "stationCount": 20,
+    "lengthKm": 58.3,
+    "maxSpeedKmh": 130,
+    "officialSource": "https://www.mir.co.jp/feature/about_tx/",
+    "note": "路線図上の駅間は模式表示で、実距離には比例しません。"
+  },
+  "vehicles": [
+    {
+      "id": "TX-1000",
+      "label": "TX-1000系",
+      "serviceRange": {"from": "TX01", "to": "TX15"},
+      "rangeText": "秋葉原〜守谷",
+      "kidHint": "車両番号の色は青。1000系は守谷まで走るよ。",
+      "officialSource": "https://www.mir.co.jp/feature/kids/vehicle.html",
+      "image": {
+        "src": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Tsukuba-Express-TX-1000.jpg?width=720",
+        "page": "https://commons.wikimedia.org/wiki/File:Tsukuba-Express-TX-1000.jpg",
+        "author": "LERK",
+        "license": "CC BY 2.5",
+        "licenseUrl": "https://creativecommons.org/licenses/by/2.5/"
+      }
+    },
+    {
+      "id": "TX-2000",
+      "label": "TX-2000系",
+      "serviceRange": {"from": "TX01", "to": "TX20"},
+      "rangeText": "秋葉原〜つくば",
+      "kidHint": "車両番号の色は赤。1000系と似ているけどパンタグラフの数が違うよ。",
+      "officialSource": "https://www.mir.co.jp/feature/kids/vehicle.html",
+      "image": {
+        "src": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Tsukuba-Express-TX-2000.jpg?width=720",
+        "page": "https://commons.wikimedia.org/wiki/File:Tsukuba-Express-TX-2000.jpg",
+        "author": "LERK",
+        "license": "CC BY 2.5",
+        "licenseUrl": "https://creativecommons.org/licenses/by/2.5/"
+      }
+    },
+    {
+      "id": "TX-3000",
+      "label": "TX-3000系",
+      "serviceRange": {"from": "TX01", "to": "TX20"},
+      "rangeText": "秋葉原〜つくば",
+      "kidHint": "2020年から登場。前面がよりシャープで、ライトの形も違うよ。",
+      "officialSource": "https://www.mir.co.jp/feature/kids/vehicle.html",
+      "image": {
+        "src": "https://commons.wikimedia.org/wiki/Special:Redirect/file/つくばエクスプレス_Tsukuba_Express_TX-3000_流山おおたかの森駅_(20240526)_(55076188093).jpg?width=720",
+        "page": "https://commons.wikimedia.org/wiki/File:つくばエクスプレス_Tsukuba_Express_TX-3000_流山おおたかの森駅_(20240526)_(55076188093).jpg",
+        "author": "Takeshi Aida",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/"
+      }
+    }
+  ]
+}
