@@ -1,10 +1,11 @@
 {
-  "schemaVersion": 1,
-  "dataVersion": "2026-08-23.1",
+  "schemaVersion": 2,
+  "dataVersion": "2026-08-23.2",
   "checkedAt": "2026-08-23T00:51:00+09:00",
   "timetableRevision": "2025-03-15",
   "source": {
     "mode": "versioned-static-snapshot",
+    "officialStationPage": "https://www.mir.co.jp/route_map/kenkyu-gakuen/",
     "officialTimetable": "https://transfer-train.navitime.biz/tx",
     "odpt": {
       "available": true,
@@ -17,7 +18,7 @@
   },
   "coverage": {
     "allStations": "daytime-pattern-model",
-    "TX19": "daytime-model-plus-verified-edge-times",
+    "TX19": "daytime-model-plus-verified-weekday-holiday-edge-times",
     "passingTrains": "interpolated-model",
     "note": "ODPT API key is not stored in this public repository. Until an authenticated sync is configured, the app uses this versioned snapshot and clearly labels modeled/estimated values."
   },
@@ -34,6 +35,7 @@
   "services": {
     "local": "普通",
     "section": "区間快速",
+    "commuter": "通勤快速",
     "rapid": "快速",
     "train": "電車"
   },
@@ -58,25 +60,50 @@
   "verifiedEdgeTimes": {
     "TX19": {
       "sourceCheckedAt": "2026-08-23T00:51:00+09:00",
-      "up": [
-        [0,3,"local"],[5,9,"section"],[5,35,"section"],[5,50,"section"],
-        [6,5,"section"],[6,14,"local"],[6,23,"local"],[6,40,"section"],[6,53,"local"],
-        [7,10,"section"],[7,23,"local"],[7,40,"section"],[7,53,"local"],
-        [23,2,"local"],[23,17,"local"],[23,25,"local"],[23,37,"local"],[23,49,"local"]
-      ],
-      "down": [
-        [0,6,"local"],[0,18,"local"],[0,41,"local"],
-        [5,34,"local"],[5,54,"local"],[6,3,"local"],[6,25,"local"],[6,43,"local"],
-        [6,55,"local"],[7,7,"local"],[7,23,"local"],[7,34,"local"],[7,51,"local"],
-        [23,6,"local"],[23,21,"local"],[23,36,"local"],[23,51,"local"]
-      ],
-      "overnight": {
-        "startsAfter": "00:41",
-        "endsBefore": "05:09",
-        "next": [
-          {"dir":"up","time":"05:09","label":"秋葉原方面"},
-          {"dir":"down","time":"05:34","label":"つくば方面"}
-        ]
+      "weekday": {
+        "up": [
+          [0,3,"local"],[5,9,"section"],[5,35,"section"],[5,50,"section"],
+          [6,5,"section"],[6,16,"local"],[6,28,"local"],[6,36,"section"],[6,47,"local"],[6,53,"section"],[6,58,"local"],
+          [7,6,"section"],[7,11,"local"],[7,17,"local"],[7,25,"section"],[7,31,"local"],[7,39,"section"],[7,47,"local"],[7,54,"section"],
+          [23,2,"local"],[23,17,"local"],[23,25,"local"],[23,37,"local"],[23,49,"local"]
+        ],
+        "down": [
+          [0,9,"local"],[0,21,"section"],[0,41,"local"],
+          [5,34,"local"],[5,54,"local"],
+          [6,3,"local"],[6,14,"local"],[6,25,"local"],[6,43,"local"],[6,55,"section"],
+          [7,7,"local"],[7,18,"local"],[7,25,"commuter"],[7,32,"local"],[7,41,"section"],[7,52,"local"],
+          [23,8,"section"],[23,23,"section"],[23,38,"section"],[23,52,"section"]
+        ],
+        "overnight": {
+          "startsAfter": "00:41",
+          "endsBefore": "05:09",
+          "next": [
+            {"dir":"up","time":"05:09","label":"秋葉原方面"},
+            {"dir":"down","time":"05:34","label":"つくば方面"}
+          ]
+        }
+      },
+      "holiday": {
+        "up": [
+          [0,3,"local"],[5,9,"section"],[5,35,"section"],[5,50,"section"],
+          [6,5,"section"],[6,14,"local"],[6,23,"local"],[6,40,"section"],[6,53,"local"],
+          [7,10,"section"],[7,23,"local"],[7,40,"section"],[7,53,"local"],
+          [23,2,"local"],[23,17,"local"],[23,25,"local"],[23,37,"local"],[23,49,"local"]
+        ],
+        "down": [
+          [0,6,"local"],[0,18,"local"],[0,41,"local"],
+          [5,34,"local"],[5,54,"local"],[6,3,"local"],[6,25,"local"],[6,43,"local"],[6,55,"local"],
+          [7,7,"local"],[7,23,"local"],[7,34,"local"],[7,51,"local"],
+          [23,6,"local"],[23,21,"local"],[23,36,"local"],[23,51,"local"]
+        ],
+        "overnight": {
+          "startsAfter": "00:41",
+          "endsBefore": "05:09",
+          "next": [
+            {"dir":"up","time":"05:09","label":"秋葉原方面"},
+            {"dir":"down","time":"05:34","label":"つくば方面"}
+          ]
+        }
       }
     }
   }
