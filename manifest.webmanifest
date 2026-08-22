@@ -1,0 +1,11 @@
+{
+  "name": "TRAIN WATCH - TXでんしゃを見よう！",
+  "short_name": "Train Watch",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#07111f",
+  "theme_color": "#08111f",
+  "description": "つくばエクスプレスの電車が来るまでを親子で楽しくカウントダウンするWebアプリ",
+  "icons": [{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
