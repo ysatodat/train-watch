@@ -1,0 +1,223 @@
+/* Moments v1 — 到着・停車・発車・通過を「見どころ」として扱う */
+.moments-section {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+.moments-heading {
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+.moments-heading > div { min-width: 0; }
+.moments-heading h2 { margin: 0; }
+.moments-heading p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: var(--text-small);
+  line-height: 1.45;
+}
+.watched-count {
+  flex: none;
+  min-height: var(--tap-min);
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--brand-blue-dark);
+  font-size: var(--text-small);
+  font-weight: 700;
+}
+.rare-banner {
+  position: relative;
+  overflow: hidden;
+  min-height: 74px;
+  margin-bottom: 10px;
+  padding: 14px 122px 14px 14px;
+  border: 1px solid #c39b3d;
+  border-left: 5px solid var(--brand-yellow);
+  border-radius: 9px;
+  background: #f4e8c9;
+}
+.rare-banner strong {
+  display: block;
+  font-size: 1rem;
+  line-height: 1.3;
+}
+.rare-copy {
+  display: block;
+  margin-top: 4px;
+  color: #66501f;
+  font-size: var(--text-small);
+  line-height: 1.35;
+}
+.rare-rails {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  width: 96px;
+  height: 50px;
+}
+.rare-rails::before,
+.rare-rails::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #7b766d;
+}
+.rare-rails::before { top: 15px; }
+.rare-rails::after { bottom: 13px; }
+.rare-train {
+  position: absolute;
+  width: 36px;
+  height: 13px;
+  border-radius: 4px 7px 4px 4px;
+  background: var(--brand-blue);
+}
+.rare-train::after {
+  content: "";
+  position: absolute;
+  left: 7px;
+  top: 3px;
+  width: 17px;
+  height: 5px;
+  border-radius: 2px;
+  background: var(--surface-strong);
+}
+.rare-train.a { top: 3px; left: 2px; animation: rare-a 1.8s ease-in-out infinite alternate; }
+.rare-train.b { bottom: 1px; right: 2px; transform: scaleX(-1); animation: rare-b 1.8s ease-in-out infinite alternate; }
+@keyframes rare-a { to { transform: translateX(48px); } }
+@keyframes rare-b { to { transform: scaleX(-1) translateX(48px); } }
+.moment-list { display: grid; gap: 8px; }
+.moment-card {
+  display: grid;
+  grid-template-columns: 38px minmax(0,1fr) auto;
+  gap: 11px;
+  align-items: center;
+  min-height: 82px;
+  padding: 11px 11px 11px 9px;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--brand-blue);
+  border-radius: 9px;
+  background: var(--surface);
+}
+.moment-card.departure-active,
+.moment-card.confirmed-stop {
+  border-left-color: var(--brand-yellow);
+  background: #f7f0dd;
+}
+.moment-card.pass-active {
+  border-left-color: var(--brand-coral);
+  background: #f8ebe6;
+}
+.moment-card.arrival-active { background: #edf1ec; }
+.moment-direction {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  background: #e1e7e3;
+  color: var(--brand-blue-dark);
+  font-size: 1.125rem;
+  font-weight: 800;
+}
+.moment-copy { min-width: 0; }
+.moment-copy p {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--text-small);
+  line-height: 1.3;
+}
+.moment-copy strong {
+  display: block;
+  margin-top: 2px;
+  font-size: 1rem;
+  line-height: 1.3;
+  font-weight: 800;
+}
+.moment-copy span {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: var(--text-small);
+  line-height: 1.35;
+}
+.moment-side {
+  display: grid;
+  justify-items: end;
+  gap: 7px;
+  min-width: 92px;
+}
+.moment-side > b {
+  color: var(--brand-blue-dark);
+  font-size: var(--text-small);
+  line-height: 1.2;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.moment-action {
+  min-height: var(--tap-min);
+  padding: 0 12px;
+  border: 1px solid var(--brand-blue-dark);
+  border-radius: 7px;
+  background: var(--brand-blue-dark);
+  color: #fff;
+  font-size: var(--text-small);
+  font-weight: 800;
+  white-space: nowrap;
+}
+.moment-card.confirmed-stop .moment-action {
+  border-color: #8d681b;
+  background: #8d681b;
+}
+.moment-card.pass-active .moment-action {
+  border-color: #8f3829;
+  background: #8f3829;
+}
+.moment-empty {
+  padding: 15px 12px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: var(--text-small);
+  text-align: center;
+}
+.hero-card[data-moment="arrival"].now .train-wrap { color: var(--brand-blue); }
+.hero-card[data-moment="departure"].now .train-wrap { color: #9a711b; }
+.hero-card[data-moment="pass"].now .train-wrap { color: var(--brand-coral); }
+.hero-card[data-moment="departure"] .service-badge { border-color: #c8ae6e; background: #f2e6c8; }
+.hero-card[data-moment="pass"] .service-badge { border-color: #d0a395; background: #f2e3de; }
+@media (max-width: 430px) {
+  .moments-section { margin-top: 22px; }
+  .rare-banner { padding-right: 108px; }
+  .rare-rails { width: 82px; right: 10px; }
+  .moment-card {
+    grid-template-columns: 34px minmax(0,1fr);
+    align-items: start;
+  }
+  .moment-side {
+    grid-column: 2;
+    grid-row: 2;
+    width: 100%;
+    min-width: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2px;
+  }
+  .moment-action { min-width: 108px; }
+}
+@media (max-width: 360px) {
+  .moments-heading { gap: 8px; }
+  .watched-count { padding-inline: 8px; }
+  .rare-banner { padding-right: 14px; padding-bottom: 64px; }
+  .rare-rails { left: 14px; right: auto; top: auto; bottom: 7px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rare-train { animation: none !important; }
+}
