@@ -16,7 +16,8 @@
       .from('.hero-card .countdown, .hero-card .hero-message', { y:5, opacity:0, duration:.24, stagger:.05 }, '-=.18')
       .from('.train-wrap', { x:-18, opacity:0, duration:.34, ease:'power3.out', clearProps:'transform,opacity' }, '-=.16')
       .from('.hero-actions > *', { y:5, opacity:0, duration:.2, stagger:.045 }, '-=.10')
-      .from('.favorites-section,.timeline-section', { y:7, opacity:0, duration:.22, stagger:.06 }, '-=.04');
+      .from('.moments-section', { y:7, opacity:0, duration:.24 }, '-=.04')
+      .from('.favorites-section,.timeline-section', { y:7, opacity:0, duration:.22, stagger:.06 }, '-=.08');
   }
 
   function pressIn(el) {
