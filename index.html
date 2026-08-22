@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ja" class="wa-theme-default wa-palette-default wa-brand-blue">
+<html lang="ja">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -12,9 +12,6 @@
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="./icon.svg">
-  <link rel="stylesheet" href="https://ka-f.webawesome.com/@awesome.me/webawesome@3.11.0/styles/themes/default.css">
-  <link rel="stylesheet" href="https://ka-f.webawesome.com/@awesome.me/webawesome@3.11.0/styles/utilities.css">
-  <script type="module" src="https://ka-f.webawesome.com/@awesome.me/webawesome@3.11.0/webawesome.loader.js"></script>
   <link rel="stylesheet" href="./styles.css">
   <link rel="stylesheet" href="./mobile-fixes.css">
 </head>
@@ -38,7 +35,7 @@
 
   <main id="main" class="app-shell">
     <section class="station-toolbar" aria-label="表示中の駅">
-      <button id="stationButton" type="button" class="station-button touchable" aria-label="駅を変更">
+      <button id="stationButton" type="button" class="station-button touchable" aria-haspopup="dialog" aria-controls="stationDialog" aria-label="駅を変更">
         <span class="station-code" id="stationCode">TX19</span>
         <span id="stationName">研究学園</span>
         <span class="chevron" aria-hidden="true">⌄</span>
@@ -49,7 +46,7 @@
     <section id="dataNotice" class="data-notice" aria-live="polite">
       <span class="data-dot" aria-hidden="true"></span>
       <span id="modeBadge">土休日モデル</span>
-      <button id="openDataInfo" type="button">時刻について</button>
+      <button id="openDataInfo" type="button" aria-haspopup="dialog" aria-controls="dataDialog">時刻について</button>
     </section>
 
     <section class="hero-card" id="hero" aria-labelledby="heroLabel" aria-live="polite">
@@ -95,7 +92,7 @@
     <section class="favorites-section" aria-labelledby="favoritesTitle">
       <div class="section-heading">
         <div><span class="eyebrow">MY STATIONS</span><h2 id="favoritesTitle">お気に入りの駅</h2></div>
-        <button id="openStations" type="button" class="add-station-button touchable">＋ 駅を追加</button>
+        <button id="openStations" type="button" class="add-station-button touchable" aria-haspopup="dialog" aria-controls="stationDialog">＋ 駅を追加</button>
       </div>
       <div id="favoriteCards" class="favorite-cards" role="list"></div>
     </section>
@@ -103,7 +100,7 @@
     <section class="timeline-section" aria-labelledby="timelineTitle">
       <div class="section-heading">
         <div><span class="eyebrow">NEXT TRAINS</span><h2 id="timelineTitle">このあと見られる電車</h2></div>
-        <button class="settings-link" id="openSettings" type="button">表示設定 ⚙︎</button>
+        <button class="settings-link touchable" id="openSettings" type="button" aria-haspopup="dialog" aria-controls="settingsDialog">表示設定 ⚙︎</button>
       </div>
       <div id="timeline" class="timeline"></div>
     </section>
@@ -119,47 +116,73 @@
     <a href="https://www.mir.co.jp/route_map/index.html" target="_blank" rel="noopener">つくばエクスプレス公式 ↗</a>
   </footer>
 
-  <wa-dialog id="stationDialog" label="駅をえらぶ" light-dismiss class="app-dialog">
-    <label class="search-label" for="stationSearch">駅名を検索</label>
-    <input id="stationSearch" class="station-search" type="search" inputmode="search" placeholder="例：研究学園、TX19" autocomplete="off">
-    <div id="stationList" class="station-list"></div>
-  </wa-dialog>
+  <dialog id="stationDialog" class="native-dialog" aria-labelledby="stationDialogTitle">
+    <div class="dialog-shell">
+      <header class="dialog-header">
+        <div><span class="eyebrow">STATIONS</span><h2 id="stationDialogTitle">駅をえらぶ</h2></div>
+        <button type="button" class="dialog-close touchable" data-close-dialog="stationDialog" aria-label="閉じる">×</button>
+      </header>
+      <label class="search-label" for="stationSearch">駅名を検索</label>
+      <input id="stationSearch" class="station-search" type="search" inputmode="search" placeholder="例：研究学園、TX19" autocomplete="off">
+      <div id="stationList" class="station-list"></div>
+    </div>
+  </dialog>
 
-  <wa-dialog id="settingsDialog" label="表示とお知らせの設定" light-dismiss class="app-dialog">
-    <div class="setting-block">
-      <h3>見たい電車</h3>
-      <div class="segmented" id="trainFilter" role="group" aria-label="見たい電車">
-        <button type="button" data-filter="all" class="active">通過も含める</button>
-        <button type="button" data-filter="stop">停車だけ</button>
+  <dialog id="settingsDialog" class="native-dialog" aria-labelledby="settingsDialogTitle">
+    <div class="dialog-shell">
+      <header class="dialog-header">
+        <div><span class="eyebrow">SETTINGS</span><h2 id="settingsDialogTitle">表示とお知らせ</h2></div>
+        <button type="button" class="dialog-close touchable" data-close-dialog="settingsDialog" aria-label="閉じる">×</button>
+      </header>
+      <div class="setting-block">
+        <h3>見たい電車</h3>
+        <div class="segmented" id="trainFilter" role="group" aria-label="見たい電車">
+          <button type="button" data-filter="all" class="active">通過も含める</button>
+          <button type="button" data-filter="stop">停車だけ</button>
+        </div>
+      </div>
+      <div class="setting-block">
+        <h3>方面</h3>
+        <div class="segmented three" id="directionFilter" role="group" aria-label="方面">
+          <button type="button" data-dir="both" class="active">両方</button>
+          <button type="button" data-dir="down">つくば</button>
+          <button type="button" data-dir="up">秋葉原</button>
+        </div>
+      </div>
+      <div class="setting-block switches">
+        <label class="toggle-row" for="soundToggle">
+          <span><strong>お知らせ音</strong><small>接近時に音で知らせる</small></span>
+          <input id="soundToggle" type="checkbox" checked>
+          <span class="toggle-ui" aria-hidden="true"></span>
+        </label>
+        <label class="toggle-row" for="vibrateToggle">
+          <span><strong>振動</strong><small>対応端末のみ</small></span>
+          <input id="vibrateToggle" type="checkbox" checked>
+          <span class="toggle-ui" aria-hidden="true"></span>
+        </label>
+      </div>
+      <p class="settings-help">設定はこの端末に保存されます。お知らせ自体はブラウザの制約上、ページを開いている間だけです。</p>
+    </div>
+  </dialog>
+
+  <dialog id="dataDialog" class="native-dialog" aria-labelledby="dataDialogTitle">
+    <div class="dialog-shell">
+      <header class="dialog-header">
+        <div><span class="eyebrow">ABOUT TIME</span><h2 id="dataDialogTitle">時刻について</h2></div>
+        <button type="button" class="dialog-close touchable" data-close-dialog="dataDialog" aria-label="閉じる">×</button>
+      </header>
+      <div class="data-copy">
+        <p><strong>このサービスは「電車を見る」ための参考カウントダウンです。</strong></p>
+        <p>現在は土休日の日中運行パターンを中心にしたβ版です。停車時刻・種別ごとの所要時間をもとに構成し、通過駅は前後駅から推定しています。</p>
+        <ul>
+          <li>実際の入線は表示より早いことがあります</li>
+          <li>遅延・運休・臨時列車は反映しません</li>
+          <li>「推定」と表示する時刻は目安として見てください</li>
+        </ul>
+        <p>線路やホームでは安全な場所から楽しんでね。</p>
       </div>
     </div>
-    <div class="setting-block">
-      <h3>方面</h3>
-      <div class="segmented three" id="directionFilter" role="group" aria-label="方面">
-        <button type="button" data-dir="both" class="active">両方</button>
-        <button type="button" data-dir="down">つくば</button>
-        <button type="button" data-dir="up">秋葉原</button>
-      </div>
-    </div>
-    <div class="setting-block switches">
-      <wa-switch id="soundToggle" checked size="large">お知らせ音</wa-switch>
-      <wa-switch id="vibrateToggle" checked size="large">振動（対応端末）</wa-switch>
-    </div>
-    <p class="settings-help">設定はこの端末に保存されます。お知らせ自体はブラウザの制約上、ページを開いている間だけです。</p>
-  </wa-dialog>
-
-  <wa-dialog id="dataDialog" label="時刻について" light-dismiss class="app-dialog">
-    <div class="data-copy">
-      <p><strong>このサービスは「電車を見る」ための参考カウントダウンです。</strong></p>
-      <p>現在は土休日の日中運行パターンを中心にしたβ版です。停車時刻・種別ごとの所要時間をもとに構成し、通過駅は前後駅から推定しています。</p>
-      <ul>
-        <li>実際の入線は表示より早いことがあります</li>
-        <li>遅延・運休・臨時列車は反映しません</li>
-        <li>「推定」と表示する時刻は目安として見てください</li>
-      </ul>
-      <p>線路やホームでは安全な場所から楽しんでね。</p>
-    </div>
-  </wa-dialog>
+  </dialog>
 
   <div id="toast" class="app-toast" role="status" aria-live="assertive" hidden></div>
   <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js"></script>
