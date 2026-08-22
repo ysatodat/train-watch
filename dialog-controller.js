@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const DIALOG_IDS = ['stationDialog', 'settingsDialog', 'dataDialog', 'aboutDialog'];
+  const DIALOG_IDS = ['stationDialog', 'settingsDialog', 'dataDialog', 'aboutDialog', 'notifyDialog'];
   const dialogs = () => DIALOG_IDS.map(id => document.getElementById(id)).filter(Boolean);
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const finePointer = window.matchMedia('(pointer: fine)').matches;
@@ -78,9 +78,10 @@
 
   function triggerInfo(target) {
     if (target.closest('#stationButton') || target.closest('#openStations')) return {dialog:document.getElementById('stationDialog'),focus:document.getElementById('stationSearch')};
-    if (target.closest('#openSettings')) return {dialog:document.getElementById('settingsDialog'),focus:null};
+    if (target.closest('#openSettings') || target.closest('#openSettingsFromNotify')) return {dialog:document.getElementById('settingsDialog'),focus:null};
     if (target.closest('#openDataInfo')) return {dialog:document.getElementById('dataDialog'),focus:null};
     if (target.closest('#openAbout') || target.closest('#openAboutFooter')) return {dialog:document.getElementById('aboutDialog'),focus:null};
+    if (target.closest('#notifyButton')) return {dialog:document.getElementById('notifyDialog'),focus:null};
     return null;
   }
 
