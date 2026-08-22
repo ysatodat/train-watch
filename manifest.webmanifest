@@ -1,12 +1,12 @@
 {
-  "name": "でんしゃくるよ！｜TRAIN WATCH",
+  "name": "でんしゃくるよ！｜TX TRAIN WATCH",
   "short_name": "でんしゃくるよ！",
-  "description": "子どもと一緒に、電車の到着・発車・通過の瞬間を楽しく見る親子向け電車ウォッチ。",
+  "description": "つくばエクスプレス専用の非公式ファンツール。子どもと一緒に、到着・発車・通過の瞬間を楽しく見る親子向け電車ウォッチ。",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f4f0e6",
-  "theme_color": "#244d55",
+  "background_color": "#f3f6fa",
+  "theme_color": "#003b8f",
   "lang": "ja",
   "icons": [
     {"src":"./icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
