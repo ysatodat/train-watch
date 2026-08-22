@@ -21,8 +21,12 @@ jobs:
           node-version: '22'
       - name: Check JavaScript syntax
         run: |
+          node --check train-engine.js
           node --check app.js
           node --check dialog-controller.js
           node --check microinteractions.js
+          node --check moments-interactions.js
       - name: Run product QA
-        run: node tests/static-qa.mjs
+        run: |
+          node tests/static-qa.mjs
+          node tests/moments-qa.mjs
