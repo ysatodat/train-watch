@@ -1,0 +1,322 @@
+/* Product v4 — human-led rail information design
+   Hierarchy comes from typography, spacing and horizontal rules, not SaaS cards/chips/accent stripes. */
+
+:root {
+  --rule: #bbb3a7;
+  --rule-soft: #d8d1c6;
+  --paper: #fbf8f0;
+  --paper-2: #f4f0e6;
+  --signal-yellow: #d9ac45;
+  --rail-ink: #242722;
+}
+
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0,0,0,0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* First view: one board, one message, one optional action. */
+.hero-card {
+  margin-top: 8px;
+  padding: 18px 16px 14px;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: var(--paper);
+  box-shadow: none;
+}
+.hero-card.soon,
+.hero-card.now { background: var(--paper); }
+.hero-card.soon { border-color: #a99b7b; }
+.hero-card.now { border-color: #8d7c69; }
+.hero-topline { align-items: baseline; }
+.hero-topline p {
+  color: #5f5d57;
+  font-size: .9375rem;
+  font-weight: 600;
+}
+.service-badge {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent !important;
+  color: #444641;
+  font-size: .875rem;
+  font-weight: 700;
+}
+.countdown { margin-top: 12px; }
+.hero-message { margin-top: 9px; }
+.train-scene { height: 82px; margin-top: 7px; }
+.train-wrap { width: 162px; bottom: 18px; }
+.track { bottom: 12px; }
+
+.hero-moment-action {
+  width: 100%;
+  min-height: 56px;
+  margin: 8px 0 2px;
+  padding: 10px 16px;
+  border: 1px solid var(--rail-ink);
+  border-radius: 4px;
+  background: var(--rail-ink);
+  color: #fff;
+  font-size: 1.125rem;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: .01em;
+}
+.hero-moment-action[hidden] { display: none; }
+.hero-moment-action:active { transform: translateY(1px); }
+
+.hero-meta {
+  display: block;
+  min-height: 0;
+  margin-top: 10px;
+  color: #66645e;
+  font-size: .875rem;
+  line-height: 1.4;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* Utilities are tools, not competing CTAs. */
+.quick-tools {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin: 8px 0 0;
+  border-top: 1px solid var(--rule-soft);
+  border-bottom: 1px solid var(--rule-soft);
+}
+.quick-tool {
+  min-width: 0;
+  min-height: 48px;
+  padding: 7px 6px;
+  border: 0;
+  border-right: 1px solid var(--rule-soft);
+  border-radius: 0;
+  background: transparent;
+  color: #464842;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-size: .9375rem;
+  font-weight: 650;
+}
+.quick-tool:last-child { border-right: 0; }
+.quick-tool > span { color: #6b6b63; font-size: .875rem; font-weight: 700; }
+.quick-tool.enabled { color: var(--brand-blue-dark); }
+.quick-tool.enabled > span { color: #51705b; }
+
+/* Moment list: a timetable-like list, not stacked cards with colored stripes. */
+.moments-section,
+.favorites-section,
+.timeline-section {
+  margin-top: 30px;
+  padding-top: 0;
+  border-top: 0;
+}
+.moment-list {
+  gap: 0;
+  border-top: 1px solid var(--rule);
+}
+.moment-card {
+  grid-template-columns: 30px minmax(0,1fr) auto;
+  gap: 12px;
+  min-height: 78px;
+  padding: 12px 0;
+  border: 0;
+  border-bottom: 1px solid var(--rule-soft);
+  border-left: 0 !important;
+  border-radius: 0;
+  background: transparent !important;
+}
+.moment-card.arrival-active,
+.moment-card.departure-active,
+.moment-card.pass-active,
+.moment-card.confirmed-stop {
+  background: #f0ece2 !important;
+}
+.moment-direction {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--brand-blue-dark);
+  font-size: 1.125rem;
+}
+.moment-copy p { color: #69675f; }
+.moment-copy strong { font-size: 1.0625rem; }
+.moment-copy span { color: #69675f; }
+.moment-side { min-width: 86px; }
+.moment-action {
+  min-height: 44px;
+  padding: 0 11px;
+  border: 1px solid #77736b !important;
+  border-radius: 4px;
+  background: transparent !important;
+  color: var(--rail-ink) !important;
+  font-size: .875rem;
+}
+
+/* Rare event gets a bespoke rail motif instead of a generic colored alert card. */
+.rare-banner {
+  min-height: 70px;
+  margin-bottom: 8px;
+  padding: 12px 112px 12px 0;
+  border: 0;
+  border-top: 2px solid #9d8039;
+  border-bottom: 1px solid #c9b783;
+  border-left: 0 !important;
+  border-radius: 0;
+  background: transparent;
+}
+.rare-banner strong { font-size: 1rem; }
+.rare-copy { color: #675a38; }
+
+/* Counts and section controls are plain information. */
+.watched-count {
+  padding: 4px 0;
+  border: 0 !important;
+  background: transparent;
+  color: #66645e;
+  font-weight: 600;
+}
+.section-heading h2 { font-size: 1.25rem; }
+.add-station-button,
+.settings-link {
+  padding-inline: 4px;
+  border: 0;
+  border-radius: 0;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+/* Favorite stations: selected state uses a full border, never an accent stripe. */
+.favorite-card {
+  border-radius: 4px;
+  box-shadow: none;
+}
+.favorite-card.active {
+  border-color: #536d6f;
+  box-shadow: none !important;
+  background: #f1eee5;
+}
+
+/* Upcoming trains: current row is a typographic emphasis, not a left stripe. */
+.timeline { border-top-color: var(--rule); }
+.event-row.next {
+  padding-left: 2px;
+  border-left: 0 !important;
+  background: #f0ece2;
+}
+.event-row.next .event-time,
+.event-row.next .event-main strong { font-weight: 800; }
+
+.data-notice-bottom {
+  margin-top: 34px;
+  padding-top: 12px;
+  border-top: 1px solid var(--rule-soft);
+  color: #6b6962;
+}
+.data-notice-bottom .data-dot { width: 6px; height: 6px; }
+
+/* Onboarding: one continuous editorial list, not three cards. */
+.about-dialog .dialog-shell { padding-bottom: 18px; }
+.about-lead {
+  margin: 0 0 20px;
+  color: #454741;
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  font-weight: 600;
+}
+.howto-steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--rule);
+}
+.howto-steps li {
+  display: grid;
+  grid-template-columns: 38px minmax(0,1fr);
+  gap: 12px;
+  padding: 15px 0;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.howto-steps li > span {
+  color: #79766e;
+  font-size: 1.125rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+.howto-steps strong { display: block; font-size: 1rem; }
+.howto-steps p { margin: 4px 0 0; color: #66645e; font-size: .9375rem; line-height: 1.55; }
+.about-note { margin-top: 18px; }
+.about-note strong { font-size: .9375rem; }
+.about-note p { margin: 3px 0 0; color: #66645e; font-size: .875rem; line-height: 1.55; }
+.about-data {
+  margin: 16px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--rule-soft);
+  color: #706e67;
+  font-size: .8125rem;
+  line-height: 1.5;
+}
+.about-primary {
+  width: 100%;
+  min-height: 52px;
+  margin-top: 16px;
+  border: 1px solid var(--brand-blue-dark);
+  border-radius: 4px;
+  background: var(--brand-blue-dark);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.footer-link {
+  min-height: 44px;
+  padding: 8px 5px;
+  border: 0;
+  background: transparent;
+  color: var(--brand-blue-dark);
+  font-size: .875rem;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Dialogs are simple sheets, with little chrome. */
+.dialog-shell { border-radius: 6px; box-shadow: 0 14px 40px rgba(36,39,34,.18); }
+.dialog-close { border-radius: 3px; }
+.station-search,
+.segmented,
+.segmented button,
+.toggle-ui { border-radius: 4px; }
+
+@media (max-width: 430px) {
+  .hero-card { padding-inline: 14px; }
+  .train-scene { height: 76px; }
+  .train-wrap { width: 150px; }
+  .moment-card { grid-template-columns: 28px minmax(0,1fr); }
+  .moment-side { grid-column: 2; grid-row: 2; }
+  .rare-banner { padding-right: 92px; }
+}
+
+@media (max-width: 360px) {
+  .quick-tool { gap: 5px; font-size: .875rem; }
+  .hero-moment-action { font-size: 1.0625rem; }
+  .about-lead { font-size: 1rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-moment-action:active { transform: none; }
+}
