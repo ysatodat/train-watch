@@ -10,10 +10,14 @@ for (const file of requiredFiles) {
 }
 JSON.parse(fs.readFileSync('manifest.webmanifest','utf8'));
 const timetable=JSON.parse(fs.readFileSync('data/timetable.json','utf8'));
-if (!timetable.dataVersion || !timetable.checkedAt || !timetable.timetableRevision) throw new Error('Timetable provenance metadata is incomplete');
+if (!timetable.dataVersion || !timetable.checkedAt || !timetable.timetableRevision || !timetable.validThrough) throw new Error('Timetable provenance metadata is incomplete');
 if (timetable.source?.odpt?.requiresApiKey !== true) throw new Error('ODPT API-key requirement must be documented in timetable data');
-const tx19down=timetable.verifiedEdgeTimes?.TX19?.down||[];
-if (!tx19down.some(x=>x[0]===0&&x[1]===41)) throw new Error('Verified TX19 00:41 service is missing from timetable JSON');
+const tx19=timetable.verifiedEdgeTimes?.TX19;
+if (!tx19?.weekday || !tx19?.holiday) throw new Error('TX19 verified timetable must separate weekday and holiday service days');
+if (!tx19.weekday.down.some(x=>x[0]===0&&x[1]===21)) throw new Error('Weekday TX19 00:21 service is missing');
+if (!tx19.holiday.down.some(x=>x[0]===0&&x[1]===18)) throw new Error('Holiday TX19 00:18 service is missing');
+if (!tx19.holiday.down.some(x=>x[0]===0&&x[1]===41)) throw new Error('Holiday TX19 00:41 service is missing');
+if (!(timetable.calendar?.holidayDates||[]).includes('2026-09-22')) throw new Error('2026 statutory holiday calendar is incomplete');
 
 const html=fs.readFileSync('index.html','utf8');
 const requiredIds=[
@@ -62,6 +66,7 @@ if (!appJs.includes('getOvernightState')) throw new Error('Overnight service sta
 const engineJs=fs.readFileSync('train-engine.js','utf8');
 if (!engineJs.includes("fetch('./data/timetable.json'")) throw new Error('Engine must load versioned timetable JSON');
 if (!engineJs.includes('LONG_WAIT_MS')) throw new Error('Long-wait formatting guard is missing');
+if (!engineJs.includes('SERVICE_DAY_BOUNDARY_HOUR') || !engineJs.includes('dayTypeForMoment')) throw new Error('Railway service-day calendar logic is missing');
 if (/acl:consumerKey\s*=|ODPT_API_KEY\s*=/.test(engineJs+appJs)) throw new Error('Public client code must not contain an ODPT API key');
 
 const readme=fs.readFileSync('README.md','utf8');
