@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-08-23T23:00:00+09:00",
+  "officialSource": "https://www.keisei.co.jp/keisei/keisei_museum/pictbook/",
+  "featuredVehicles": [
+    {
+      "id": "AE",
+      "label": "AE形",
+      "subtitle": "スカイライナー",
+      "kidHint": "青い顔と、低くのびた流線形。見つけたら特別感のある1本。",
+      "fact": "2010年登場。スカイライナー用の8両編成で、営業最高速度は160km/h。",
+      "officialUrl": "https://www.keisei.co.jp/keisei/tetudou/accessj/sharyou.php",
+      "image": {
+        "src": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Keisei-Type-AE.jpg?width=720",
+        "page": "https://commons.wikimedia.org/wiki/File:Keisei-Type-AE.jpg",
+        "author": "MaedaAkihiko",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/"
+      }
+    },
+    {
+      "id": "3200",
+      "label": "3200形",
+      "subtitle": "2025年デビュー",
+      "kidHint": "まんなかに扉がある新しい顔。編成の長さを変えられるのも特徴。",
+      "fact": "2025年に営業運転開始。4両を基本に、6両・8両へ組み替えられる新型車両。",
+      "officialUrl": "https://www.keisei.co.jp/news/detail.php?CN=6771",
+      "image": {
+        "src": "https://commons.wikimedia.org/wiki/Special:Redirect/file/%E4%BA%AC%E6%88%90%E9%9B%BB%E9%89%843200%E5%BD%A2%E9%9B%BB%E8%BB%8A.jpg?width=720",
+        "page": "https://commons.wikimedia.org/wiki/File:%E4%BA%AC%E6%88%90%E9%9B%BB%E9%89%843200%E5%BD%A2%E9%9B%BB%E8%BB%8A.jpg",
+        "author": "HiLensJP",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/"
+      }
+    },
+    {
+      "id": "3100",
+      "label": "3100形",
+      "subtitle": "空港アクセスのオレンジ",
+      "kidHint": "オレンジ色が目印。車体には空港アクセスらしいモチーフも。",
+      "fact": "2019年デビュー。成田空港アクセスを担う車両で、オレンジを基調にしたデザイン。",
+      "officialUrl": "https://www.keisei.co.jp/keisei/special_3100/vehicle/",
+      "image": {
+        "src": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Keisei-Series3100.jpg?width=720",
+        "page": "https://commons.wikimedia.org/wiki/File:Keisei-Series3100.jpg",
+        "author": "MaedaAkihiko",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/"
+      }
+    },
+    {
+      "id": "3000",
+      "label": "3000形",
+      "subtitle": "京成のスタンダード",
+      "kidHint": "京成でよく会える標準タイプ。赤と青の帯を探してみよう。",
+      "fact": "京成グループの標準型として幅広く活躍している通勤車両。",
+      "officialUrl": "https://www.keisei.co.jp/keisei/keisei_museum/pictbook/",
+      "image": {
+        "src": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Keisei-series-3000.jpg?width=720",
+        "page": "https://commons.wikimedia.org/wiki/File:Keisei-series-3000.jpg",
+        "author": "Duke Admiral",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/"
+      }
+    }
+  ],
+  "otherCurrentVehicles": [
+    {"label":"3700形","note":"成田空港ターミナル直下への乗り入れに合わせて登場した通勤型車両。"},
+    {"label":"3600形","note":"京成電鉄初のオールステンレス車両。"},
+    {"label":"3500形（更新車）","note":"京成の通勤車両として初めて冷房を採用した系譜の車両。"},
+    {"label":"3400形","note":"初代AE形の走行装置を活用して生まれた車両。"}
+  ]
+}
