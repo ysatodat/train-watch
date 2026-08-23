@@ -72,13 +72,6 @@ export type ObservationEvent =
   | { type: 'TICK'; now: number }
   | { type: 'CLEAR' };
 
-const clearObservation = assign<ObservationContext, ObservationEvent>(() => ({ visitId: null, expiresAt: null }));
-const rememberFor = (durationMs: number) => assign<ObservationContext, ObservationEvent>(({ event }) => {
-  const now = 'now' in event ? event.now : Date.now();
-  const visitId = 'visitId' in event ? event.visitId : null;
-  return { visitId, expiresAt: now + durationMs };
-});
-
 export const observationMachine = setup({
   types: {
     context: {} as ObservationContext,
@@ -86,6 +79,17 @@ export const observationMachine = setup({
   },
   guards: {
     expired: ({ context, event }) => event.type === 'TICK' && context.expiresAt !== null && event.now >= context.expiresAt
+  },
+  actions: {
+    clearObservation: assign(() => ({ visitId: null, expiresAt: null })),
+    rememberTenMinutes: assign(({ event }) => ({
+      visitId: 'visitId' in event ? event.visitId : null,
+      expiresAt: 'now' in event ? event.now + 10 * 60_000 : null
+    })),
+    rememberFarewell: assign(({ event }) => ({
+      visitId: 'visitId' in event ? event.visitId : null,
+      expiresAt: 'now' in event ? event.now + 3_000 : null
+    }))
   }
 }).createMachine({
   id: 'observation',
@@ -94,29 +98,29 @@ export const observationMachine = setup({
   states: {
     idle: {
       on: {
-        ARRIVED: { target: 'stopped', actions: rememberFor(10 * 60_000) },
-        NOT_HERE: { target: 'waiting', actions: rememberFor(10 * 60_000) },
-        CLEAR: { actions: clearObservation }
+        ARRIVED: { target: 'stopped', actions: 'rememberTenMinutes' },
+        NOT_HERE: { target: 'waiting', actions: 'rememberTenMinutes' },
+        CLEAR: { actions: 'clearObservation' }
       }
     },
     waiting: {
       on: {
-        ARRIVED: { target: 'stopped', actions: rememberFor(10 * 60_000) },
-        TICK: { guard: 'expired', target: 'idle', actions: clearObservation },
-        CLEAR: { target: 'idle', actions: clearObservation }
+        ARRIVED: { target: 'stopped', actions: 'rememberTenMinutes' },
+        TICK: { guard: 'expired', target: 'idle', actions: 'clearObservation' },
+        CLEAR: { target: 'idle', actions: 'clearObservation' }
       }
     },
     stopped: {
       on: {
-        DEPARTED: { target: 'farewell', actions: rememberFor(3_000) },
-        TICK: { guard: 'expired', target: 'idle', actions: clearObservation },
-        CLEAR: { target: 'idle', actions: clearObservation }
+        DEPARTED: { target: 'farewell', actions: 'rememberFarewell' },
+        TICK: { guard: 'expired', target: 'idle', actions: 'clearObservation' },
+        CLEAR: { target: 'idle', actions: 'clearObservation' }
       }
     },
     farewell: {
       on: {
-        TICK: { guard: 'expired', target: 'idle', actions: clearObservation },
-        CLEAR: { target: 'idle', actions: clearObservation }
+        TICK: { guard: 'expired', target: 'idle', actions: 'clearObservation' },
+        CLEAR: { target: 'idle', actions: 'clearObservation' }
       }
     }
   }
