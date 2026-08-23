@@ -213,6 +213,7 @@
 }
 .location-empty { margin: 18px 2px; color: var(--muted, #5e6772); font-size: .9375rem; }
 .location-setup .location-picker-lead { color: var(--ink, #242722); font-size: 1rem; font-weight: 650; }
+.location-setup .dialog-close[hidden] { display: none !important; }
 
 html[data-rail="keisei"] {
   --keisei-blue: #005bac;
