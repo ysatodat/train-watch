@@ -1,6 +1,12 @@
 /* Location-first product layer: the main screen confirms where we are watching.
    Rail/station selection is intentionally progressive disclosure. */
 
+/* The brand says what the product is; the location row says which rail we are on. */
+.brand-lockup small {
+  color: var(--muted, #5e6772) !important;
+  font-weight: 700 !important;
+}
+
 .location-context {
   display: flex;
   align-items: center;
@@ -227,7 +233,6 @@ html[data-rail="keisei"] {
 }
 html[data-rail="keisei"], html[data-rail="keisei"] body { background: var(--cloud); }
 html[data-rail="keisei"] .brand-mark { color: var(--keisei-blue); }
-html[data-rail="keisei"] .brand-lockup small { color: var(--keisei-red-deep); font-weight: 800; }
 html[data-rail="keisei"] .station-code { background: var(--keisei-blue-deep); }
 html[data-rail="keisei"] .location-rail-label,
 html[data-rail="keisei"] .location-code,
@@ -235,8 +240,11 @@ html[data-rail="keisei"] .recent-location > span { color: var(--keisei-blue-deep
 html[data-rail="keisei"] .hero-card { background:#fff; border-color:#a9bbcc; }
 html[data-rail="keisei"] .hero-card.soon { border-color:#6f97bc; background:#f7fafd; }
 html[data-rail="keisei"] .hero-card.now { border-color:var(--keisei-red); background:#fff7f7; }
-html[data-rail="keisei"] .train-wrap { color:var(--keisei-blue); }
-html[data-rail="keisei"] .hero-card.now .train-wrap { color:var(--keisei-red); }
+/* Some earlier product layers color the SVG itself; pin both wrapper and SVG. */
+html[data-rail="keisei"] .hero-card .train-wrap,
+html[data-rail="keisei"] .hero-card .train-illustration { color:var(--keisei-blue) !important; }
+html[data-rail="keisei"] .hero-card.now .train-wrap,
+html[data-rail="keisei"] .hero-card.now .train-illustration { color:var(--keisei-red) !important; }
 html[data-rail="keisei"] .hero-moment-action,
 html[data-rail="keisei"] .notify-toggle-button,
 html[data-rail="keisei"] .tutorial-primary { background:var(--keisei-blue-deep); border-color:var(--keisei-blue-deep); }
