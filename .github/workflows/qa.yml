@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   static-qa:
@@ -19,54 +19,33 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Check JavaScript syntax
-        run: |
-          node --check train-engine.js
-          node --check keisei-engine.js
-          node --check app.js
-          node --check dialog-controller.js
-          node --check onboarding.js
-          node --check rail-switch.js
-          node --check ux-v6.js
-          node --check keisei-ui.js
-          node --check keisei-special.js
-          node --check tx-special.js
-          node --check microinteractions.js
-          node --check moments-interactions.js
-          node --check scripts/inspect-keisei.mjs
-          node --check scripts/capture-preview.mjs
-      - name: Validate data JSON
+          cache: npm
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Validate source data JSON
         run: |
           node -e "JSON.parse(require('fs').readFileSync('data/timetable.json','utf8')); console.log('TX timetable JSON valid')"
           node -e "JSON.parse(require('fs').readFileSync('data/tx-profile.json','utf8')); console.log('TX profile JSON valid')"
           node -e "JSON.parse(require('fs').readFileSync('data/keisei-main-stations.json','utf8')); console.log('Keisei station catalog valid')"
           node -e "JSON.parse(require('fs').readFileSync('data/keisei-main.json','utf8')); console.log('Keisei timetable JSON valid')"
           node -e "JSON.parse(require('fs').readFileSync('data/keisei-profile.json','utf8')); console.log('Keisei profile JSON valid')"
-      - name: Generate Keisei official timetable snapshot
+      - name: Validate Keisei official timetable parser
         run: node scripts/inspect-keisei.mjs
-      - name: Persist first Keisei snapshot to feature branch
-        if: github.event_name == 'pull_request'
-        shell: bash
+      - name: TypeScript typecheck
+        run: npm run typecheck
+      - name: Unit tests
+        run: npm run test:unit
+      - name: Production build
+        run: npm run build
+      - name: Verify production output
         run: |
-          if [ ! -f data/keisei-main.json ]; then
-            cp generated/keisei-main.json /tmp/keisei-main.json
-            git fetch origin "${{ github.head_ref }}"
-            git checkout -B "${{ github.head_ref }}" "origin/${{ github.head_ref }}"
-            cp /tmp/keisei-main.json data/keisei-main.json
-            git config user.name 'github-actions[bot]'
-            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git add data/keisei-main.json
-            git commit -m 'data: add official Keisei Main Line timetable snapshot'
-            git push origin "${{ github.head_ref }}"
-          fi
-      - name: Run product QA
-        run: |
-          node tests/static-qa.mjs
-          node tests/tx-static-qa.mjs
-          node tests/rail-location-qa.mjs
-          node tests/ux-v6-static-qa.mjs
-          node tests/moments-qa.mjs
-          node tests/observation-qa.mjs
+          test -f dist/index.html
+          test -f dist/manifest.webmanifest
+          test -f dist/sw.js
+          test -d dist/assets
+          test -f dist/data/timetable.json
+          test -f dist/data/keisei-main.json
+          ! grep -R "TX専用" dist/index.html dist/assets || false
 
   user-scenario-qa:
     needs: static-qa
@@ -78,26 +57,19 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Install scenario test runner
+          cache: npm
+      - name: Install dependencies
         run: npm install --no-audit --no-fund
       - name: Install WebKit
         run: npx playwright install --with-deps webkit
-      - name: Start local app
+      - name: Start Vite app
         run: |
-          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/train-watch-server.log 2>&1 &
-          for i in {1..20}; do
+          npm run dev -- --host 127.0.0.1 --port 4173 >/tmp/train-watch-vite.log 2>&1 &
+          for i in {1..40}; do
             if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
             sleep 0.5
           done
-          cat /tmp/train-watch-server.log
+          cat /tmp/train-watch-vite.log
           exit 1
-      - name: Capture WIP mobile preview
-        run: node scripts/capture-preview.mjs
-      - name: Upload WIP mobile preview
-        uses: actions/upload-artifact@v4
-        with:
-          name: location-first-wip-preview
-          path: preview-screenshots/*.png
-          retention-days: 1
-      - name: Run user scenarios on mobile WebKit
+      - name: Run mobile WebKit user scenarios
         run: npm run test:scenario
