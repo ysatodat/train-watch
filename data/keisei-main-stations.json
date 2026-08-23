@@ -1,0 +1,7 @@
+{
+  "lineId": "main",
+  "lineName": "京成本線",
+  "stations": [
+    ["KS01","京成上野","Keisei Ueno",0],["KS02","日暮里","Nippori",1],["KS03","新三河島","Shin Mikawashima",2],["KS04","町屋","Machiya",3],["KS05","千住大橋","Senjuohashi",4],["KS06","京成関屋","Keisei Sekiya",5],["KS07","堀切菖蒲園","Horikirishobuen",6],["KS08","お花茶屋","Ohanajaya",7],["KS09","青砥","Aoto",8],["KS10","京成高砂","Keisei Takasago",9],["KS11","京成小岩","Keisei Koiwa",10],["KS12","江戸川","Edogawa",11],["KS13","国府台","Konodai",12],["KS14","市川真間","Ichikawamama",13],["KS15","菅野","Sugano",14],["KS16","京成八幡","Keisei Yawata",15],["KS17","鬼越","Onigoe",16],["KS18","京成中山","Keisei Nakayama",17],["KS19","東中山","Higashi Nakayama",18],["KS20","京成西船","Keisei Nishifuna",19],["KS21","海神","Kaijin",20],["KS22","京成船橋","Keisei Funabashi",21],["KS23","大神宮下","Daijingushita",22],["KS24","船橋競馬場","Funabashi Keibajo",23],["KS25","谷津","Yatsu",24],["KS26","京成津田沼","Keisei Tsudanuma",25],["KS27","京成大久保","Keisei Okubo",26],["KS28","実籾","Mimomi",27],["KS29","八千代台","Yachiyodai",28],["KS30","京成大和田","Keisei Owada",29],["KS31","勝田台","Katsutadai",30],["KS32","志津","Shizu",31],["KS33","ユーカリが丘","Yukarigaoka",32],["KS34","京成臼井","Keisei Usui",33],["KS35","京成佐倉","Keisei Sakura",34],["KS36","大佐倉","Osakura",35],["KS37","京成酒々井","Keisei Shisui",36],["KS38","宗吾参道","Sogosando",37],["KS39","公津の杜","Kozunomori",38],["KS40","京成成田","Keisei Narita",39],["KS41","空港第2ビル","Narita Airport Terminal 2/3",41],["KS42","成田空港","Narita Airport Terminal 1",42]
+  ]
+}
