@@ -144,7 +144,19 @@
     const railButton=e.target.closest('[data-location-rail]');
     if(railButton){pickerRail=railButton.dataset.locationRail;locationSearch.value='';renderStations();resetPickerScroll();locationSearch.focus({preventScroll:true});return;}
     const location=e.target.closest('[data-go-rail][data-go-station]');
-    if(location){ctx.goToLocation(location.dataset.goRail,location.dataset.goStation);}
+    if(location){
+      const targetRail=location.dataset.goRail;
+      const provisionalOtherRail=ctx.needsLocationSetup&&targetRail!==ctx.rail?ctx.rail:null;
+      ctx.goToLocation(targetRail,location.dataset.goStation);
+      // During first setup the app booted a provisional TX screen only so the
+      // shell had data. Do not later mislabel that untouched rail as "recent".
+      if(provisionalOtherRail){
+        try{
+          localStorage.removeItem(`denshaKuruyoV1:${provisionalOtherRail}`);
+          localStorage.removeItem(`denshaKuruyoMomentsV1:${provisionalOtherRail}`);
+        }catch{}
+      }
+    }
   });
   locationSearch.addEventListener('input',renderStations);
   renderRecent();renderStations();
