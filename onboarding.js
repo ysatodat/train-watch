@@ -28,6 +28,7 @@
   }
   function ensureTxSpecialScript(){return rail==='tx'?loadLocalScript('./tx-special.js','data-tx-special'):Promise.resolve();}
   function ensureRailSwitchScript(){return loadLocalScript('./rail-switch.js','data-rail-switch');}
+  function ensureKeiseiUiScript(){return rail==='keisei'?loadLocalScript('./keisei-ui.js','data-keisei-ui'):Promise.resolve();}
 
   ensureStyles();
 
@@ -35,6 +36,7 @@
     try { await (window.TrainWatchEngineReady || Promise.resolve()); } catch {}
     await ensureTxSpecialScript();
     await ensureRailSwitchScript();
+    await ensureKeiseiUiScript();
 
     // TX's older dedicated station chooser may have added its own explanatory
     // row. The location-first picker replaces it completely.
@@ -49,8 +51,11 @@
     const done=document.getElementById('tutorialDone');
     if(!dialog||!controller||slides.length!==3||!back||!next||!done)return;
 
+    const firstDescription=rail==='keisei'
+      ? '到着・発車。いちばん近い瞬間を大きく表示します。'
+      : '到着・発車・通過。いちばん近い瞬間を大きく表示します。';
     const copy=[
-      ['次の見どころがわかる','到着・発車・通過。いちばん近い瞬間を大きく表示します。'],
+      ['次の見どころがわかる',firstDescription],
       ['来た瞬間を楽しもう','「停まった！」「動いた！」は任意。押さなくても自動で進みます。'],
       ['見逃しそうならお知らせ','このページを開いている間、3分前と30秒前に知らせることもできます。']
     ];
