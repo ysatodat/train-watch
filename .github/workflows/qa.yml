@@ -27,7 +27,9 @@ jobs:
           node --check dialog-controller.js
           node --check onboarding.js
           node --check rail-switch.js
+          node --check ux-v6.js
           node --check keisei-ui.js
+          node --check keisei-special.js
           node --check tx-special.js
           node --check microinteractions.js
           node --check moments-interactions.js
@@ -39,6 +41,7 @@ jobs:
           node -e "JSON.parse(require('fs').readFileSync('data/tx-profile.json','utf8')); console.log('TX profile JSON valid')"
           node -e "JSON.parse(require('fs').readFileSync('data/keisei-main-stations.json','utf8')); console.log('Keisei station catalog valid')"
           node -e "JSON.parse(require('fs').readFileSync('data/keisei-main.json','utf8')); console.log('Keisei timetable JSON valid')"
+          node -e "JSON.parse(require('fs').readFileSync('data/keisei-profile.json','utf8')); console.log('Keisei profile JSON valid')"
       - name: Generate Keisei official timetable snapshot
         run: node scripts/inspect-keisei.mjs
       - name: Persist first Keisei snapshot to feature branch
@@ -61,6 +64,7 @@ jobs:
           node tests/static-qa.mjs
           node tests/tx-static-qa.mjs
           node tests/rail-location-qa.mjs
+          node tests/ux-v6-static-qa.mjs
           node tests/moments-qa.mjs
           node tests/observation-qa.mjs
 
