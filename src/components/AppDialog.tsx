@@ -1,7 +1,7 @@
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useRef, type ComponentProps, type ReactNode } from 'react';
 import { Button, Dialog, Heading, Modal, ModalOverlay } from 'react-aria-components';
 
-export function PressButton(props: React.ComponentProps<typeof Button>) {
+export function PressButton(props: ComponentProps<typeof Button>) {
   const { className, ...rest } = props;
   return <Button {...rest} className={typeof className === 'function' ? className : `press-button ${className || ''}`} />;
 }
