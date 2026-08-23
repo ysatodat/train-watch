@@ -2,6 +2,13 @@
   'use strict';
 
   const root = document.documentElement;
+  if (root.dataset.rail === 'tx') {
+    // tx-special.css historically used red for excitement/current states. Keep
+    // those selectors working, but remap their tokens to calm teal/green so red
+    // stays reserved for actual warnings/errors in UX v6.
+    root.style.setProperty('--tx-red', '#4f7568');
+    root.style.setProperty('--tx-red-deep', '#385b50');
+  }
   const meta = document.querySelector('meta[name="description"]');
   if (meta) meta.content = '子どもと一緒に、電車の到着・発車・通過などの見どころを楽しく見る親子向け電車ウォッチ。TXと京成本線に対応した非公式Webアプリ。';
 
