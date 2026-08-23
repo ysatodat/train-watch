@@ -16,8 +16,12 @@
     if(rail!=='tx'||document.querySelector('script[data-tx-special]'))return;
     const script=document.createElement('script');script.src='./tx-special.js';script.async=false;script.dataset.txSpecial='1';document.head.appendChild(script);
   }
+  function ensureRailSwitchScript(){
+    if(document.querySelector('script[data-rail-switch]'))return;
+    const script=document.createElement('script');script.src='./rail-switch.js';script.async=false;script.dataset.railSwitch='1';document.head.appendChild(script);
+  }
 
-  ensureStyles();ensureTxSpecialScript();
+  ensureStyles();ensureTxSpecialScript();ensureRailSwitchScript();
 
   async function init(){
     try { await (window.TrainWatchEngineReady || Promise.resolve()); } catch {}
