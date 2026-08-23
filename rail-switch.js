@@ -56,9 +56,12 @@
   const up=document.querySelector('#directionFilter [data-dir="up"]');
   const down=document.querySelector('#directionFilter [data-dir="down"]');
 
+  // Route context already sits directly above the hero; repeating TX/Keisei in
+  // the brand lockup added noise after the visual review.
+  if(brandSub){brandSub.textContent='TRAIN WATCH · 非公式';brandSub.setAttribute('aria-label','非公式の親子向け電車ウォッチ');}
+
   if(ctx.rail==='keisei'){
     document.body.classList.add('keisei-app');
-    if(brandSub){brandSub.textContent='京成・非公式';brandSub.setAttribute('aria-label','京成本線に対応した非公式ファンツール');}
     if(footerLabel)footerLabel.textContent='京成本線・非公式 β';
     if(official){official.href='https://www.keisei.co.jp/keisei/tetudou/railmap/';official.textContent='京成公式サイト ↗';}
     if(dataLink){dataLink.href='https://keisei.ekitan.com/naritaacs-i/timetable';dataLink.textContent='京成公式の時刻表を見る ↗';}
@@ -68,7 +71,6 @@
     if(dataCopy&&!dataCopy.querySelector('.keisei-data-note')){const p=document.createElement('p');p.className='keisei-data-note';p.textContent='京成は公式の駅発時刻を使用しています。通過列車と終着列車の到着は、現在のβ版では表示しません。';dataCopy.appendChild(p);}
     document.querySelector('#notifyDialog .notify-facts dd')?.replaceChildren(document.createTextNode('到着・発車'));
   }else{
-    if(brandSub){brandSub.textContent='TX・非公式';brandSub.setAttribute('aria-label','つくばエクスプレスに対応した非公式ファンツール');}
     if(footerLabel)footerLabel.textContent='TX・非公式 β';
   }
 
@@ -108,8 +110,12 @@
   const recentList=picker.querySelector('.recent-location-list');
 
   function stationInfo(rail,id){return catalogs[rail].find(s=>s.id===id);}
+  function hasVisitedRail(rail){
+    if(rail===ctx.rail)return true;
+    try{return !!localStorage.getItem(`denshaKuruyoV1:${rail}`);}catch{return false;}
+  }
   function renderRecent(){
-    const rows=['tx','keisei'].map(rail=>{const id=ctx.stationFor(rail),s=stationInfo(rail,id);return s?{rail,...s}:null;}).filter(Boolean);
+    const rows=['tx','keisei'].filter(hasVisitedRail).map(rail=>{const id=ctx.stationFor(rail),s=stationInfo(rail,id);return s?{rail,...s}:null;}).filter(Boolean);
     if(ctx.needsLocationSetup||!rows.length){recentSection.hidden=true;return;}
     recentSection.hidden=false;
     recentList.innerHTML=rows.map(x=>`<button type="button" class="recent-location" data-go-rail="${x.rail}" data-go-station="${x.id}"><span>${railMeta[x.rail].label}</span><strong>${x.name}</strong><small>${x.id}</small></button>`).join('');
@@ -126,9 +132,17 @@
     }).join(''):'<p class="location-empty">該当する駅がありません。</p>';
   }
 
+  function resetPickerScroll(){
+    const shell=stationDialog.querySelector('.dialog-shell');
+    if(shell)shell.scrollTop=0;
+  }
+  document.addEventListener('click',e=>{
+    if(e.target.closest?.('#stationButton,#openStations'))setTimeout(resetPickerScroll,120);
+  },true);
+
   picker.addEventListener('click',e=>{
     const railButton=e.target.closest('[data-location-rail]');
-    if(railButton){pickerRail=railButton.dataset.locationRail;locationSearch.value='';renderStations();locationSearch.focus({preventScroll:true});return;}
+    if(railButton){pickerRail=railButton.dataset.locationRail;locationSearch.value='';renderStations();resetPickerScroll();locationSearch.focus({preventScroll:true});return;}
     const location=e.target.closest('[data-go-rail][data-go-station]');
     if(location){ctx.goToLocation(location.dataset.goRail,location.dataset.goStation);}
   });
@@ -141,7 +155,7 @@
     stationDialog.addEventListener('cancel',e=>e.preventDefault());
     stationDialog.addEventListener('click',e=>{if(e.target===stationDialog){e.preventDefault();e.stopImmediatePropagation();}},true);
     const controller=window.__trainWatchDialogs;
-    const show=()=>setTimeout(()=>{if(!stationDialog.open)controller?.openDialog(stationDialog,null,null);},80);
+    const show=()=>setTimeout(()=>{if(!stationDialog.open){controller?.openDialog(stationDialog,null,null);setTimeout(resetPickerScroll,140);}},80);
     if(document.readyState==='complete')show();else window.addEventListener('load',show,{once:true});
   }
 
