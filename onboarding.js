@@ -12,19 +12,34 @@
       const link=document.createElement('link');link.rel='stylesheet';link.href='./tx-special.css';link.dataset.txSpecial='1';document.head.appendChild(link);
     }
   }
-  function ensureTxSpecialScript(){
-    if(rail!=='tx'||document.querySelector('script[data-tx-special]'))return;
-    const script=document.createElement('script');script.src='./tx-special.js';script.async=false;script.dataset.txSpecial='1';document.head.appendChild(script);
+  function loadLocalScript(src,attr){
+    const selector=`script[${attr}]`;
+    const existing=document.querySelector(selector);
+    if(existing){
+      if(existing.dataset.ready==='1')return Promise.resolve();
+      return new Promise(resolve=>{existing.addEventListener('load',resolve,{once:true});existing.addEventListener('error',resolve,{once:true});setTimeout(resolve,1200);});
+    }
+    return new Promise(resolve=>{
+      const script=document.createElement('script');script.src=src;script.async=false;script.setAttribute(attr,'1');
+      script.addEventListener('load',()=>{script.dataset.ready='1';resolve();},{once:true});
+      script.addEventListener('error',resolve,{once:true});
+      document.head.appendChild(script);
+    });
   }
-  function ensureRailSwitchScript(){
-    if(document.querySelector('script[data-rail-switch]'))return;
-    const script=document.createElement('script');script.src='./rail-switch.js';script.async=false;script.dataset.railSwitch='1';document.head.appendChild(script);
-  }
+  function ensureTxSpecialScript(){return rail==='tx'?loadLocalScript('./tx-special.js','data-tx-special'):Promise.resolve();}
+  function ensureRailSwitchScript(){return loadLocalScript('./rail-switch.js','data-rail-switch');}
 
-  ensureStyles();ensureTxSpecialScript();ensureRailSwitchScript();
+  ensureStyles();
 
   async function init(){
     try { await (window.TrainWatchEngineReady || Promise.resolve()); } catch {}
+    await ensureTxSpecialScript();
+    await ensureRailSwitchScript();
+
+    // TX's older dedicated station chooser may have added its own explanatory
+    // row. The location-first picker replaces it completely.
+    document.querySelector('.tx-route-intro')?.remove();
+
     const dialog=document.getElementById('aboutDialog');
     const controller=window.__trainWatchDialogs;
     const slides=[...document.querySelectorAll('[data-tutorial-step]')];
@@ -39,13 +54,15 @@
       ['来た瞬間を楽しもう','「停まった！」「動いた！」は任意。押さなくても自動で進みます。'],
       ['見逃しそうならお知らせ','このページを開いている間、3分前と30秒前に知らせることもできます。']
     ];
-    slides.forEach((slide,i)=>{
+    const applyCopy=()=>slides.forEach((slide,i)=>{
       const h=slide.querySelector('h3'),p=slide.querySelector(':scope > p:last-child');
       if(h)h.textContent=copy[i][0];if(p)p.textContent=copy[i][1];
     });
+    applyCopy();
 
     let step=0;
     function render(nextStep,{animate=true,direction=1}={}){
+      applyCopy();
       step=Math.max(0,Math.min(slides.length-1,nextStep));
       slides.forEach((slide,i)=>{const active=i===step;slide.hidden=!active;slide.classList.toggle('is-active',active);slide.setAttribute('aria-hidden',String(!active));});
       dots.forEach((dot,i)=>dot.classList.toggle('is-active',i===step));
