@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 
-for (const file of ['rail-switch.js','rail-switch.css','keisei-engine.js','data/keisei-main-stations.json','data/keisei-main.json','docs/data-sources.md']) {
+for (const file of ['rail-switch.js','rail-switch.css','keisei-engine.js','keisei-ui.js','data/keisei-main-stations.json','data/keisei-main.json','docs/data-sources.md']) {
   if (!fs.existsSync(file)) throw new Error(`Missing two-rail asset: ${file}`);
 }
 
@@ -10,12 +10,12 @@ if(stationCatalog.stations[0]?.[0]!=='KS01'||stationCatalog.stations.at(-1)?.[0]
 if(fs.statSync('data/keisei-main.json').size<1000) throw new Error('Keisei timetable snapshot is unexpectedly small');
 
 const controller=fs.readFileSync('dialog-controller.js','utf8');
-for(const phrase of ['denshaKuruyoLocationReadyV1','needsLocationSetup','goToLocation','lastStations','keisei']){
+for(const phrase of ['denshaKuruyoLocationReadyV1','needsLocationSetup','goToLocation','lastStations','migratedTxStation','keisei']){
   if(!controller.includes(phrase)) throw new Error(`Rail context missing: ${phrase}`);
 }
 
 const railJs=fs.readFileSync('rail-switch.js','utf8');
-for(const phrase of ['location-context-button','location-picker','recent-location-list','data-location-rail','location-station-choice','京成本線']){
+for(const phrase of ['location-context-button','location-picker','recent-location-list','data-location-rail','location-station-choice','京成本線','hasVisitedRail','resetPickerScroll']){
   if(!railJs.includes(phrase)) throw new Error(`Location-first UI missing: ${phrase}`);
 }
 if(/nav\.className\s*=\s*['"]rail-switch['"]/.test(railJs)) throw new Error('Persistent TX/Keisei switch must not be rendered on the first view');
@@ -27,12 +27,16 @@ for(const selector of ['.location-context','.location-context-button','.location
 }
 const tiny=[...railCss.matchAll(/font-size\s*:\s*(\d+(?:\.\d+)?)px/gi)].map(m=>Number(m[1])).filter(n=>n<13);
 if(tiny.length) throw new Error(`rail-switch.css contains font sizes below 13px: ${tiny.join(', ')}`);
+if(!railCss.includes('.train-illustration')||!railCss.includes('var(--keisei-blue) !important')) throw new Error('Keisei train illustration color must be pinned to the rail palette');
 
 const keiseiEngine=fs.readFileSync('keisei-engine.js','utf8');
 if(!keiseiEngine.includes("RAIL_ID:'keisei'")||!keiseiEngine.includes("SUPPORTS_PASS:false")||!keiseiEngine.includes("fetch('./data/keisei-main.json'")) throw new Error('Keisei engine must use its official timetable snapshot without inferred pass events');
 
+const keiseiUi=fs.readFileSync('keisei-ui.js','utf8');
+if(!keiseiUi.includes("replaceAll('つくば方面', '成田・空港方面')")||!keiseiUi.includes('到着・発車')||!keiseiUi.includes('stopImmediatePropagation')) throw new Error('Keisei user-facing copy adapter is incomplete');
+
 const onboarding=fs.readFileSync('onboarding.js','utf8');
-if(!onboarding.includes('needsLocationSetup')||!onboarding.includes('次の見どころがわかる')||!onboarding.includes('見逃しそうならお知らせ')) throw new Error('Onboarding must follow location setup and explain product value');
+if(!onboarding.includes('needsLocationSetup')||!onboarding.includes('次の見どころがわかる')||!onboarding.includes('見逃しそうならお知らせ')||!onboarding.includes("'./keisei-ui.js'")) throw new Error('Onboarding must follow location setup, load rail UI, and explain product value');
 
 const scenarios=fs.readFileSync('tests/user-scenarios.spec.js','utf8');
 for(const phrase of ['まず見る場所を選び','路線切替やお気に入り駅UIを常駐させない','TXと京成を切り替え','前回位置へ戻れる']){
