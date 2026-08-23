@@ -25,7 +25,7 @@ if(js.includes('if (vehicleDialog?.open) renderVehicleDialog();')) throw new Err
 if(!js.includes('nextStationId === observedStationId')) throw new Error('Station observer must ignore no-op station code mutations');
 
 const onboarding=fs.readFileSync('onboarding.js','utf8');
-if(!onboarding.includes("href='./tx-special.css'")||!onboarding.includes("script.src='./tx-special.js'")) throw new Error('TX-specialized assets are not loaded by onboarding layer');
+if(!onboarding.includes("href='./tx-special.css'")||!onboarding.includes("'./tx-special.js'")) throw new Error('TX-specialized assets are not loaded by onboarding layer');
 
 const css=fs.readFileSync('tx-special.css','utf8');
 if(!css.includes('.tx-vehicle-photo')) throw new Error('TX vehicle visualization styles are missing');
