@@ -32,6 +32,8 @@ jobs:
         run: |
           node -e "JSON.parse(require('fs').readFileSync('data/timetable.json','utf8')); console.log('Timetable JSON valid')"
           node -e "JSON.parse(require('fs').readFileSync('data/tx-profile.json','utf8')); console.log('TX profile JSON valid')"
+      - name: Inspect Keisei official timetable source
+        run: node scripts/inspect-keisei.mjs
       - name: Run product QA
         run: |
           node tests/static-qa.mjs
