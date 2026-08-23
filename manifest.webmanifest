@@ -1,7 +1,7 @@
 {
-  "name": "でんしゃくるよ！｜TX TRAIN WATCH",
+  "name": "でんしゃくるよ！｜TRAIN WATCH",
   "short_name": "でんしゃくるよ！",
-  "description": "つくばエクスプレス専用の非公式ファンツール。子どもと一緒に、到着・発車・通過の瞬間を楽しく見る親子向け電車ウォッチ。",
+  "description": "TXと京成本線に対応した非公式の親子向け電車ウォッチ。子どもと一緒に、到着・発車・通過などの見どころを楽しく見るWebアプリ。",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
