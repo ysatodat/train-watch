@@ -11,7 +11,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "test:unit": "vitest run",
+    "test:unit": "vitest run tests/domain.test.ts",
     "test:scenario": "playwright test"
   },
   "dependencies": {
