@@ -1,5 +1,6 @@
 (() => {
   'use strict';
+  if (window.RailContext?.rail === 'keisei') return;
 
   window.TrainWatchEngineReady = (async () => {
     const response = await fetch('./data/timetable.json', { cache: 'no-cache' });
@@ -220,6 +221,7 @@
     }
 
     const engine={
+      RAIL_ID:'tx',LINE_ID:'tx',LINE_NAME:'つくばエクスプレス',DEFAULT_STATION:'TX19',SUPPORTS_PASS:true,
       DATA_META:{dataVersion:DATA.dataVersion,checkedAt:DATA.checkedAt,timetableRevision:DATA.timetableRevision,validThrough:DATA.validThrough,source:DATA.source,coverage:DATA.coverage},
       STATIONS,SERVICE,ARRIVAL_LEAD_MS,DEPARTURE_WINDOW_MS,LONG_WAIT_MS,SERVICE_DAY_BOUNDARY_HOUR,
       stationById,dirText,isOrigin,isTerminal,fmtTime,fmtClock,fmtRemain,dateKey,serviceDateForMoment,dayTypeForMoment,
