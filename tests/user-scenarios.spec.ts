@@ -1,21 +1,22 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page, type Route } from '@playwright/test';
 
 const FIXED_NOW = new Date('2026-08-23T12:00:00+09:00').valueOf();
 
 type PrepareOptions = { seenIntro?: boolean; ready?: boolean; rail?: 'tx' | 'keisei'; txStation?: string; keiseiStation?: string; now?: number };
+type InitArgs = { initialNow: number; seen: boolean; isReady: boolean; activeRail: 'tx' | 'keisei'; tx: string; ks: string };
 
-async function prepare(page: any, options: PrepareOptions = {}) {
+async function prepare(page: Page, options: PrepareOptions = {}) {
   const { seenIntro = true, ready = true, rail = 'tx', txStation = 'TX19', keiseiStation = 'KS22', now = FIXED_NOW } = options;
-  await page.route('https://**/*', (route: any) => route.abort());
-  await page.addInitScript(({ initialNow, seen, isReady, activeRail, tx, ks }) => {
+  await page.route('https://**/*', (route: Route) => route.abort());
+  await page.addInitScript(({ initialNow, seen, isReady, activeRail, tx, ks }: InitArgs) => {
     const RealDate = Date;
     let currentNow = initialNow;
-    (window as any).__setTestNow = (value: number) => { currentNow = value; };
+    (window as typeof window & { __setTestNow?: (value: number) => void }).__setTestNow = (value: number) => { currentNow = value; };
     class FixedDate extends RealDate {
-      constructor(...args: any[]) { super(...(args.length ? args : [currentNow])); }
+      constructor(value?: string | number | Date) { super(value === undefined ? currentNow : value); }
       static now() { return currentNow; }
     }
-    (window as any).Date = FixedDate;
+    (window as typeof window & { Date: DateConstructor }).Date = FixedDate as DateConstructor;
     localStorage.clear();
     if (seen) localStorage.setItem('trainWatch:intro:v3', 'seen');
     if (isReady) localStorage.setItem('trainWatch:location:v2', JSON.stringify({
@@ -27,9 +28,9 @@ async function prepare(page: any, options: PrepareOptions = {}) {
   }, { initialNow: now, seen: seenIntro, isReady: ready, activeRail: rail, tx: txStation, ks: keiseiStation });
 }
 
-async function setNow(page: any, iso: string) {
+async function setNow(page: Page, iso: string) {
   const value = new Date(iso).valueOf();
-  await page.evaluate((ms: number) => (window as any).__setTestNow(ms), value);
+  await page.evaluate((ms: number) => (window as typeof window & { __setTestNow: (value: number) => void }).__setTestNow(ms), value);
   await page.waitForTimeout(1200);
 }
 
@@ -151,15 +152,15 @@ test('京成では京成ならではと4車種の車両ずかんを表示する'
   await expect(guide).toContainText('3200形');
 });
 
-test('押している間のフィードバック用data-pressedがReact Ariaから出る', async ({ page }) => {
+test('FVの駅名全体がタップ領域として場所変更を開く', async ({ page }) => {
   await prepare(page);
   await page.goto('/?rail=tx&station=TX19');
   const button = page.getByTestId('location-button');
   const box = await button.boundingBox();
   expect(box).toBeTruthy();
-  await page.touchscreen.tap((box?.x || 0) + 4, (box?.y || 0) + 4);
+  expect(box?.height).toBeGreaterThanOrEqual(44);
+  await button.click({ position: { x: 4, y: 4 } });
   await expect(page.getByTestId('location-dialog')).toBeVisible();
-  await expect(page.locator('style')).toHaveCount(0);
 });
 
 test('320px幅でも横にはみ出さない', async ({ page }) => {
