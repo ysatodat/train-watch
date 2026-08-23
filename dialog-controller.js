@@ -1,6 +1,88 @@
 (() => {
   'use strict';
 
+  // The dialog controller is the first local deferred script on the page.
+  // Establish rail context here so the timetable engine and app can boot with
+  // the correct network without introducing a blocking loader.
+  const RAIL_STORAGE_KEY='denshaKuruyoRailContextV1';
+  const LEGACY_STATE_KEY='denshaKuruyoV1';
+  const LEGACY_MOMENTS_KEY='denshaKuruyoMomentsV1';
+  const RAILS={
+    tx:{id:'tx',label:'TX',prefix:'TX',defaultStation:'TX19'},
+    keisei:{id:'keisei',label:'京成',prefix:'KS',defaultStation:'KS22'}
+  };
+  let savedRail={};
+  try{savedRail=JSON.parse(localStorage.getItem(RAIL_STORAGE_KEY)||'{}')||{};}catch{}
+  const pageUrl=new URL(location.href);
+  const stationParam=pageUrl.searchParams.get('station')||'';
+  const requestedRail=pageUrl.searchParams.get('rail');
+  let activeRail=RAILS[requestedRail]?requestedRail:null;
+  if(!activeRail&&stationParam.startsWith('KS'))activeRail='keisei';
+  if(!activeRail&&stationParam.startsWith('TX'))activeRail='tx';
+  if(!activeRail&&RAILS[savedRail.rail])activeRail=savedRail.rail;
+  if(!activeRail)activeRail='tx';
+  const lastStations={tx:'TX19',keisei:'KS22',...(savedRail.lastStations||{})};
+  if(stationParam.startsWith(RAILS[activeRail].prefix))lastStations[activeRail]=stationParam;
+
+  const railKey=(base,rail=activeRail)=>`${base}:${rail}`;
+  function safeGet(key){try{return localStorage.getItem(key);}catch{return null;}}
+  function safeSet(key,value){try{localStorage.setItem(key,value);}catch{}}
+  function defaultState(rail){
+    const old=(()=>{try{return JSON.parse(safeGet(LEGACY_STATE_KEY)||'{}')||{};}catch{return{};}})();
+    const station=RAILS[rail].defaultStation;
+    return JSON.stringify({station,includePass:rail==='tx',dir:'both',favorites:[station],sound:old.sound!==false,vibrate:old.vibrate!==false});
+  }
+  function snapshotCurrentRail(){
+    const state=safeGet(LEGACY_STATE_KEY);if(state)safeSet(railKey(LEGACY_STATE_KEY),state);
+    const moments=safeGet(LEGACY_MOMENTS_KEY);if(moments)safeSet(railKey(LEGACY_MOMENTS_KEY),moments);
+  }
+  function restoreRailStorage(){
+    const specificState=safeGet(railKey(LEGACY_STATE_KEY));
+    if(specificState)safeSet(LEGACY_STATE_KEY,specificState);
+    else if(activeRail==='tx'&&safeGet(LEGACY_STATE_KEY))safeSet(railKey(LEGACY_STATE_KEY),safeGet(LEGACY_STATE_KEY));
+    else safeSet(LEGACY_STATE_KEY,defaultState(activeRail));
+
+    const specificMoments=safeGet(railKey(LEGACY_MOMENTS_KEY));
+    if(specificMoments)safeSet(LEGACY_MOMENTS_KEY,specificMoments);
+    else if(activeRail==='tx'&&safeGet(LEGACY_MOMENTS_KEY))safeSet(railKey(LEGACY_MOMENTS_KEY),safeGet(LEGACY_MOMENTS_KEY));
+    else safeSet(LEGACY_MOMENTS_KEY,JSON.stringify({date:'',events:{}}));
+  }
+  restoreRailStorage();
+
+  function persistRail(nextRail=activeRail){
+    safeSet(RAIL_STORAGE_KEY,JSON.stringify({rail:nextRail,lastStations}));
+  }
+  function stationFor(rail){return lastStations[rail]||RAILS[rail]?.defaultStation;}
+  function rememberStation(id){if(id&&id.startsWith(RAILS[activeRail].prefix)){lastStations[activeRail]=id;persistRail();}}
+  function hrefFor(rail){const u=new URL(location.href);u.searchParams.set('rail',rail);u.searchParams.set('station',stationFor(rail));return u.href;}
+  function switchRail(rail){if(!RAILS[rail]||rail===activeRail)return;snapshotCurrentRail();persistRail(rail);location.href=hrefFor(rail);}
+
+  if(!stationParam.startsWith(RAILS[activeRail].prefix)){
+    pageUrl.searchParams.set('rail',activeRail);pageUrl.searchParams.set('station',stationFor(activeRail));history.replaceState(null,'',pageUrl);
+  }else if(!requestedRail){pageUrl.searchParams.set('rail',activeRail);history.replaceState(null,'',pageUrl);}
+  persistRail();
+  document.documentElement.dataset.rail=activeRail;
+  window.RailContext={rail:activeRail,rails:RAILS,defaultStation:stationFor(activeRail),stationFor,hrefFor,switchRail,rememberStation,snapshotCurrentRail};
+  window.addEventListener('pagehide',snapshotCurrentRail);
+
+  if(!document.querySelector('link[data-rail-switch]')){
+    const link=document.createElement('link');link.rel='stylesheet';link.href='./rail-switch.css';link.dataset.railSwitch='1';document.head.appendChild(link);
+  }
+
+  // The TX engine is already a static script in index.html. In Keisei mode we
+  // expose a stable promise before train-engine.js/app.js run, then resolve it
+  // when the Keisei engine module has loaded.
+  if(activeRail==='keisei'){
+    let resolveEngine,rejectEngine;
+    const ready=new Promise((resolve,reject)=>{resolveEngine=resolve;rejectEngine=reject;});
+    window.TrainWatchEngineReady=ready;
+    window.__resolveKeiseiEngine=resolveEngine;
+    window.__rejectKeiseiEngine=rejectEngine;
+    const script=document.createElement('script');script.src='./keisei-engine.js';script.async=false;script.dataset.keiseiEngine='1';
+    script.onerror=()=>rejectEngine(new Error('Keisei engine script failed to load'));
+    document.head.appendChild(script);
+  }
+
   const DIALOG_IDS = ['stationDialog', 'settingsDialog', 'dataDialog', 'aboutDialog', 'notifyDialog'];
   const dialogs = () => DIALOG_IDS.map(id => document.getElementById(id)).filter(Boolean);
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
