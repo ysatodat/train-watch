@@ -27,6 +27,7 @@ jobs:
           node --check dialog-controller.js
           node --check onboarding.js
           node --check rail-switch.js
+          node --check keisei-ui.js
           node --check tx-special.js
           node --check microinteractions.js
           node --check moments-interactions.js
