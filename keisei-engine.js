@@ -1,7 +1,7 @@
 (() => {
   'use strict';
   if(window.RailContext?.rail!=='keisei')return;
-  window.TrainWatchEngineReady=(async()=>{
+  const boot=(async()=>{
     const response=await fetch('./data/keisei-main.json',{cache:'no-cache'});
     if(!response.ok)throw new Error(`Keisei timetable load failed: ${response.status}`);
     const DATA=await response.json();
@@ -16,7 +16,7 @@
     const fmtTime=d=>`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
     const fmtClock=ms=>{const s=Math.max(0,Math.ceil(ms/1000));return`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;};
     const fmtRemain=ms=>{const s=Math.max(0,Math.ceil(ms/1000));if(s<60)return`あと${s}秒`;if(s<3600)return`あと${Math.floor(s/60)}分${String(s%60).padStart(2,'0')}秒`;const h=Math.floor(s/3600),m=Math.floor((s%3600)/60);if(h<3)return`あと${h}時間${m?`${m}分`:''}`;return`約${Math.round(s/3600)}時間後`;};
-    const dirText=v=>(DATA.directions?.[v.dir]|| (v.dir==='up'?'上野・押上方面':'成田・空港方面'));
+    const dirText=v=>(DATA.directions?.[v.dir]||(v.dir==='up'?'上野・押上方面':'成田・空港方面'));
     const isOrigin=v=>!!v.origin;
     const isTerminal=()=>false;
 
@@ -49,4 +49,6 @@
     const engine={RAIL_ID:'keisei',LINE_ID:'main',LINE_NAME:'京成本線',DEFAULT_STATION:'KS22',SUPPORTS_PASS:false,DATA_META:{dataVersion:DATA.dataVersion,checkedAt:DATA.checkedAt,timetableRevision:DATA.timetableRevision,validThrough:DATA.validThrough,source:DATA.source,coverage:DATA.coverage},STATIONS,SERVICE,ARRIVAL_LEAD_MS,DEPARTURE_WINDOW_MS,LONG_WAIT_MS,SERVICE_DAY_BOUNDARY_HOUR,stationById,dirText,isOrigin,isTerminal,fmtTime,fmtClock,fmtRemain,dateKey,serviceDateForMoment,dayTypeForMoment,buildVisits,filterVisits,focusForVisit,getFocuses,getOvernightState,focusTitle,focusMessage,focusCountdown};
     window.TrainWatchEngine=engine;return engine;
   })();
+  if(typeof window.__resolveKeiseiEngine==='function')boot.then(window.__resolveKeiseiEngine,window.__rejectKeiseiEngine);
+  else window.TrainWatchEngineReady=boot;
 })();
