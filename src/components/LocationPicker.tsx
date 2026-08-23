@@ -57,12 +57,11 @@ export function LocationPicker({ isOpen, required, onOpenChange, activeRail, act
         </section>
       )}
 
-      <div className="rail-tabs" role="tablist" aria-label="路線">
+      <div className="rail-tabs" role="group" aria-label="路線">
         {(Object.keys(railMeta) as RailId[]).map(rail => (
           <PressButton
             key={rail}
-            role="tab"
-            aria-selected={pickerRail === rail}
+            aria-pressed={pickerRail === rail}
             className="rail-tab"
             data-testid={`rail-tab-${rail}`}
             onPress={() => { setPickerRail(rail); setQuery(''); }}
