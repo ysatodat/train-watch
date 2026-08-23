@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   static-qa:
@@ -36,12 +36,18 @@ jobs:
           node -e "JSON.parse(require('fs').readFileSync('data/keisei-main-stations.json','utf8')); console.log('Keisei station catalog valid')"
       - name: Generate Keisei official timetable snapshot
         run: node scripts/inspect-keisei.mjs
-      - name: Upload Keisei timetable snapshot
-        uses: actions/upload-artifact@v4
-        with:
-          name: keisei-main-timetable
-          path: generated/keisei-main.json
-          retention-days: 1
+      - name: Persist first Keisei snapshot to feature branch
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          if [ ! -f data/keisei-main.json ]; then
+            cp generated/keisei-main.json data/keisei-main.json
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add data/keisei-main.json
+            git commit -m 'data: add official Keisei Main Line timetable snapshot'
+            git push origin HEAD:${{ github.head_ref }}
+          fi
       - name: Run product QA
         run: |
           node tests/static-qa.mjs
