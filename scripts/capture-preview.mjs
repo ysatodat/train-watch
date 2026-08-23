@@ -21,14 +21,18 @@ async function makePage(){
       static now(){return initialNow;}
     }
     window.Date=FixedDate;
-    try{localStorage.clear();localStorage.setItem('denshaKuruyoIntroV2','seen');}catch{}
+    try{
+      localStorage.clear();
+      localStorage.setItem('denshaKuruyoIntroV2','seen');
+      localStorage.setItem('denshaKuruyoLocationReadyV1','1');
+    }catch{}
   },FIXED_NOW);
   return {context,page:await context.newPage()};
 }
 
 async function ready(page,url,{stationCode,stationName}){
   await page.goto(url,{waitUntil:'domcontentloaded'});
-  await page.waitForSelector('.rail-switch',{timeout:15000});
+  await page.waitForSelector('.location-context-button',{timeout:15000});
   await page.waitForFunction(({code,name})=>{
     return document.querySelector('#stationCode')?.textContent?.trim()===code &&
       document.querySelector('#stationName')?.textContent?.trim()===name &&
@@ -50,10 +54,11 @@ async function ready(page,url,{stationCode,stationName}){
   await page.screenshot({path:'preview-screenshots/02-keisei-home.png',fullPage:false});
   await page.locator('#stationButton').click();
   await page.waitForSelector('#stationDialog[open]');
+  await page.waitForSelector('.location-picker');
   await page.waitForTimeout(250);
-  await page.screenshot({path:'preview-screenshots/03-keisei-stations.png',fullPage:false});
+  await page.screenshot({path:'preview-screenshots/03-location-picker.png',fullPage:false});
   await context.close();
 }
 
 await browser.close();
-console.log('Preview screenshots captured');
+console.log('Location-first preview screenshots captured');
