@@ -28,12 +28,20 @@ jobs:
           node --check tx-special.js
           node --check microinteractions.js
           node --check moments-interactions.js
+          node --check scripts/inspect-keisei.mjs
       - name: Validate data JSON
         run: |
           node -e "JSON.parse(require('fs').readFileSync('data/timetable.json','utf8')); console.log('Timetable JSON valid')"
           node -e "JSON.parse(require('fs').readFileSync('data/tx-profile.json','utf8')); console.log('TX profile JSON valid')"
-      - name: Inspect Keisei official timetable source
+          node -e "JSON.parse(require('fs').readFileSync('data/keisei-main-stations.json','utf8')); console.log('Keisei station catalog valid')"
+      - name: Generate Keisei official timetable snapshot
         run: node scripts/inspect-keisei.mjs
+      - name: Upload Keisei timetable snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: keisei-main-timetable
+          path: generated/keisei-main.json
+          retention-days: 1
       - name: Run product QA
         run: |
           node tests/static-qa.mjs
