@@ -29,6 +29,7 @@ jobs:
           node --check microinteractions.js
           node --check moments-interactions.js
           node --check scripts/inspect-keisei.mjs
+          node --check scripts/capture-preview.mjs
       - name: Validate data JSON
         run: |
           node -e "JSON.parse(require('fs').readFileSync('data/timetable.json','utf8')); console.log('Timetable JSON valid')"
@@ -81,5 +82,13 @@ jobs:
           done
           cat /tmp/train-watch-server.log
           exit 1
+      - name: Capture WIP mobile preview
+        run: node scripts/capture-preview.mjs
+      - name: Upload WIP mobile preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: rail-switch-wip-preview
+          path: preview-screenshots/*.png
+          retention-days: 1
       - name: Run user scenarios on mobile WebKit
         run: npm run test:scenario
