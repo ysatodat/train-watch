@@ -25,8 +25,6 @@
   };
   const activeMeta=railMeta[ctx.rail];
 
-  // The first view only confirms the current watching place. Choosing/changing
-  // a rail is a low-frequency action and lives behind this one compact control.
   document.querySelector('.rail-switch')?.remove();
   const toolbar=document.querySelector('.station-toolbar');
   const stationButton=$('stationButton');
@@ -56,8 +54,6 @@
   const up=document.querySelector('#directionFilter [data-dir="up"]');
   const down=document.querySelector('#directionFilter [data-dir="down"]');
 
-  // Route context already sits directly above the hero; repeating TX/Keisei in
-  // the brand lockup added noise after the visual review.
   if(brandSub){brandSub.textContent='TRAIN WATCH · 非公式';brandSub.setAttribute('aria-label','非公式の親子向け電車ウォッチ');}
 
   if(ctx.rail==='keisei'){
@@ -133,7 +129,9 @@
   }
 
   function resetPickerScroll(){
+    const body=stationDialog.querySelector('.dialog-body');
     const shell=stationDialog.querySelector('.dialog-shell');
+    if(body)body.scrollTop=0;
     if(shell)shell.scrollTop=0;
   }
   document.addEventListener('click',e=>{
@@ -142,14 +140,18 @@
 
   picker.addEventListener('click',e=>{
     const railButton=e.target.closest('[data-location-rail]');
-    if(railButton){pickerRail=railButton.dataset.locationRail;locationSearch.value='';renderStations();resetPickerScroll();locationSearch.focus({preventScroll:true});return;}
+    if(railButton){
+      pickerRail=railButton.dataset.locationRail;
+      locationSearch.value='';
+      renderStations();
+      resetPickerScroll();
+      return;
+    }
     const location=e.target.closest('[data-go-rail][data-go-station]');
     if(location){
       const targetRail=location.dataset.goRail;
       const provisionalOtherRail=ctx.needsLocationSetup&&targetRail!==ctx.rail?ctx.rail:null;
       ctx.goToLocation(targetRail,location.dataset.goStation);
-      // During first setup the app booted a provisional TX screen only so the
-      // shell had data. Do not later mislabel that untouched rail as "recent".
       if(provisionalOtherRail){
         try{
           localStorage.removeItem(`denshaKuruyoV1:${provisionalOtherRail}`);

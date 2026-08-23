@@ -1,0 +1,270 @@
+/* UX v6 — observation first, touch-native dialogs, calmer rail palettes */
+
+:root,
+html[data-rail="tx"] {
+  --brand-blue: #2f5d68;
+  --brand-blue-dark: #214b55;
+  --brand-sky: #e6eff0;
+  --brand-yellow: #d3b25f;
+  --brand-coral: #4f7568;
+  --brand-mint: #5d7c6d;
+  --focus: #176677;
+  --cloud: #f3f4f1;
+  --surface: #f8f8f5;
+  --surface-strong: #ffffff;
+  --line: #d3d7d3;
+  --line-strong: #aeb8b5;
+  --press-overlay: rgba(33, 75, 85, .09);
+  --danger: #b3261e;
+}
+
+html[data-rail="keisei"] {
+  --keisei-blue: #2360a5;
+  --keisei-blue-deep: #164a86;
+  --keisei-blue-soft: #eaf1f8;
+  --brand-blue: var(--keisei-blue);
+  --brand-blue-dark: var(--keisei-blue-deep);
+  --brand-sky: var(--keisei-blue-soft);
+  --brand-coral: #52739a;
+  --brand-mint: #577b70;
+  --focus: #1f5d9d;
+  --cloud: #f3f5f7;
+  --surface: #f8fafc;
+  --surface-strong: #ffffff;
+  --line: #d0d8e0;
+  --line-strong: #a9b7c6;
+  --press-overlay: rgba(22, 74, 134, .085);
+}
+
+html,
+body { background: var(--cloud) !important; }
+
+/* Red is reserved for actual warnings/errors. "Now" is exciting, not dangerous. */
+.hero-card.now {
+  border-color: color-mix(in srgb, var(--brand-blue) 58%, var(--line)) !important;
+  background: color-mix(in srgb, var(--brand-sky) 68%, #fff) !important;
+}
+.hero-card.now .train-wrap,
+.hero-card.now .train-illustration { color: var(--brand-blue-dark) !important; }
+.ten-count { background: var(--brand-blue-dark) !important; }
+.location-current { color: var(--brand-blue-dark) !important; }
+.tutorial-art [stroke="#c04a36"] { stroke: var(--brand-blue-dark) !important; }
+html[data-rail="keisei"] .hero-card.now {
+  border-color: #7195ba !important;
+  background: #f0f5fa !important;
+}
+html[data-rail="keisei"] .hero-card.now .train-wrap,
+html[data-rail="keisei"] .hero-card.now .train-illustration { color: var(--keisei-blue-deep) !important; }
+
+/* The current place is a control, so it should look and feel tappable without
+   competing with the hero. */
+.location-context {
+  border-bottom: 0 !important;
+  padding: 0 0 7px !important;
+}
+.location-context-button {
+  min-height: 48px !important;
+  padding: 4px 9px !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 8px !important;
+  background: var(--surface-strong) !important;
+}
+.location-context-button .chevron { margin-right: 2px; }
+
+/* Touch feedback: while a finger is down, the whole hit area gets a quiet wash.
+   An inset overlay keeps filled primary buttons recognisable. */
+.touchable:not(:disabled):active,
+.location-station-choice:not(:disabled):active,
+.recent-location:not(:disabled):active,
+.location-rail-tabs button:not(:disabled):active,
+.segmented button:not(:disabled):active,
+.toggle-row:active,
+.keisei-highlight-row:active,
+.keisei-vehicle-open:active,
+.tx-highlight-row:active {
+  box-shadow: inset 0 0 0 999px var(--press-overlay) !important;
+}
+.location-context-button:active,
+.quick-tool:active,
+.settings-link:active,
+.footer-link:active,
+.data-notice button:active,
+.notify-settings-link:active {
+  background: color-mix(in srgb, var(--surface-strong) 90%, var(--brand-sky)) !important;
+}
+@media (hover: hover) {
+  .location-context-button:hover,
+  .location-station-choice:hover,
+  .recent-location:hover,
+  .quick-tool:hover { background: color-mix(in srgb, var(--surface-strong) 94%, var(--brand-sky)) !important; }
+}
+
+/* Dialog model: shell never scrolls. Header and body are sibling rows; only the
+   body scrolls. This removes sticky-header overlap and makes the close action
+   stable without positioning tricks. */
+.native-dialog {
+  overflow: visible !important;
+}
+.dialog-shell,
+.tutorial-shell {
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) !important;
+  width: 100%;
+  max-height: min(86dvh, 760px) !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border-radius: 12px !important;
+  background: var(--surface-strong) !important;
+}
+.dialog-header,
+.tutorial-header {
+  position: static !important;
+  z-index: auto !important;
+  top: auto !important;
+  margin: 0 !important;
+  padding: 14px 16px 12px !important;
+  border-bottom: 1px solid var(--line) !important;
+  background: var(--surface-strong) !important;
+}
+.dialog-body {
+  min-width: 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 16px 20px max(20px, env(safe-area-inset-bottom));
+}
+.tutorial-dialog .dialog-body {
+  display: flex;
+  flex-direction: column;
+}
+.dialog-body > :first-child { margin-top: 0; }
+.dialog-body > :last-child { margin-bottom: 0; }
+.dialog-close {
+  flex: none;
+  background: #f4f5f3 !important;
+  border-color: var(--line) !important;
+}
+/* Programmatic initial focus should not paint a ring around Close. Keyboard
+   users still get a strong ring once they start tab navigation. */
+.native-dialog .dialog-close:focus { outline: none !important; }
+html.keyboard-nav .native-dialog .dialog-close:focus {
+  outline: 3px solid color-mix(in srgb, var(--focus) 30%, transparent) !important;
+  outline-offset: 2px !important;
+}
+.dialog-header h2[tabindex="-1"]:focus { outline: none !important; }
+
+/* Location picker stays at the top when opened; its list scrolls with the body. */
+.location-dialog .dialog-shell { max-width: 540px; }
+.location-dialog .dialog-body { padding-top: 14px; }
+.location-search { scroll-margin-top: 10px; }
+
+/* Keisei-specific content is deliberately a short list, not another card wall. */
+.keisei-special-section {
+  margin-top: 30px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+}
+.keisei-special-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.keisei-special-heading h2 { margin: 0; font-size: 1.375rem; line-height: 1.2; }
+.keisei-special-heading p { margin: 5px 0 0; color: var(--muted); font-size: .875rem; line-height: 1.45; }
+.keisei-vehicle-open {
+  min-height: 44px;
+  padding: 7px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  background: var(--surface-strong);
+  color: var(--brand-blue-dark);
+  font-size: .9375rem;
+  font-weight: 750;
+  white-space: nowrap;
+}
+.keisei-highlight-list { border-top: 1px solid var(--line); }
+.keisei-highlight-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 12px;
+  min-height: 72px;
+  padding: 12px 2px;
+  border-bottom: 1px solid var(--line);
+}
+.keisei-highlight-row > span { color: var(--muted); font-size: .8125rem; font-weight: 700; }
+.keisei-highlight-row > strong { grid-column: 1; font-size: 1rem; line-height: 1.35; }
+.keisei-highlight-time { grid-column: 2; grid-row: 1 / span 2; align-self: center; font-size: 1.125rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.keisei-highlight-meta { grid-column: 1 / -1; margin: 2px 0 0; color: var(--muted); font-size: .8125rem; line-height: 1.4; }
+
+.keisei-vehicle-dialog .dialog-body { padding-top: 12px; }
+.keisei-vehicle-lead { margin: 0 0 10px; color: var(--muted); font-size: .9375rem; line-height: 1.5; }
+.keisei-vehicle-summary { margin: 0 0 16px; font-size: 1rem; font-weight: 750; }
+.keisei-vehicle-list { display: grid; gap: 0; }
+.keisei-vehicle-item {
+  padding: 18px 0;
+  border-top: 1px solid var(--line);
+}
+.keisei-vehicle-item:first-child { border-top: 0; padding-top: 0; }
+.keisei-vehicle-photo {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 6px;
+  background: var(--surface);
+}
+.keisei-vehicle-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+}
+.keisei-vehicle-head h3 { margin: 0; font-size: 1.125rem; }
+.keisei-vehicle-head span { color: var(--muted); font-size: .8125rem; font-weight: 700; text-align: right; }
+.keisei-vehicle-hint { margin: 7px 0 0; font-size: 1rem; line-height: 1.5; font-weight: 650; }
+.keisei-vehicle-fact { margin: 5px 0 0; color: var(--muted); font-size: .875rem; line-height: 1.5; }
+.keisei-found-button {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  background: var(--surface-strong);
+  color: var(--brand-blue-dark);
+  font-weight: 750;
+}
+.keisei-found-button[aria-pressed="true"] {
+  border-color: var(--brand-blue);
+  background: var(--brand-sky);
+}
+.keisei-vehicle-credit { margin: 7px 0 0; color: var(--muted); font-size: .8125rem; line-height: 1.4; }
+.keisei-vehicle-credit a { color: inherit; }
+.keisei-other-vehicles {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.keisei-other-vehicles summary { min-height: 44px; display: flex; align-items: center; color: var(--brand-blue-dark); font-weight: 750; cursor: pointer; }
+.keisei-other-vehicles ul { margin: 4px 0 0; padding-left: 1.2rem; }
+.keisei-other-vehicles li { margin: 9px 0; font-size: .875rem; line-height: 1.5; }
+.keisei-source-note { margin: 16px 0 0; color: var(--muted); font-size: .8125rem; line-height: 1.5; }
+.keisei-source-note a { color: var(--brand-blue-dark); }
+
+@media (max-width: 430px) {
+  .dialog-shell,
+  .tutorial-shell { max-height: 88dvh !important; border-radius: 10px !important; }
+  .dialog-header,
+  .tutorial-header { padding: max(12px, env(safe-area-inset-top)) 14px 10px !important; }
+  .dialog-body { padding: 14px 16px max(18px, env(safe-area-inset-bottom)); }
+  .keisei-special-heading { align-items: start; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .touchable,
+  button { transition: none !important; }
+}
