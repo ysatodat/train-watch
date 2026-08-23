@@ -18,7 +18,9 @@
   function safeRemove(key){try{localStorage.removeItem(key);}catch{}}
 
   let savedRail={};
+  let legacyState={};
   try{savedRail=JSON.parse(safeGet(RAIL_STORAGE_KEY)||'{}')||{};}catch{}
+  try{legacyState=JSON.parse(safeGet(LEGACY_STATE_KEY)||'{}')||{};}catch{}
   const pageUrl=new URL(location.href);
   const stationParam=pageUrl.searchParams.get('station')||'';
   const requestedRail=pageUrl.searchParams.get('rail');
@@ -35,7 +37,10 @@
   if(!activeRail&&RAILS[savedRail.rail])activeRail=savedRail.rail;
   if(!activeRail)activeRail='tx';
 
-  const lastStations={tx:'TX19',keisei:'KS22',...(savedRail.lastStations||{})};
+  // Existing TX users should keep the station they were already watching when
+  // the two-rail context is introduced, instead of silently jumping to TX19.
+  const migratedTxStation=typeof legacyState.station==='string'&&legacyState.station.startsWith('TX')?legacyState.station:'TX19';
+  const lastStations={tx:migratedTxStation,keisei:'KS22',...(savedRail.lastStations||{})};
   if(stationParam.startsWith(RAILS[activeRail].prefix))lastStations[activeRail]=stationParam;
 
   const railKey=(base,rail=activeRail)=>`${base}:${rail}`;
