@@ -3,29 +3,57 @@ import fs from 'node:fs';
 
 fs.mkdirSync('preview-screenshots',{recursive:true});
 const browser=await webkit.launch();
-const context=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true});
-await context.addInitScript(()=>{
-  try{localStorage.setItem('denshaKuruyoIntroV2','seen');}catch{}
-});
-const page=await context.newPage();
+const FIXED_NOW=new Date('2026-08-23T18:40:00+09:00').valueOf();
 
-async function ready(url){
-  await page.goto(url,{waitUntil:'domcontentloaded'});
-  await page.waitForSelector('.rail-switch',{timeout:15000});
-  await page.waitForFunction(()=>document.querySelector('#countdown')?.textContent?.trim()!=='--:--',{timeout:15000}).catch(()=>{});
-  await page.waitForTimeout(700);
+async function makePage(){
+  const context=await browser.newContext({
+    viewport:{width:390,height:844},
+    deviceScaleFactor:2,
+    isMobile:true,
+    hasTouch:true,
+    timezoneId:'Asia/Tokyo'
+  });
+  await context.route('https://**/*',route=>route.abort());
+  await context.addInitScript(initialNow=>{
+    const RealDate=Date;
+    class FixedDate extends RealDate{
+      constructor(...args){super(...(args.length?args:[initialNow]));}
+      static now(){return initialNow;}
+    }
+    window.Date=FixedDate;
+    try{localStorage.clear();localStorage.setItem('denshaKuruyoIntroV2','seen');}catch{}
+  },FIXED_NOW);
+  return {context,page:await context.newPage()};
 }
 
-await ready('http://127.0.0.1:4173/?rail=tx&station=TX19');
-await page.screenshot({path:'preview-screenshots/01-tx-home.png',fullPage:false});
+async function ready(page,url,{stationCode,stationName}){
+  await page.goto(url,{waitUntil:'domcontentloaded'});
+  await page.waitForSelector('.rail-switch',{timeout:15000});
+  await page.waitForFunction(({code,name})=>{
+    return document.querySelector('#stationCode')?.textContent?.trim()===code &&
+      document.querySelector('#stationName')?.textContent?.trim()===name &&
+      document.querySelector('#countdown')?.textContent?.trim()!=='--:--';
+  },{code:stationCode,name:stationName},{timeout:15000});
+  await page.waitForTimeout(350);
+}
 
-await ready('http://127.0.0.1:4173/?rail=keisei&station=KS22');
-await page.screenshot({path:'preview-screenshots/02-keisei-home.png',fullPage:false});
+{
+  const {context,page}=await makePage();
+  await ready(page,'http://127.0.0.1:4173/?rail=tx&station=TX19',{stationCode:'TX19',stationName:'研究学園'});
+  await page.screenshot({path:'preview-screenshots/01-tx-home.png',fullPage:false});
+  await context.close();
+}
 
-await page.locator('#stationButton').click();
-await page.waitForSelector('#stationDialog[open]');
-await page.waitForTimeout(300);
-await page.screenshot({path:'preview-screenshots/03-keisei-stations.png',fullPage:false});
+{
+  const {context,page}=await makePage();
+  await ready(page,'http://127.0.0.1:4173/?rail=keisei&station=KS22',{stationCode:'KS22',stationName:'京成船橋'});
+  await page.screenshot({path:'preview-screenshots/02-keisei-home.png',fullPage:false});
+  await page.locator('#stationButton').click();
+  await page.waitForSelector('#stationDialog[open]');
+  await page.waitForTimeout(250);
+  await page.screenshot({path:'preview-screenshots/03-keisei-stations.png',fullPage:false});
+  await context.close();
+}
 
 await browser.close();
 console.log('Preview screenshots captured');
