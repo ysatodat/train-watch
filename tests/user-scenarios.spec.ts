@@ -86,7 +86,8 @@ test('モーダルを開いてもCloseや検索欄へ勝手にフォーカスし
   await prepare(page);
   await page.goto('/?rail=tx&station=TX19');
   await page.getByTestId('location-button').click();
-  await expect(page.getByRole('button', { name: '閉じる' })).not.toBeFocused();
+  const dialog = page.getByTestId('location-dialog');
+  await expect(dialog.locator('.dialog-close')).not.toBeFocused();
   await expect(page.getByTestId('station-search')).not.toBeFocused();
   await page.getByTestId('rail-tab-keisei').click();
   await expect(page.getByTestId('station-search')).not.toBeFocused();
