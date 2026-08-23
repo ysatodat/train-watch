@@ -11,6 +11,9 @@
     if(rail==='tx'&&!document.querySelector('link[data-tx-special]')){
       const link=document.createElement('link');link.rel='stylesheet';link.href='./tx-special.css';link.dataset.txSpecial='1';document.head.appendChild(link);
     }
+    if(!document.querySelector('link[data-ux-v6]')){
+      const link=document.createElement('link');link.rel='stylesheet';link.href='./ux-v6.css';link.dataset.uxV6='1';document.head.appendChild(link);
+    }
   }
   function loadLocalScript(src,attr){
     const selector=`script[${attr}]`;
@@ -27,19 +30,21 @@
     });
   }
   function ensureTxSpecialScript(){return rail==='tx'?loadLocalScript('./tx-special.js','data-tx-special'):Promise.resolve();}
+  function ensureUxV6Script(){return loadLocalScript('./ux-v6.js','data-ux-v6');}
   function ensureRailSwitchScript(){return loadLocalScript('./rail-switch.js','data-rail-switch');}
   function ensureKeiseiUiScript(){return rail==='keisei'?loadLocalScript('./keisei-ui.js','data-keisei-ui'):Promise.resolve();}
+  function ensureKeiseiSpecialScript(){return rail==='keisei'?loadLocalScript('./keisei-special.js','data-keisei-special'):Promise.resolve();}
 
   ensureStyles();
 
   async function init(){
     try { await (window.TrainWatchEngineReady || Promise.resolve()); } catch {}
     await ensureTxSpecialScript();
+    await ensureUxV6Script();
     await ensureRailSwitchScript();
     await ensureKeiseiUiScript();
+    await ensureKeiseiSpecialScript();
 
-    // TX's older dedicated station chooser may have added its own explanatory
-    // row. The location-first picker replaces it completely.
     document.querySelector('.tx-route-intro')?.remove();
 
     const dialog=document.getElementById('aboutDialog');
