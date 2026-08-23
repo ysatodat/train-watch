@@ -19,7 +19,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: npm
       - name: Install dependencies
         run: npm install --no-audit --no-fund
       - name: Validate source data JSON
@@ -45,7 +44,7 @@ jobs:
           test -d dist/assets
           test -f dist/data/timetable.json
           test -f dist/data/keisei-main.json
-          ! grep -R "TX専用" dist/index.html dist/assets || false
+          ! grep -R "TX専用" dist/index.html dist/assets
 
   user-scenario-qa:
     needs: static-qa
@@ -57,7 +56,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: npm
       - name: Install dependencies
         run: npm install --no-audit --no-fund
       - name: Install WebKit
