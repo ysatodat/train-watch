@@ -1,0 +1,88 @@
+/* Two-rail product layer: only TX and Keisei are exposed at the top level. */
+.rail-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  margin: 10px 0 12px;
+  border: 1px solid var(--line-strong, #a8b5c6);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--surface-strong, #fff);
+}
+.rail-switch button {
+  min-height: 48px;
+  padding: 8px 12px;
+  border: 0;
+  border-right: 1px solid var(--line-strong, #a8b5c6);
+  background: transparent;
+  color: var(--ink, #242722);
+  font-size: 1rem;
+  line-height: 1.2;
+  font-weight: 750;
+  cursor: pointer;
+}
+.rail-switch button:last-child { border-right: 0; }
+.rail-switch button[aria-pressed="true"] { background: var(--rail-current-bg, #eef3fa); color: var(--rail-current-ink, #002b68); }
+.rail-switch button:focus-visible { outline: 3px solid var(--focus, #0057b8); outline-offset: -3px; }
+.rail-switch small { display:block; margin-top:2px; font-size:.8125rem; font-weight:600; opacity:.72; }
+
+.rail-scope-note {
+  margin: -2px 0 12px;
+  color: var(--muted, #5e6772);
+  font-size: .875rem;
+  line-height: 1.45;
+}
+
+html[data-rail="keisei"] {
+  --keisei-blue: #005bac;
+  --keisei-blue-deep: #00447f;
+  --keisei-blue-soft: #e9f2fb;
+  --keisei-red: #e60012;
+  --keisei-red-deep: #b8000e;
+  --brand-blue: var(--keisei-blue);
+  --brand-blue-dark: var(--keisei-blue-deep);
+  --brand-sky: var(--keisei-blue-soft);
+  --brand-coral: var(--keisei-red);
+  --focus: #0066bd;
+  --cloud: #f3f6f9;
+  --surface: #f8fafc;
+  --surface-strong: #fff;
+  --line: #c9d3dd;
+  --line-strong: #a8b5c2;
+  --rail-current-bg: #e9f2fb;
+  --rail-current-ink: #00447f;
+}
+html[data-rail="keisei"], html[data-rail="keisei"] body { background: var(--cloud); }
+html[data-rail="keisei"] .brand-mark { color: var(--keisei-blue); }
+html[data-rail="keisei"] .brand-lockup small { color: var(--keisei-red-deep); font-weight: 800; }
+html[data-rail="keisei"] .station-code { background: var(--keisei-blue-deep); }
+html[data-rail="keisei"] .hero-card { background:#fff; border-color:#a9bbcc; }
+html[data-rail="keisei"] .hero-card.soon { border-color:#6f97bc; background:#f7fafd; }
+html[data-rail="keisei"] .hero-card.now { border-color:var(--keisei-red); background:#fff7f7; }
+html[data-rail="keisei"] .train-wrap { color:var(--keisei-blue); }
+html[data-rail="keisei"] .hero-card.now .train-wrap { color:var(--keisei-red); }
+html[data-rail="keisei"] .hero-moment-action,
+html[data-rail="keisei"] .notify-toggle-button,
+html[data-rail="keisei"] .tutorial-primary { background:var(--keisei-blue-deep); border-color:var(--keisei-blue-deep); }
+html[data-rail="keisei"] #stationDialog .station-code-mini {
+  border-color:#7ea4c5;
+  background:#fff;
+  color:var(--keisei-blue-deep);
+}
+html[data-rail="keisei"] #stationDialog .station-row.current { background:#edf5fb; }
+html[data-rail="keisei"] #stationDialog .station-row.current .station-code-mini { border-color:var(--keisei-red); color:var(--keisei-red-deep); }
+html[data-rail="keisei"] #trainFilter { display:none; }
+html[data-rail="keisei"] #trainFilter + * { margin-top:0; }
+
+.keisei-data-note {
+  margin: 10px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--line, #c9d3dd);
+  color: var(--muted, #5e6772);
+  font-size: .875rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 360px) {
+  .rail-switch button { min-height: 46px; font-size: .9375rem; }
+}
