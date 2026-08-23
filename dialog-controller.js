@@ -1,36 +1,52 @@
 (() => {
   'use strict';
 
-  // The dialog controller is the first local deferred script on the page.
-  // Establish rail context here so the timetable engine and app can boot with
-  // the correct network without introducing a blocking loader.
+  // Resolve rail context before the timetable engine boots. The UI should expose
+  // "where are we watching?" rather than leak the underlying rail data model.
   const RAIL_STORAGE_KEY='denshaKuruyoRailContextV1';
+  const LOCATION_READY_KEY='denshaKuruyoLocationReadyV1';
+  const LOCATION_PENDING_KEY='denshaKuruyoLocationPendingV1';
   const LEGACY_STATE_KEY='denshaKuruyoV1';
   const LEGACY_MOMENTS_KEY='denshaKuruyoMomentsV1';
   const RAILS={
-    tx:{id:'tx',label:'TX',prefix:'TX',defaultStation:'TX19'},
-    keisei:{id:'keisei',label:'京成',prefix:'KS',defaultStation:'KS22'}
+    tx:{id:'tx',label:'TX',name:'つくばエクスプレス',prefix:'TX',defaultStation:'TX19'},
+    keisei:{id:'keisei',label:'京成',name:'京成本線',prefix:'KS',defaultStation:'KS22'}
   };
+
+  function safeGet(key){try{return localStorage.getItem(key);}catch{return null;}}
+  function safeSet(key,value){try{localStorage.setItem(key,value);}catch{}}
+  function safeRemove(key){try{localStorage.removeItem(key);}catch{}}
+
   let savedRail={};
-  try{savedRail=JSON.parse(localStorage.getItem(RAIL_STORAGE_KEY)||'{}')||{};}catch{}
+  try{savedRail=JSON.parse(safeGet(RAIL_STORAGE_KEY)||'{}')||{};}catch{}
   const pageUrl=new URL(location.href);
   const stationParam=pageUrl.searchParams.get('station')||'';
   const requestedRail=pageUrl.searchParams.get('rail');
+  const explicitLocation=!!stationParam||!!requestedRail;
+  const hadLegacyState=!!safeGet(LEGACY_STATE_KEY);
+  const setupPending=safeGet(LOCATION_PENDING_KEY)==='1';
+  const setupReady=safeGet(LOCATION_READY_KEY)==='1';
+  const needsLocationSetup=setupPending||(!setupReady&&!explicitLocation&&!savedRail.rail&&!hadLegacyState);
+  if(needsLocationSetup)safeSet(LOCATION_PENDING_KEY,'1');
+
   let activeRail=RAILS[requestedRail]?requestedRail:null;
   if(!activeRail&&stationParam.startsWith('KS'))activeRail='keisei';
   if(!activeRail&&stationParam.startsWith('TX'))activeRail='tx';
   if(!activeRail&&RAILS[savedRail.rail])activeRail=savedRail.rail;
   if(!activeRail)activeRail='tx';
+
   const lastStations={tx:'TX19',keisei:'KS22',...(savedRail.lastStations||{})};
   if(stationParam.startsWith(RAILS[activeRail].prefix))lastStations[activeRail]=stationParam;
 
   const railKey=(base,rail=activeRail)=>`${base}:${rail}`;
-  function safeGet(key){try{return localStorage.getItem(key);}catch{return null;}}
-  function safeSet(key,value){try{localStorage.setItem(key,value);}catch{}}
   function defaultState(rail){
     const old=(()=>{try{return JSON.parse(safeGet(LEGACY_STATE_KEY)||'{}')||{};}catch{return{};}})();
     const station=RAILS[rail].defaultStation;
     return JSON.stringify({station,includePass:rail==='tx',dir:'both',favorites:[station],sound:old.sound!==false,vibrate:old.vibrate!==false});
+  }
+  function parseState(raw,fallbackRail){
+    try{return JSON.parse(raw||defaultState(fallbackRail))||JSON.parse(defaultState(fallbackRail));}
+    catch{return JSON.parse(defaultState(fallbackRail));}
   }
   function snapshotCurrentRail(){
     const state=safeGet(LEGACY_STATE_KEY);if(state)safeSet(railKey(LEGACY_STATE_KEY),state);
@@ -54,24 +70,47 @@
   }
   function stationFor(rail){return lastStations[rail]||RAILS[rail]?.defaultStation;}
   function rememberStation(id){if(id&&id.startsWith(RAILS[activeRail].prefix)){lastStations[activeRail]=id;persistRail();}}
-  function hrefFor(rail){const u=new URL(location.href);u.searchParams.set('rail',rail);u.searchParams.set('station',stationFor(rail));return u.href;}
-  function switchRail(rail){if(!RAILS[rail]||rail===activeRail)return;snapshotCurrentRail();persistRail(rail);location.href=hrefFor(rail);}
+  function hrefFor(rail,station=stationFor(rail)){
+    const u=new URL(location.href);u.searchParams.set('rail',rail);u.searchParams.set('station',station);return u.href;
+  }
+  function saveTargetStation(rail,station){
+    const key=railKey(LEGACY_STATE_KEY,rail);
+    const state=parseState(safeGet(key),rail);
+    state.station=station;
+    if(!Array.isArray(state.favorites))state.favorites=[];
+    safeSet(key,JSON.stringify(state));
+  }
+  function goToLocation(rail,station){
+    const config=RAILS[rail];
+    if(!config||!station||!station.startsWith(config.prefix))return;
+    snapshotCurrentRail();
+    saveTargetStation(rail,station);
+    lastStations[rail]=station;
+    safeSet(LOCATION_READY_KEY,'1');safeRemove(LOCATION_PENDING_KEY);
+    persistRail(rail);
+    location.href=hrefFor(rail,station);
+  }
+  function switchRail(rail){
+    if(!RAILS[rail]||rail===activeRail)return;
+    goToLocation(rail,stationFor(rail));
+  }
 
   if(!stationParam.startsWith(RAILS[activeRail].prefix)){
     pageUrl.searchParams.set('rail',activeRail);pageUrl.searchParams.set('station',stationFor(activeRail));history.replaceState(null,'',pageUrl);
   }else if(!requestedRail){pageUrl.searchParams.set('rail',activeRail);history.replaceState(null,'',pageUrl);}
-  persistRail();
+  if(!needsLocationSetup)persistRail();
+
   document.documentElement.dataset.rail=activeRail;
-  window.RailContext={rail:activeRail,rails:RAILS,defaultStation:stationFor(activeRail),stationFor,hrefFor,switchRail,rememberStation,snapshotCurrentRail};
+  window.RailContext={
+    rail:activeRail,rails:RAILS,defaultStation:stationFor(activeRail),stationFor,hrefFor,
+    switchRail,goToLocation,rememberStation,snapshotCurrentRail,needsLocationSetup
+  };
   window.addEventListener('pagehide',snapshotCurrentRail);
 
   if(!document.querySelector('link[data-rail-switch]')){
     const link=document.createElement('link');link.rel='stylesheet';link.href='./rail-switch.css';link.dataset.railSwitch='1';document.head.appendChild(link);
   }
 
-  // The TX engine is already a static script in index.html. In Keisei mode we
-  // expose a stable promise before train-engine.js/app.js run, then resolve it
-  // when the Keisei engine module has loaded.
   if(activeRail==='keisei'){
     let resolveEngine,rejectEngine;
     const ready=new Promise((resolve,reject)=>{resolveEngine=resolve;rejectEngine=reject;});
@@ -134,11 +173,15 @@
 
   function prepareStationDialog(dialog) {
     if (!dialog || dialog.id !== 'stationDialog') return;
+    const customSearch=document.getElementById('locationSearch');
+    if(customSearch&&customSearch.value){customSearch.value='';customSearch.dispatchEvent(new Event('input',{bubbles:true}));}
+    const customList=document.getElementById('locationStationList');
+    if(customList)customList.scrollTop=0;
     const search = document.getElementById('stationSearch');
     const list = document.getElementById('stationList');
     if (search && search.value) { search.value = ''; search.dispatchEvent(new Event('input', { bubbles: true })); }
     if (list) list.scrollTop = 0;
-    setTimeout(() => { const current = dialog.querySelector('.station-row.current'); if (current) current.scrollIntoView({ block: 'center' }); }, 60);
+    setTimeout(() => { const current = dialog.querySelector('.location-station-choice[aria-current="true"],.station-row.current'); if (current) current.scrollIntoView({ block: 'center' }); }, 60);
   }
 
   function openDialog(dialog, trigger, focusTarget) {
@@ -159,7 +202,7 @@
   }
 
   function triggerInfo(target) {
-    if (target.closest('#stationButton') || target.closest('#openStations')) return {dialog:document.getElementById('stationDialog'),focus:document.getElementById('stationSearch')};
+    if (target.closest('#stationButton') || target.closest('#openStations')) return {dialog:document.getElementById('stationDialog'),focus:document.getElementById('locationSearch')};
     if (target.closest('#openSettings') || target.closest('#openSettingsFromNotify')) return {dialog:document.getElementById('settingsDialog'),focus:null};
     if (target.closest('#openDataInfo')) return {dialog:document.getElementById('dataDialog'),focus:null};
     if (target.closest('#openAbout') || target.closest('#openAboutFooter')) return {dialog:document.getElementById('aboutDialog'),focus:null};
