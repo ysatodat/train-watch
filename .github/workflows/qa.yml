@@ -20,7 +20,7 @@ jobs:
         with:
           node-version: '22'
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
       - name: Validate source data JSON
         run: |
           node -e "JSON.parse(require('fs').readFileSync('data/timetable.json','utf8')); console.log('TX timetable JSON valid')"
@@ -57,7 +57,7 @@ jobs:
         with:
           node-version: '22'
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
       - name: Install WebKit
         run: npx playwright install --with-deps webkit
       - name: Start Vite app

@@ -106,6 +106,39 @@ test('TXと京成を切り替えても各路線の前回駅へ戻れる', async 
   await expect(page.getByTestId('location-button')).toContainText('研究学園');
 });
 
+test('お知らせをONにすると音を準備し、3分前と30秒前の案内内容を確認できる', async ({ page }) => {
+  await prepare(page);
+  await page.addInitScript(() => {
+    class FakeAudioContext {
+      state = 'running';
+      currentTime = 0;
+      destination = {};
+      resume() { return Promise.resolve(); }
+      createOscillator() {
+        return {
+          frequency: { value: 0 },
+          connect() {},
+          start() { (window as typeof window & { __alertToneCount?: number }).__alertToneCount = ((window as typeof window & { __alertToneCount?: number }).__alertToneCount || 0) + 1; },
+          stop() {}
+        };
+      }
+      createGain() {
+        return {
+          gain: { setValueAtTime() {}, exponentialRampToValueAtTime() {} },
+          connect() {}
+        };
+      }
+    }
+    Object.defineProperty(window, 'AudioContext', { configurable: true, value: FakeAudioContext });
+  });
+  await page.goto('/?rail=tx&station=TX19');
+  await page.getByRole('button', { name: 'お知らせ' }).click();
+  const dialog = page.getByTestId('notify-dialog');
+  await expect(dialog).toContainText('画面表示・音・対応端末では振動');
+  await dialog.getByRole('button', { name: 'お知らせをONにする' }).click();
+  await expect.poll(() => page.evaluate(() => (window as typeof window & { __alertToneCount?: number }).__alertToneCount || 0)).toBeGreaterThan(0);
+});
+
 test('停まった→動いたで同じ列車へ戻らず見送り表示になる', async ({ page }) => {
   await prepare(page, { now: new Date('2026-08-23T12:20:50+09:00').valueOf() });
   await page.goto('/?rail=tx&station=TX19');

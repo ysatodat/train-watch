@@ -18,6 +18,32 @@ function useNow(): Date {
   return now;
 }
 
+type AudioContextWindow = Window & typeof globalThis & {
+  webkitAudioContext?: typeof AudioContext;
+};
+
+function createAlertTone(contextRef: { current: AudioContext | null }, urgent = false) {
+  const AudioContextConstructor = window.AudioContext || (window as AudioContextWindow).webkitAudioContext;
+  if (!AudioContextConstructor) return;
+  try {
+    const context = contextRef.current || new AudioContextConstructor();
+    contextRef.current = context;
+    if (context.state === 'suspended') void context.resume();
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    oscillator.connect(gain);
+    gain.connect(context.destination);
+    oscillator.frequency.value = urgent ? 980 : 740;
+    gain.gain.setValueAtTime(0.0001, context.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.06, context.currentTime + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + 0.15);
+    oscillator.start(context.currentTime);
+    oscillator.stop(context.currentTime + 0.16);
+  } catch {
+    // 音声APIが使えない端末でも、画面表示と振動は継続する。
+  }
+}
+
 function useObservation() {
   const actorRef = useRef<ReturnType<typeof createActor> | null>(null);
   if (!actorRef.current) actorRef.current = createActor(observationMachine);
@@ -121,6 +147,7 @@ export default function App() {
   const observation = useObservation();
   const tutorialPrompted = useRef(false);
   const notified = useRef(new Set<string>());
+  const audioContext = useRef<AudioContext | null>(null);
 
   useEffect(() => { loadCatalogs().then(setCatalogs).catch(() => setToast('駅データを読み込めませんでした')); }, []);
   useEffect(() => {
@@ -153,6 +180,7 @@ export default function App() {
       if (focus.deltaMs <= threshold && !notified.current.has(key)) {
         notified.current.add(key);
         setToast(threshold === 180_000 ? 'あと3分くらいで見どころ！' : 'あと30秒くらい！');
+        if (settings.sound) createAlertTone(audioContext, threshold === 30_000);
         if (settings.vibrate && navigator.vibrate) navigator.vibrate(threshold === 30_000 ? [80, 60, 80] : 80);
       }
     }
@@ -236,14 +264,14 @@ export default function App() {
     <AppDialog isOpen={settingsOpen} onOpenChange={setSettingsOpen} title="表示設定" testId="settings-dialog">
       {provider.capabilities.passPrediction && <section className="setting-block"><h3>見たい電車</h3><div className="segmented"><PressButton aria-pressed={settings.includePass} className={settings.includePass ? 'selected' : ''} onPress={() => saveSettings({ ...settings, includePass: true })}>通過も含める</PressButton><PressButton aria-pressed={!settings.includePass} className={!settings.includePass ? 'selected' : ''} onPress={() => saveSettings({ ...settings, includePass: false })}>停車だけ</PressButton></div></section>}
       <section className="setting-block"><h3>方面</h3><div className="segmented three">{(['both','down','up'] as const).map(dir => <PressButton key={dir} aria-pressed={settings.dir === dir} className={settings.dir === dir ? 'selected' : ''} onPress={() => saveSettings({ ...settings, dir })}>{dir === 'both' ? '両方' : dir === 'down' ? (rail === 'tx' ? 'つくば' : '成田・空港') : (rail === 'tx' ? '秋葉原' : '上野・押上')}</PressButton>)}</div></section>
-      <label className="toggle-row"><span><strong>お知らせ音</strong><small>お知らせ中に音を鳴らす</small></span><input type="checkbox" checked={settings.sound} onChange={e => saveSettings({ ...settings, sound: e.target.checked })}/></label>
+      <label className="toggle-row"><span><strong>お知らせ音</strong><small>お知らせ中に音を鳴らす</small></span><input type="checkbox" checked={settings.sound} onChange={e => { const sound = e.target.checked; saveSettings({ ...settings, sound }); if (sound) createAlertTone(audioContext); }}/></label>
       <label className="toggle-row"><span><strong>振動</strong><small>対応端末のみ</small></span><input type="checkbox" checked={settings.vibrate} onChange={e => saveSettings({ ...settings, vibrate: e.target.checked })}/></label>
     </AppDialog>
 
     <AppDialog isOpen={notifyOpen} onOpenChange={setNotifyOpen} title="お知らせ" testId="notify-dialog">
       <p className="dialog-lead">見どころが近づいたら、このページを開いている間だけ知らせます。</p>
-      <div className="notify-facts"><p><strong>3分前と30秒前</strong><span>画面表示・対応端末では振動</span></p><p><strong>Safariを閉じた後は届きません</strong><span>プッシュ通知ではありません。</span></p></div>
-      <PressButton className="primary-button full" aria-pressed={settings.notify} onPress={() => { const next = { ...settings, notify: !settings.notify }; saveSettings(next); setToast(next.notify ? 'お知らせをONにしました' : 'お知らせをOFFにしました'); }}>{settings.notify ? 'お知らせをOFFにする' : 'お知らせをONにする'}</PressButton>
+      <div className="notify-facts"><p><strong>3分前と30秒前</strong><span>画面表示・音・対応端末では振動</span></p><p><strong>Safariを閉じた後は届きません</strong><span>プッシュ通知ではありません。</span></p></div>
+      <PressButton className="primary-button full" aria-pressed={settings.notify} onPress={() => { const next = { ...settings, notify: !settings.notify }; saveSettings(next); if (next.notify && next.sound) createAlertTone(audioContext); setToast(next.notify ? 'お知らせをONにしました' : 'お知らせをOFFにしました'); }}>{settings.notify ? 'お知らせをOFFにする' : 'お知らせをONにする'}</PressButton>
     </AppDialog>
 
     <AppDialog isOpen={dataOpen} onOpenChange={setDataOpen} title="時刻について" testId="data-dialog">
