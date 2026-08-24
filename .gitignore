@@ -1,0 +1,8 @@
+node_modules/
+dist/
+public/data/
+public/icon.svg
+coverage/
+playwright-report/
+test-results/
+preview-screenshots/
